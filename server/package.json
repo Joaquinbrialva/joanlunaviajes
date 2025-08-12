@@ -12,15 +12,34 @@
 	],
 	"license": "MIT",
 	"author": "Joaquin Alvarez",
-	"type": "module",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"dev": "node --watch src/index.js"
+		"dev": "node --watch src/index.js",
+		"start": "node src/index.js",
+		"migration:generate": "npx sequelize-cli migration:generate --name",
+		"migration:run": "npx sequelize-cli db:migrate",
+		"migration:undo": "npx sequelize-cli db:migrate:undo",
+		"migration:undo:all": "npx sequelize-cli db:migrate:undo:all",
+		"migration:status": "npx sequelize-cli db:migrate:status",
+		"seeder:generate": "npx sequelize-cli seed:generate --name",
+		"seeder:run": "npx sequelize-cli db:seed:all",
+		"seeder:undo": "npx sequelize-cli db:seed:undo",
+		"seeder:undo:all": "npx sequelize-cli db:seed:undo:all",
+		"db:create": "npx sequelize-cli db:create",
+		"db:drop": "npx sequelize-cli db:drop",
+		"db:reset": "npm run db:drop && npm run db:create && npm run migration:run && npm run seeder:run",
+		"db:setup": "npm run db:create && npm run migration:run",
+		"db:seed": "npm run migration:run && npm run seeder:run"
 	},
 	"dependencies": {
 		"dotenv": "^17.2.1",
 		"express": "^5.1.0",
-		"pg": "^8.16.3"
+		"pg": "^8.16.3",
+		"pg-hstore": "^2.3.4",
+		"sequelize": "^6.37.7"
+	},
+	"devDependencies": {
+		"sequelize-cli": "^6.6.3"
 	}
 }
