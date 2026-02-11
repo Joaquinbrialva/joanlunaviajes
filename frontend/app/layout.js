@@ -1,14 +1,15 @@
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Inter, Fira_Code } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from 'next-themes';
+import Navbar from '@/components/inicio/ui/Navbar';
 
-const geistSans = Geist({
-	variable: '--font-geist-sans',
+const inter = Inter({
+	variable: '--font-sans',
 	subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({
-	variable: '--font-geist-mono',
+const fira = Fira_Code({
+	variable: '--font-mono',
 	subsets: ['latin'],
 });
 
@@ -21,9 +22,12 @@ export default function RootLayout({ children }) {
 	return (
 		<html lang='es' suppressHydrationWarning>
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+				className={`${inter.variable} ${fira.variable} font-sans antialiased`}
 			>
-				<ThemeProvider>{children}</ThemeProvider>
+				<ThemeProvider>
+					<Navbar />
+					{children}
+				</ThemeProvider>
 			</body>
 		</html>
 	);
