@@ -23,7 +23,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="grid grid-cols-3 items-center px-6 p-4 bg-surface  border-b border-border shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.6)] backdrop-blur-md">
+    <nav className="grid grid-cols-3 items-center px-6 p-4 bg-surface  border-b border-border shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.6)] top-0 sticky z-1000">
       <div className="flex items-center gap-2">
         <p>Joanluna Viajes</p>
       </div>

@@ -1,0 +1,458 @@
+[
+  {
+    "id": "dest-001",
+    "slug": "roma-italia",
+    "name": "Roma",
+    "country": "Italia",
+    "continent": "Europa",
+    "description": "Roma es uno de los destinos más destacados de Italia, reconocido por su riqueza cultural, atractivos turísticos y experiencias inolvidables.",
+    "shortDescription": "Descubrí lo mejor de Roma en tu próximo viaje.",
+    "travelInfo": {
+      "airport": "FCO",
+      "currency": "EUR",
+      "language": "Italiano",
+      "timezone": "Europe/Rome",
+      "visaRequired": false,
+      "recommendedStayDays": 10
+    },
+    "climate": {
+      "type": "Mediterráneo",
+      "averageTemperatureC": 20,
+      "bestMonthsToVisit": [
+        "Mayo",
+        "Febrero",
+        "Marzo",
+        "Agosto"
+      ]
+    },
+    "highlights": [
+      "Centro histórico",
+      "Arquitectura icónica",
+      "Gastronomía local",
+      "Tours guiados"
+    ],
+    "travelStyles": [
+      "Urbano",
+      "Naturaleza",
+      "Aventura"
+    ],
+    "featuredImage": "https://picsum.photos/seed/roma/1200/800",
+    "gallery": [
+      "https://picsum.photos/seed/roma1/1200/800",
+      "https://picsum.photos/seed/roma2/1200/800",
+      "https://picsum.photos/seed/roma3/1200/800"
+    ],
+    "stats": {
+      "annualVisitorsMillions": 8.4,
+      "safetyIndex": 66,
+      "averageDailyBudgetUSD": 85
+    },
+    "seo": {
+      "metaTitle": "Viajes a Roma | Guía y Ofertas",
+      "metaDescription": "Información completa sobre Roma, consejos de viaje y las mejores ofertas disponibles."
+    },
+    "isPopular": true,
+    "isFeatured": true,
+    "createdAt": "2026-02-21T19:20:53.963742Z",
+    "updatedAt": "2026-02-21T19:20:53.963751Z"
+  },
+  {
+    "id": "dest-002",
+    "slug": "cancún-méxico",
+    "name": "Cancún",
+    "country": "México",
+    "continent": "América",
+    "description": "Cancún es uno de los destinos más destacados de México, reconocido por su riqueza cultural, atractivos turísticos y experiencias inolvidables.",
+    "shortDescription": "Descubrí lo mejor de Cancún en tu próximo viaje.",
+    "travelInfo": {
+      "airport": "CUN",
+      "currency": "USD",
+      "language": "Español",
+      "timezone": "America/Cancun",
+      "visaRequired": false,
+      "recommendedStayDays": 8
+    },
+    "climate": {
+      "type": "Templado",
+      "averageTemperatureC": 21,
+      "bestMonthsToVisit": [
+        "Septiembre",
+        "Mayo",
+        "Agosto",
+        "Enero"
+      ]
+    },
+    "highlights": [
+      "Playas paradisíacas",
+      "Arquitectura icónica",
+      "Gastronomía local",
+      "Museos y cultura"
+    ],
+    "travelStyles": [
+      "Gastronómico",
+      "Urbano",
+      "Relax"
+    ],
+    "featuredImage": "https://picsum.photos/seed/cancún/1200/800",
+    "gallery": [
+      "https://picsum.photos/seed/cancún1/1200/800",
+      "https://picsum.photos/seed/cancún2/1200/800",
+      "https://picsum.photos/seed/cancún3/1200/800"
+    ],
+    "stats": {
+      "annualVisitorsMillions": 5.4,
+      "safetyIndex": 77,
+      "averageDailyBudgetUSD": 121
+    },
+    "seo": {
+      "metaTitle": "Viajes a Cancún | Guía y Ofertas",
+      "metaDescription": "Información completa sobre Cancún, consejos de viaje y las mejores ofertas disponibles."
+    },
+    "isPopular": false,
+    "isFeatured": false,
+    "createdAt": "2026-02-21T19:20:53.963786Z",
+    "updatedAt": "2026-02-21T19:20:53.963789Z"
+  },
+  {
+    "id": "dest-003",
+    "slug": "bariloche-argentina",
+    "name": "Bariloche",
+    "country": "Argentina",
+    "continent": "América",
+    "description": "Bariloche es uno de los destinos más destacados de Argentina, reconocido por su riqueza cultural, atractivos turísticos y experiencias inolvidables.",
+    "shortDescription": "Descubrí lo mejor de Bariloche en tu próximo viaje.",
+    "travelInfo": {
+      "airport": "BRC",
+      "currency": "ARS",
+      "language": "Español",
+      "timezone": "America/Argentina/Buenos_Aires",
+      "visaRequired": false,
+      "recommendedStayDays": 9
+    },
+    "climate": {
+      "type": "Mediterráneo",
+      "averageTemperatureC": 14,
+      "bestMonthsToVisit": [
+        "Diciembre",
+        "Octubre",
+        "Mayo",
+        "Enero"
+      ]
+    },
+    "highlights": [
+      "Gastronomía local",
+      "Centro histórico",
+      "Vida nocturna",
+      "Museos y cultura"
+    ],
+    "travelStyles": [
+      "Naturaleza",
+      "Cultural",
+      "Relax"
+    ],
+    "featuredImage": "https://picsum.photos/seed/bariloche/1200/800",
+    "gallery": [
+      "https://picsum.photos/seed/bariloche1/1200/800",
+      "https://picsum.photos/seed/bariloche2/1200/800",
+      "https://picsum.photos/seed/bariloche3/1200/800"
+    ],
+    "stats": {
+      "annualVisitorsMillions": 18.6,
+      "safetyIndex": 76,
+      "averageDailyBudgetUSD": 73
+    },
+    "seo": {
+      "metaTitle": "Viajes a Bariloche | Guía y Ofertas",
+      "metaDescription": "Información completa sobre Bariloche, consejos de viaje y las mejores ofertas disponibles."
+    },
+    "isPopular": true,
+    "isFeatured": false,
+    "createdAt": "2026-02-21T19:20:53.963814Z",
+    "updatedAt": "2026-02-21T19:20:53.963816Z"
+  },
+  {
+    "id": "dest-004",
+    "slug": "parís-francia",
+    "name": "París",
+    "country": "Francia",
+    "continent": "Europa",
+    "description": "París es uno de los destinos más destacados de Francia, reconocido por su riqueza cultural, atractivos turísticos y experiencias inolvidables.",
+    "shortDescription": "Descubrí lo mejor de París en tu próximo viaje.",
+    "travelInfo": {
+      "airport": "CDG",
+      "currency": "EUR",
+      "language": "Francés",
+      "timezone": "Europe/Paris",
+      "visaRequired": false,
+      "recommendedStayDays": 6
+    },
+    "climate": {
+      "type": "Frío de montaña",
+      "averageTemperatureC": 22,
+      "bestMonthsToVisit": [
+        "Agosto",
+        "Abril",
+        "Febrero",
+        "Mayo"
+      ]
+    },
+    "highlights": [
+      "Tours guiados",
+      "Naturaleza y paisajes",
+      "Playas paradisíacas",
+      "Arquitectura icónica"
+    ],
+    "travelStyles": [
+      "Gastronómico",
+      "Cultural",
+      "Aventura"
+    ],
+    "featuredImage": "https://picsum.photos/seed/parís/1200/800",
+    "gallery": [
+      "https://picsum.photos/seed/parís1/1200/800",
+      "https://picsum.photos/seed/parís2/1200/800",
+      "https://picsum.photos/seed/parís3/1200/800"
+    ],
+    "stats": {
+      "annualVisitorsMillions": 13.7,
+      "safetyIndex": 80,
+      "averageDailyBudgetUSD": 224
+    },
+    "seo": {
+      "metaTitle": "Viajes a París | Guía y Ofertas",
+      "metaDescription": "Información completa sobre París, consejos de viaje y las mejores ofertas disponibles."
+    },
+    "isPopular": true,
+    "isFeatured": true,
+    "createdAt": "2026-02-21T19:20:53.963852Z",
+    "updatedAt": "2026-02-21T19:20:53.963854Z"
+  },
+  {
+    "id": "dest-005",
+    "slug": "bangkok-tailandia",
+    "name": "Bangkok",
+    "country": "Tailandia",
+    "continent": "Asia",
+    "description": "Bangkok es uno de los destinos más destacados de Tailandia, reconocido por su riqueza cultural, atractivos turísticos y experiencias inolvidables.",
+    "shortDescription": "Descubrí lo mejor de Bangkok en tu próximo viaje.",
+    "travelInfo": {
+      "airport": "BKK",
+      "currency": "THB",
+      "language": "Tailandés",
+      "timezone": "Asia/Bangkok",
+      "visaRequired": true,
+      "recommendedStayDays": 6
+    },
+    "climate": {
+      "type": "Subtropical",
+      "averageTemperatureC": 26,
+      "bestMonthsToVisit": [
+        "Diciembre",
+        "Marzo",
+        "Octubre",
+        "Febrero"
+      ]
+    },
+    "highlights": [
+      "Gastronomía local",
+      "Centro histórico",
+      "Tours guiados",
+      "Museos y cultura"
+    ],
+    "travelStyles": [
+      "Urbano",
+      "Gastronómico",
+      "Cultural"
+    ],
+    "featuredImage": "https://picsum.photos/seed/bangkok/1200/800",
+    "gallery": [
+      "https://picsum.photos/seed/bangkok1/1200/800",
+      "https://picsum.photos/seed/bangkok2/1200/800",
+      "https://picsum.photos/seed/bangkok3/1200/800"
+    ],
+    "stats": {
+      "annualVisitorsMillions": 5.9,
+      "safetyIndex": 85,
+      "averageDailyBudgetUSD": 209
+    },
+    "seo": {
+      "metaTitle": "Viajes a Bangkok | Guía y Ofertas",
+      "metaDescription": "Información completa sobre Bangkok, consejos de viaje y las mejores ofertas disponibles."
+    },
+    "isPopular": true,
+    "isFeatured": true,
+    "createdAt": "2026-02-21T19:20:53.963878Z",
+    "updatedAt": "2026-02-21T19:20:53.963880Z"
+  },
+  {
+    "id": "dest-006",
+    "slug": "nueva-york-estados-unidos",
+    "name": "Nueva York",
+    "country": "Estados Unidos",
+    "continent": "América",
+    "description": "Nueva York es uno de los destinos más destacados de Estados Unidos, reconocido por su riqueza cultural, atractivos turísticos y experiencias inolvidables.",
+    "shortDescription": "Descubrí lo mejor de Nueva York en tu próximo viaje.",
+    "travelInfo": {
+      "airport": "JFK",
+      "currency": "USD",
+      "language": "Inglés",
+      "timezone": "America/New_York",
+      "visaRequired": true,
+      "recommendedStayDays": 5
+    },
+    "climate": {
+      "type": "Subtropical",
+      "averageTemperatureC": 22,
+      "bestMonthsToVisit": [
+        "Diciembre",
+        "Agosto",
+        "Enero",
+        "Julio"
+      ]
+    },
+    "highlights": [
+      "Arquitectura icónica",
+      "Tours guiados",
+      "Vida nocturna",
+      "Centro histórico"
+    ],
+    "travelStyles": [
+      "Romántico",
+      "Aventura",
+      "Cultural"
+    ],
+    "featuredImage": "https://picsum.photos/seed/nuevayork/1200/800",
+    "gallery": [
+      "https://picsum.photos/seed/nuevayork1/1200/800",
+      "https://picsum.photos/seed/nuevayork2/1200/800",
+      "https://picsum.photos/seed/nuevayork3/1200/800"
+    ],
+    "stats": {
+      "annualVisitorsMillions": 10.5,
+      "safetyIndex": 80,
+      "averageDailyBudgetUSD": 59
+    },
+    "seo": {
+      "metaTitle": "Viajes a Nueva York | Guía y Ofertas",
+      "metaDescription": "Información completa sobre Nueva York, consejos de viaje y las mejores ofertas disponibles."
+    },
+    "isPopular": false,
+    "isFeatured": true,
+    "createdAt": "2026-02-21T19:20:53.963904Z",
+    "updatedAt": "2026-02-21T19:20:53.963907Z"
+  },
+  {
+    "id": "dest-007",
+    "slug": "madrid-españa",
+    "name": "Madrid",
+    "country": "España",
+    "continent": "Europa",
+    "description": "Madrid es uno de los destinos más destacados de España, reconocido por su riqueza cultural, atractivos turísticos y experiencias inolvidables.",
+    "shortDescription": "Descubrí lo mejor de Madrid en tu próximo viaje.",
+    "travelInfo": {
+      "airport": "MAD",
+      "currency": "EUR",
+      "language": "Español",
+      "timezone": "Europe/Madrid",
+      "visaRequired": false,
+      "recommendedStayDays": 10
+    },
+    "climate": {
+      "type": "Templado",
+      "averageTemperatureC": 20,
+      "bestMonthsToVisit": [
+        "Enero",
+        "Noviembre",
+        "Julio",
+        "Mayo"
+      ]
+    },
+    "highlights": [
+      "Vida nocturna",
+      "Museos y cultura",
+      "Centro histórico",
+      "Playas paradisíacas"
+    ],
+    "travelStyles": [
+      "Relax",
+      "Gastronómico",
+      "Naturaleza"
+    ],
+    "featuredImage": "https://picsum.photos/seed/madrid/1200/800",
+    "gallery": [
+      "https://picsum.photos/seed/madrid1/1200/800",
+      "https://picsum.photos/seed/madrid2/1200/800",
+      "https://picsum.photos/seed/madrid3/1200/800"
+    ],
+    "stats": {
+      "annualVisitorsMillions": 18.9,
+      "safetyIndex": 71,
+      "averageDailyBudgetUSD": 67
+    },
+    "seo": {
+      "metaTitle": "Viajes a Madrid | Guía y Ofertas",
+      "metaDescription": "Información completa sobre Madrid, consejos de viaje y las mejores ofertas disponibles."
+    },
+    "isPopular": false,
+    "isFeatured": true,
+    "createdAt": "2026-02-21T19:20:53.963930Z",
+    "updatedAt": "2026-02-21T19:20:53.963932Z"
+  },
+  {
+    "id": "dest-008",
+    "slug": "cusco-perú",
+    "name": "Cusco",
+    "country": "Perú",
+    "continent": "América",
+    "description": "Cusco es uno de los destinos más destacados de Perú, reconocido por su riqueza cultural, atractivos turísticos y experiencias inolvidables.",
+    "shortDescription": "Descubrí lo mejor de Cusco en tu próximo viaje.",
+    "travelInfo": {
+      "airport": "CUZ",
+      "currency": "PEN",
+      "language": "Español",
+      "timezone": "America/Lima",
+      "visaRequired": true,
+      "recommendedStayDays": 10
+    },
+    "climate": {
+      "type": "Templado",
+      "averageTemperatureC": 13,
+      "bestMonthsToVisit": [
+        "Septiembre",
+        "Julio",
+        "Diciembre",
+        "Febrero"
+      ]
+    },
+    "highlights": [
+      "Tours guiados",
+      "Arquitectura icónica",
+      "Gastronomía local",
+      "Centro histórico"
+    ],
+    "travelStyles": [
+      "Naturaleza",
+      "Relax",
+      "Aventura"
+    ],
+    "featuredImage": "https://picsum.photos/seed/cusco/1200/800",
+    "gallery": [
+      "https://picsum.photos/seed/cusco1/1200/800",
+      "https://picsum.photos/seed/cusco2/1200/800",
+      "https://picsum.photos/seed/cusco3/1200/800"
+    ],
+    "stats": {
+      "annualVisitorsMillions": 17.0,
+      "safetyIndex": 69,
+      "averageDailyBudgetUSD": 87
+    },
+    "seo": {
+      "metaTitle": "Viajes a Cusco | Guía y Ofertas",
+      "metaDescription": "Información completa sobre Cusco, consejos de viaje y las mejores ofertas disponibles."
+    },
+    "isPopular": true,
+    "isFeatured": false,
+    "createdAt": "2026-02-21T19:20:53.963968Z",
+    "updatedAt": "2026-02-21T19:20:53.963970Z"
+  }
+]
