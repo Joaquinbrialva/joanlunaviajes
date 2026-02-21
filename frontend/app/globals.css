@@ -135,3 +135,18 @@ button {
 		border-color 0.3s ease,
 		box-shadow 0.3s ease;
 }
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-fadeIn {
+	animation: fadeIn 0.7s ease forwards;
+}
