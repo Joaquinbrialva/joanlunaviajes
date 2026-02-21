@@ -1,6 +1,5 @@
 import ThemeToggle from "@/app/ThemeToggle";
 import { Button } from "@heroui/react";
-import { PlaneTakeoff } from "lucide-react";
 import Link from "next/link";
 
 export default function Navbar() {
@@ -26,7 +25,6 @@ export default function Navbar() {
   return (
     <nav className="grid grid-cols-3 items-center px-6 p-4 bg-surface  border-b border-border shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.6)] backdrop-blur-md">
       <div className="flex items-center gap-2">
-        <PlaneTakeoff />
         <p>Joanluna Viajes</p>
       </div>
       <div className="flex justify-center space-x-4">

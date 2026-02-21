@@ -1,0 +1,2417 @@
+[
+  {
+    "id": "of-4001",
+    "slug": "cusco-experience-2026-1",
+    "title": "Cusco Experience 2026",
+    "subtitle": "Lujo, cultura y aventura en el corazón de Cusco.",
+    "location": {
+      "city": "Cusco",
+      "country": "Perú",
+      "airport": "CUZ"
+    },
+    "category": "Nacional",
+    "tags": [
+      "Cultural",
+      "Naturaleza",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.4,
+      "reviewsCount": 538
+    },
+    "duration": {
+      "nights": 6,
+      "days": 6
+    },
+    "pricing": {
+      "currency": "USD",
+      "price": 3003,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-06-01T00:00:00Z",
+      "endDate": "2026-11-07T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 12
+    },
+    "hotel": {
+      "name": "Cusco Grand Hotel",
+      "stars": 3,
+      "roomType": "Standard",
+      "amenities": [
+        "Desayuno incluido",
+        "WiFi",
+        "Spa"
+      ]
+    },
+    "includes": [
+      "Seguro de viaje",
+      "Excursiones",
+      "Desayuno diario",
+      "Hotel"
+    ],
+    "notIncludes": [
+      "Propinas"
+    ],
+    "images": [
+      {
+        "id": "img-1-1",
+        "url": "https://picsum.photos/seed/cusco1/1200/800",
+        "alt": "Vista de Cusco",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Guía en español",
+      "Experiencia gastronómica",
+      "Tour exclusivo"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": false,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.034656Z",
+    "updatedAt": "2026-02-21T18:21:31.034661Z"
+  },
+  {
+    "id": "of-4002",
+    "slug": "punta-cana-experience-2026-2",
+    "title": "Punta Cana Experience 2026",
+    "subtitle": "Sumergite en la magia y tradición de Punta Cana.",
+    "location": {
+      "city": "Punta Cana",
+      "country": "República Dominicana",
+      "airport": "PUJ"
+    },
+    "category": "Nacional",
+    "tags": [
+      "Naturaleza",
+      "Playa",
+      "Lujo"
+    ],
+    "rating": {
+      "value": 4.9,
+      "reviewsCount": 1293
+    },
+    "duration": {
+      "nights": 9,
+      "days": 5
+    },
+    "pricing": {
+      "currency": "USD",
+      "finalPrice": 2202,
+      "pricePer": "persona",
+      "installments": {
+        "available": true
+      }
+    },
+    "availability": {
+      "startDate": "2026-01-01T00:00:00Z",
+      "endDate": "2026-07-12T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 18
+    },
+    "hotel": {
+      "name": "Punta Cana Grand Hotel",
+      "stars": 3,
+      "roomType": "Standard",
+      "amenities": [
+        "Piscina",
+        "Vista al mar",
+        "Gimnasio"
+      ]
+    },
+    "includes": [
+      "Hotel",
+      "Desayuno diario",
+      "Seguro de viaje",
+      "Vuelos"
+    ],
+    "notIncludes": [
+      "Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-2-1",
+        "url": "https://picsum.photos/seed/puntacana2/1200/800",
+        "alt": "Vista de Punta Cana",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Ubicación estratégica",
+      "Atención personalizada",
+      "Guía en español"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": true,
+    "isPopular": true,
+    "createdAt": "2026-02-21T18:21:31.034706Z",
+    "updatedAt": "2026-02-21T18:21:31.034708Z"
+  },
+  {
+    "id": "of-4003",
+    "slug": "roma-experience-2026-3",
+    "title": "Roma Experience 2026",
+    "subtitle": "Explorá Roma y viví momentos que duran para siempre.",
+    "location": {
+      "city": "Roma",
+      "country": "Italia",
+      "airport": "FCO"
+    },
+    "category": "Nacional",
+    "tags": [
+      "Playa",
+      "Gastronomía",
+      "Lujo"
+    ],
+    "rating": {
+      "value": 4.5,
+      "reviewsCount": 3090
+    },
+    "duration": {
+      "nights": 4,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "ARS",
+      "price": 1007,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-05-01T00:00:00Z",
+      "endDate": "2026-11-18T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 12
+    },
+    "hotel": {
+      "name": "Roma Grand Hotel",
+      "stars": 3,
+      "roomType": "Deluxe",
+      "amenities": [
+        "WiFi",
+        "Gimnasio",
+        "Desayuno incluido"
+      ]
+    },
+    "includes": [
+      "Traslados",
+      "Excursiones",
+      "Seguro de viaje",
+      "Desayuno diario"
+    ],
+    "notIncludes": [
+      "Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-3-1",
+        "url": "https://picsum.photos/seed/roma3/1200/800",
+        "alt": "Vista de Roma",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Experiencia gastronómica",
+      "Tour exclusivo",
+      "Guía en español"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.034756Z",
+    "updatedAt": "2026-02-21T18:21:31.034759Z"
+  },
+  {
+    "id": "of-4004",
+    "slug": "ciudad-del-cabo-experience-2026-4",
+    "title": "Ciudad del Cabo Experience 2026",
+    "subtitle": "Una combinación perfecta de historia y modernidad en Ciudad del Cabo.",
+    "location": {
+      "city": "Ciudad del Cabo",
+      "country": "Sudáfrica",
+      "airport": "CPT"
+    },
+    "category": "Romántico",
+    "tags": [
+      "Aventura",
+      "Naturaleza",
+      "Gastronomía"
+    ],
+    "rating": {
+      "value": 4.8,
+      "reviewsCount": 2109
+    },
+    "duration": {
+      "nights": 3,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "ARS",
+      "originalPrice": 4664,
+      "discountPercentage": 13,
+      "finalPrice": 4057,
+      "pricePer": "persona",
+      "installments": {
+        "available": true,
+        "quantity": 6,
+        "amount": 676.17,
+        "interestFree": true
+      }
+    },
+    "availability": {
+      "startDate": "2026-06-01T00:00:00Z",
+      "endDate": "2026-11-05T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 3
+    },
+    "hotel": {
+      "name": "Ciudad del Cabo Grand Hotel",
+      "stars": 5,
+      "roomType": "Suite",
+      "amenities": [
+        "Bar",
+        "Gimnasio",
+        "Spa"
+      ]
+    },
+    "includes": [
+      "Vuelos",
+      "Desayuno diario",
+      "Traslados",
+      "Hotel"
+    ],
+    "notIncludes": [
+      "Propinas"
+    ],
+    "images": [
+      {
+        "id": "img-4-1",
+        "url": "https://picsum.photos/seed/ciudaddelcabo4/1200/800",
+        "alt": "Vista de Ciudad del Cabo",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Guía en español",
+      "Ubicación estratégica",
+      "Tour exclusivo"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": true,
+    "isPopular": true,
+    "createdAt": "2026-02-21T18:21:31.034809Z",
+    "updatedAt": "2026-02-21T18:21:31.034810Z"
+  },
+  {
+    "id": "of-4005",
+    "slug": "cancún-experience-2026-5",
+    "title": "Cancún Experience 2026",
+    "subtitle": "Naturaleza, gastronomía y cultura en Cancún.",
+    "location": {
+      "city": "Cancún",
+      "country": "México",
+      "airport": "CUN"
+    },
+    "category": "Aventura",
+    "tags": [
+      "Naturaleza",
+      "Gastronomía",
+      "Cultural"
+    ],
+    "rating": {
+      "value": 5.0,
+      "reviewsCount": 2738
+    },
+    "duration": {
+      "nights": 10,
+      "days": 8
+    },
+    "pricing": {
+      "currency": "ARS",
+      "finalPrice": 1568,
+      "pricePer": "persona",
+      "installments": {
+        "available": true
+      }
+    },
+    "availability": {
+      "startDate": "2026-04-01T00:00:00Z",
+      "endDate": "2026-11-18T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 12
+    },
+    "hotel": {
+      "name": "Cancún Grand Hotel",
+      "stars": 4,
+      "roomType": "Deluxe",
+      "amenities": [
+        "WiFi",
+        "Piscina",
+        "Vista al mar"
+      ]
+    },
+    "includes": [
+      "Traslados",
+      "Desayuno diario",
+      "Hotel",
+      "Vuelos"
+    ],
+    "notIncludes": [
+      "Comidas no especificadas"
+    ],
+    "images": [
+      {
+        "id": "img-5-1",
+        "url": "https://picsum.photos/seed/cancún5/1200/800",
+        "alt": "Vista de Cancún",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Guía en español",
+      "Tour exclusivo",
+      "Ubicación estratégica"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": false,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.034849Z",
+    "updatedAt": "2026-02-21T18:21:31.034850Z"
+  },
+  {
+    "id": "of-4006",
+    "slug": "parís-experience-2026-6",
+    "title": "París Experience 2026",
+    "subtitle": "Escapada soñada en París con experiencias únicas.",
+    "location": {
+      "city": "París",
+      "country": "Francia",
+      "airport": "CDG"
+    },
+    "category": "Romántico",
+    "tags": [
+      "Playa",
+      "Aventura",
+      "Relax"
+    ],
+    "rating": {
+      "value": 4.8,
+      "reviewsCount": 2693
+    },
+    "duration": {
+      "nights": 5,
+      "days": 12
+    },
+    "pricing": {
+      "currency": "EUR",
+      "finalPrice": 973,
+      "pricePer": "persona",
+      "installments": {
+        "available": true
+      }
+    },
+    "availability": {
+      "startDate": "2026-05-01T00:00:00Z",
+      "endDate": "2026-11-13T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 19
+    },
+    "hotel": {
+      "name": "París Grand Hotel",
+      "stars": 4,
+      "roomType": "Deluxe",
+      "amenities": [
+        "Spa",
+        "Desayuno incluido",
+        "Vista al mar"
+      ]
+    },
+    "includes": [
+      "Seguro de viaje",
+      "Traslados",
+      "Hotel",
+      "Desayuno diario"
+    ],
+    "notIncludes": [
+      "Comidas no especificadas"
+    ],
+    "images": [
+      {
+        "id": "img-6-1",
+        "url": "https://picsum.photos/seed/parís6/1200/800",
+        "alt": "Vista de París",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Tour exclusivo",
+      "Atención personalizada",
+      "Ubicación estratégica"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": false,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.034886Z",
+    "updatedAt": "2026-02-21T18:21:31.034888Z"
+  },
+  {
+    "id": "of-4007",
+    "slug": "cusco-experience-2026-7",
+    "title": "Cusco Experience 2026",
+    "subtitle": "Descanso y confort en los mejores hoteles de Cusco.",
+    "location": {
+      "city": "Cusco",
+      "country": "Perú",
+      "airport": "CUZ"
+    },
+    "category": "Aventura",
+    "tags": [
+      "Playa",
+      "Lujo",
+      "Naturaleza"
+    ],
+    "rating": {
+      "value": 4.5,
+      "reviewsCount": 3292
+    },
+    "duration": {
+      "nights": 4,
+      "days": 6
+    },
+    "pricing": {
+      "currency": "EUR",
+      "originalPrice": 2343,
+      "discountPercentage": 15,
+      "finalPrice": 1991,
+      "pricePer": "persona",
+      "installments": {
+        "available": true,
+        "quantity": 3,
+        "amount": 663.67,
+        "interestFree": true
+      }
+    },
+    "availability": {
+      "startDate": "2026-05-01T00:00:00Z",
+      "endDate": "2026-12-20T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 20
+    },
+    "hotel": {
+      "name": "Cusco Grand Hotel",
+      "stars": 5,
+      "roomType": "Suite",
+      "amenities": [
+        "WiFi",
+        "Desayuno incluido",
+        "Vista al mar"
+      ]
+    },
+    "includes": [
+      "Traslados",
+      "Vuelos",
+      "Desayuno diario",
+      "Seguro de viaje"
+    ],
+    "notIncludes": [
+      "Comidas no especificadas"
+    ],
+    "images": [
+      {
+        "id": "img-7-1",
+        "url": "https://picsum.photos/seed/cusco7/1200/800",
+        "alt": "Vista de Cusco",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Ubicación estratégica",
+      "Guía en español",
+      "Experiencia gastronómica"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": false,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.034924Z",
+    "updatedAt": "2026-02-21T18:21:31.034926Z"
+  },
+  {
+    "id": "of-4008",
+    "slug": "madrid-experience-2026-8",
+    "title": "Madrid Experience 2026",
+    "subtitle": "Descanso y confort en los mejores hoteles de Madrid.",
+    "location": {
+      "city": "Madrid",
+      "country": "España",
+      "airport": "MAD"
+    },
+    "category": "Nacional",
+    "tags": [
+      "Cultural",
+      "Naturaleza",
+      "Relax"
+    ],
+    "rating": {
+      "value": 4.6,
+      "reviewsCount": 3373
+    },
+    "duration": {
+      "nights": 5,
+      "days": 10
+    },
+    "pricing": {
+      "currency": "EUR",
+      "price": 3361,
+      "pricePer": "pareja",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-03-01T00:00:00Z",
+      "endDate": "2026-08-12T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 1
+    },
+    "hotel": {
+      "name": "Madrid Grand Hotel",
+      "stars": 3,
+      "roomType": "Deluxe",
+      "amenities": [
+        "Gimnasio",
+        "Vista al mar",
+        "Piscina"
+      ]
+    },
+    "includes": [
+      "Hotel",
+      "Vuelos",
+      "Excursiones",
+      "Desayuno diario"
+    ],
+    "notIncludes": [
+      "Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-8-1",
+        "url": "https://picsum.photos/seed/madrid8/1200/800",
+        "alt": "Vista de Madrid",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Guía en español",
+      "Experiencia gastronómica",
+      "Atención personalizada"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": false,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.034972Z",
+    "updatedAt": "2026-02-21T18:21:31.034974Z"
+  },
+  {
+    "id": "of-4009",
+    "slug": "ciudad-del-cabo-experience-2026-9",
+    "title": "Ciudad del Cabo Experience 2026",
+    "subtitle": "Tu próxima aventura comienza en Ciudad del Cabo.",
+    "location": {
+      "city": "Ciudad del Cabo",
+      "country": "Sudáfrica",
+      "airport": "CPT"
+    },
+    "category": "Romántico",
+    "tags": [
+      "Cultural",
+      "Gastronomía",
+      "Lujo"
+    ],
+    "rating": {
+      "value": 4.5,
+      "reviewsCount": 3091
+    },
+    "duration": {
+      "nights": 5,
+      "days": 12
+    },
+    "pricing": {
+      "currency": "ARS",
+      "originalPrice": 2494,
+      "discountPercentage": 20,
+      "finalPrice": 1995,
+      "pricePer": "persona",
+      "installments": {
+        "available": true,
+        "quantity": 6,
+        "amount": 332.5,
+        "interestFree": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-06-01T00:00:00Z",
+      "endDate": "2026-10-10T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 18
+    },
+    "hotel": {
+      "name": "Ciudad del Cabo Grand Hotel",
+      "stars": 4,
+      "roomType": "Standard",
+      "amenities": [
+        "Vista al mar",
+        "Spa",
+        "Desayuno incluido"
+      ]
+    },
+    "includes": [
+      "Traslados",
+      "Desayuno diario",
+      "Hotel",
+      "Excursiones"
+    ],
+    "notIncludes": [
+      "Comidas no especificadas"
+    ],
+    "images": [
+      {
+        "id": "img-9-1",
+        "url": "https://picsum.photos/seed/ciudaddelcabo9/1200/800",
+        "alt": "Vista de Ciudad del Cabo",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Ubicación estratégica",
+      "Tour exclusivo",
+      "Atención personalizada"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": false,
+    "isPopular": true,
+    "createdAt": "2026-02-21T18:21:31.035014Z",
+    "updatedAt": "2026-02-21T18:21:31.035016Z"
+  },
+  {
+    "id": "of-4010",
+    "slug": "roma-experience-2026-10",
+    "title": "Roma Experience 2026",
+    "subtitle": "Relax y paisajes increíbles en Roma.",
+    "location": {
+      "city": "Roma",
+      "country": "Italia",
+      "airport": "FCO"
+    },
+    "category": "Internacional",
+    "tags": [
+      "Lujo",
+      "Naturaleza",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.7,
+      "reviewsCount": 987
+    },
+    "duration": {
+      "nights": 3,
+      "days": 12
+    },
+    "pricing": {
+      "currency": "USD",
+      "originalPrice": 1466,
+      "discountPercentage": 16,
+      "finalPrice": 1231,
+      "pricePer": "persona",
+      "installments": {
+        "available": true,
+        "quantity": 6,
+        "amount": 205.17,
+        "interestFree": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-01-01T00:00:00Z",
+      "endDate": "2026-06-05T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 6
+    },
+    "hotel": {
+      "name": "Roma Grand Hotel",
+      "stars": 5,
+      "roomType": "Suite",
+      "amenities": [
+        "Gimnasio",
+        "WiFi",
+        "Desayuno incluido"
+      ]
+    },
+    "includes": [
+      "Traslados",
+      "Excursiones",
+      "Seguro de viaje",
+      "Hotel"
+    ],
+    "notIncludes": [
+      "Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-10-1",
+        "url": "https://picsum.photos/seed/roma10/1200/800",
+        "alt": "Vista de Roma",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Experiencia gastronómica",
+      "Ubicación estratégica",
+      "Atención personalizada"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": true,
+    "isPopular": true,
+    "createdAt": "2026-02-21T18:21:31.035054Z",
+    "updatedAt": "2026-02-21T18:21:31.035056Z"
+  },
+  {
+    "id": "of-4011",
+    "slug": "roma-experience-2026-11",
+    "title": "Roma Experience 2026",
+    "subtitle": "Sumergite en la magia y tradición de Roma.",
+    "location": {
+      "city": "Roma",
+      "country": "Italia",
+      "airport": "FCO"
+    },
+    "category": "Romántico",
+    "tags": [
+      "Cultural",
+      "Gastronomía",
+      "Relax"
+    ],
+    "rating": {
+      "value": 4.9,
+      "reviewsCount": 3313
+    },
+    "duration": {
+      "nights": 8,
+      "days": 11
+    },
+    "pricing": {
+      "currency": "ARS",
+      "finalPrice": 3193,
+      "pricePer": "persona",
+      "installments": {
+        "available": true
+      }
+    },
+    "availability": {
+      "startDate": "2026-06-01T00:00:00Z",
+      "endDate": "2026-11-07T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 15
+    },
+    "hotel": {
+      "name": "Roma Grand Hotel",
+      "stars": 3,
+      "roomType": "Standard",
+      "amenities": [
+        "Desayuno incluido",
+        "Piscina",
+        "Gimnasio"
+      ]
+    },
+    "includes": [
+      "Desayuno diario",
+      "Vuelos",
+      "Traslados",
+      "Excursiones"
+    ],
+    "notIncludes": [
+      "Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-11-1",
+        "url": "https://picsum.photos/seed/roma11/1200/800",
+        "alt": "Vista de Roma",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Atención personalizada",
+      "Ubicación estratégica",
+      "Tour exclusivo"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": false,
+    "isPopular": true,
+    "createdAt": "2026-02-21T18:21:31.035090Z",
+    "updatedAt": "2026-02-21T18:21:31.035092Z"
+  },
+  {
+    "id": "of-4012",
+    "slug": "cartagena-experience-2026-12",
+    "title": "Cartagena Experience 2026",
+    "subtitle": "Descanso y confort en los mejores hoteles de Cartagena.",
+    "location": {
+      "city": "Cartagena",
+      "country": "Colombia",
+      "airport": "CTG"
+    },
+    "category": "Exótico",
+    "tags": [
+      "Lujo",
+      "Naturaleza",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.4,
+      "reviewsCount": 1796
+    },
+    "duration": {
+      "nights": 9,
+      "days": 12
+    },
+    "pricing": {
+      "currency": "USD",
+      "price": 1620,
+      "pricePer": "pareja",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-06-01T00:00:00Z",
+      "endDate": "2026-10-31T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 5
+    },
+    "hotel": {
+      "name": "Cartagena Grand Hotel",
+      "stars": 3,
+      "roomType": "Standard",
+      "amenities": [
+        "Desayuno incluido",
+        "Bar",
+        "Gimnasio"
+      ]
+    },
+    "includes": [
+      "Vuelos",
+      "Seguro de viaje",
+      "Traslados",
+      "Excursiones"
+    ],
+    "notIncludes": [
+      "Comidas no especificadas"
+    ],
+    "images": [
+      {
+        "id": "img-12-1",
+        "url": "https://picsum.photos/seed/cartagena12/1200/800",
+        "alt": "Vista de Cartagena",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Atención personalizada",
+      "Experiencia gastronómica",
+      "Ubicación estratégica"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035124Z",
+    "updatedAt": "2026-02-21T18:21:31.035126Z"
+  },
+  {
+    "id": "of-4013",
+    "slug": "ciudad-del-cabo-experience-2026-13",
+    "title": "Ciudad del Cabo Experience 2026",
+    "subtitle": "Sumergite en la magia y tradición de Ciudad del Cabo.",
+    "location": {
+      "city": "Ciudad del Cabo",
+      "country": "Sudáfrica",
+      "airport": "CPT"
+    },
+    "category": "Internacional",
+    "tags": [
+      "Gastronomía",
+      "Premium",
+      "Playa"
+    ],
+    "rating": {
+      "value": 4.9,
+      "reviewsCount": 2953
+    },
+    "duration": {
+      "nights": 5,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "ARS",
+      "originalPrice": 2701,
+      "discountPercentage": 18,
+      "finalPrice": 2214,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-04-01T00:00:00Z",
+      "endDate": "2026-10-30T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 2
+    },
+    "hotel": {
+      "name": "Ciudad del Cabo Grand Hotel",
+      "stars": 3,
+      "roomType": "Suite",
+      "amenities": [
+        "WiFi",
+        "Piscina",
+        "Bar"
+      ]
+    },
+    "includes": [
+      "Excursiones",
+      "Seguro de viaje",
+      "Desayuno diario",
+      "Vuelos"
+    ],
+    "notIncludes": [
+      "Comidas no especificadas"
+    ],
+    "images": [
+      {
+        "id": "img-13-1",
+        "url": "https://picsum.photos/seed/ciudaddelcabo13/1200/800",
+        "alt": "Vista de Ciudad del Cabo",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Atención personalizada",
+      "Experiencia gastronómica",
+      "Guía en español"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": true,
+    "isPopular": true,
+    "createdAt": "2026-02-21T18:21:31.035161Z",
+    "updatedAt": "2026-02-21T18:21:31.035162Z"
+  },
+  {
+    "id": "of-4014",
+    "slug": "nueva-york-experience-2026-14",
+    "title": "Nueva York Experience 2026",
+    "subtitle": "Naturaleza, gastronomía y cultura en Nueva York.",
+    "location": {
+      "city": "Nueva York",
+      "country": "Estados Unidos",
+      "airport": "JFK"
+    },
+    "category": "Nacional",
+    "tags": [
+      "Aventura",
+      "Cultural",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.5,
+      "reviewsCount": 1989
+    },
+    "duration": {
+      "nights": 9,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "ARS",
+      "originalPrice": 2947,
+      "discountPercentage": 15,
+      "finalPrice": 2504,
+      "pricePer": "persona",
+      "installments": {
+        "available": true,
+        "quantity": 9,
+        "amount": 278.22,
+        "interestFree": true
+      }
+    },
+    "availability": {
+      "startDate": "2026-04-01T00:00:00Z",
+      "endDate": "2026-09-09T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 3
+    },
+    "hotel": {
+      "name": "Nueva York Grand Hotel",
+      "stars": 4,
+      "roomType": "Standard",
+      "amenities": [
+        "Bar",
+        "Gimnasio",
+        "WiFi"
+      ]
+    },
+    "includes": [
+      "Hotel",
+      "Vuelos",
+      "Traslados",
+      "Seguro de viaje"
+    ],
+    "notIncludes": [
+      "Propinas"
+    ],
+    "images": [
+      {
+        "id": "img-14-1",
+        "url": "https://picsum.photos/seed/nuevayork14/1200/800",
+        "alt": "Vista de Nueva York",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Tour exclusivo",
+      "Guía en español",
+      "Ubicación estratégica"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": false,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035198Z",
+    "updatedAt": "2026-02-21T18:21:31.035199Z"
+  },
+  {
+    "id": "of-4015",
+    "slug": "roma-experience-2026-15",
+    "title": "Roma Experience 2026",
+    "subtitle": "Un recorrido fascinante por los rincones de Roma.",
+    "location": {
+      "city": "Roma",
+      "country": "Italia",
+      "airport": "FCO"
+    },
+    "category": "Internacional",
+    "tags": [
+      "Naturaleza",
+      "Relax",
+      "Gastronomía"
+    ],
+    "rating": {
+      "value": 4.9,
+      "reviewsCount": 2974
+    },
+    "duration": {
+      "nights": 6,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "ARS",
+      "price": 4563,
+      "pricePer": "pareja",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-03-01T00:00:00Z",
+      "endDate": "2026-06-30T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 7
+    },
+    "hotel": {
+      "name": "Roma Grand Hotel",
+      "stars": 3,
+      "roomType": "Suite",
+      "amenities": [
+        "WiFi",
+        "Piscina",
+        "Spa"
+      ]
+    },
+    "includes": [
+      "Seguro de viaje",
+      "Hotel",
+      "Vuelos",
+      "Desayuno diario"
+    ],
+    "notIncludes": [
+      "Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-15-1",
+        "url": "https://picsum.photos/seed/roma15/1200/800",
+        "alt": "Vista de Roma",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Atención personalizada",
+      "Tour exclusivo",
+      "Experiencia gastronómica"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035246Z",
+    "updatedAt": "2026-02-21T18:21:31.035248Z"
+  },
+  {
+    "id": "of-4016",
+    "slug": "cusco-experience-2026-16",
+    "title": "Cusco Experience 2026",
+    "subtitle": "Tu próxima aventura comienza en Cusco.",
+    "location": {
+      "city": "Cusco",
+      "country": "Perú",
+      "airport": "CUZ"
+    },
+    "category": "Romántico",
+    "tags": [
+      "Premium",
+      "Playa",
+      "Relax"
+    ],
+    "rating": {
+      "value": 4.8,
+      "reviewsCount": 1296
+    },
+    "duration": {
+      "nights": 4,
+      "days": 9
+    },
+    "pricing": {
+      "currency": "EUR",
+      "originalPrice": 2501,
+      "discountPercentage": 22,
+      "finalPrice": 1950,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-01-01T00:00:00Z",
+      "endDate": "2026-06-11T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 6
+    },
+    "hotel": {
+      "name": "Cusco Grand Hotel",
+      "stars": 4,
+      "roomType": "Standard",
+      "amenities": [
+        "Spa",
+        "Bar",
+        "Gimnasio"
+      ]
+    },
+    "includes": [
+      "Traslados",
+      "Hotel",
+      "Seguro de viaje",
+      "Excursiones"
+    ],
+    "notIncludes": [
+      "Propinas"
+    ],
+    "images": [
+      {
+        "id": "img-16-1",
+        "url": "https://picsum.photos/seed/cusco16/1200/800",
+        "alt": "Vista de Cusco",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Ubicación estratégica",
+      "Atención personalizada",
+      "Experiencia gastronómica"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": false,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035283Z",
+    "updatedAt": "2026-02-21T18:21:31.035285Z"
+  },
+  {
+    "id": "of-4017",
+    "slug": "cusco-experience-2026-17",
+    "title": "Cusco Experience 2026",
+    "subtitle": "Un recorrido fascinante por los rincones de Cusco.",
+    "location": {
+      "city": "Cusco",
+      "country": "Perú",
+      "airport": "CUZ"
+    },
+    "category": "Nacional",
+    "tags": [
+      "Naturaleza",
+      "Relax",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.5,
+      "reviewsCount": 932
+    },
+    "duration": {
+      "nights": 4,
+      "days": 10
+    },
+    "pricing": {
+      "currency": "EUR",
+      "finalPrice": 1665,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-03-01T00:00:00Z",
+      "endDate": "2026-08-08T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 9
+    },
+    "hotel": {
+      "name": "Cusco Grand Hotel",
+      "stars": 5,
+      "roomType": "Standard",
+      "amenities": [
+        "WiFi",
+        "Bar",
+        "Spa"
+      ]
+    },
+    "includes": [
+      "Hotel",
+      "Vuelos",
+      "Desayuno diario",
+      "Traslados"
+    ],
+    "notIncludes": [
+      "Propinas"
+    ],
+    "images": [
+      {
+        "id": "img-17-1",
+        "url": "https://picsum.photos/seed/cusco17/1200/800",
+        "alt": "Vista de Cusco",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Experiencia gastronómica",
+      "Tour exclusivo",
+      "Guía en español"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": true,
+    "isPopular": true,
+    "createdAt": "2026-02-21T18:21:31.035317Z",
+    "updatedAt": "2026-02-21T18:21:31.035319Z"
+  },
+  {
+    "id": "of-4018",
+    "slug": "parís-experience-2026-18",
+    "title": "París Experience 2026",
+    "subtitle": "Tu próxima aventura comienza en París.",
+    "location": {
+      "city": "París",
+      "country": "Francia",
+      "airport": "CDG"
+    },
+    "category": "Nacional",
+    "tags": [
+      "Premium",
+      "Naturaleza",
+      "Relax"
+    ],
+    "rating": {
+      "value": 4.6,
+      "reviewsCount": 3094
+    },
+    "duration": {
+      "nights": 7,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "EUR",
+      "originalPrice": 2907,
+      "discountPercentage": 10,
+      "finalPrice": 2616,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-02-01T00:00:00Z",
+      "endDate": "2026-08-30T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 10
+    },
+    "hotel": {
+      "name": "París Grand Hotel",
+      "stars": 5,
+      "roomType": "Suite",
+      "amenities": [
+        "Gimnasio",
+        "Vista al mar",
+        "Spa"
+      ]
+    },
+    "includes": [
+      "Excursiones",
+      "Seguro de viaje",
+      "Vuelos",
+      "Hotel"
+    ],
+    "notIncludes": [
+      "Propinas"
+    ],
+    "images": [
+      {
+        "id": "img-18-1",
+        "url": "https://picsum.photos/seed/parís18/1200/800",
+        "alt": "Vista de París",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Atención personalizada",
+      "Experiencia gastronómica",
+      "Tour exclusivo"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035359Z",
+    "updatedAt": "2026-02-21T18:21:31.035362Z"
+  },
+  {
+    "id": "of-4019",
+    "slug": "cusco-experience-2026-19",
+    "title": "Cusco Experience 2026",
+    "subtitle": "Escapada soñada en Cusco con experiencias únicas.",
+    "location": {
+      "city": "Cusco",
+      "country": "Perú",
+      "airport": "CUZ"
+    },
+    "category": "Nacional",
+    "tags": [
+      "Gastronomía",
+      "Cultural",
+      "Naturaleza"
+    ],
+    "rating": {
+      "value": 4.9,
+      "reviewsCount": 1528
+    },
+    "duration": {
+      "nights": 8,
+      "days": 8
+    },
+    "pricing": {
+      "currency": "ARS",
+      "originalPrice": 2264,
+      "discountPercentage": 20,
+      "finalPrice": 1811,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-05-01T00:00:00Z",
+      "endDate": "2026-10-29T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 20
+    },
+    "hotel": {
+      "name": "Cusco Grand Hotel",
+      "stars": 5,
+      "roomType": "Deluxe",
+      "amenities": [
+        "Desayuno incluido",
+        "WiFi",
+        "Bar"
+      ]
+    },
+    "includes": [
+      "Hotel",
+      "Vuelos",
+      "Desayuno diario",
+      "Seguro de viaje"
+    ],
+    "notIncludes": [
+      "Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-19-1",
+        "url": "https://picsum.photos/seed/cusco19/1200/800",
+        "alt": "Vista de Cusco",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Experiencia gastronómica",
+      "Atención personalizada",
+      "Ubicación estratégica"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": false,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035405Z",
+    "updatedAt": "2026-02-21T18:21:31.035407Z"
+  },
+  {
+    "id": "of-4020",
+    "slug": "ciudad-del-cabo-experience-2026-20",
+    "title": "Ciudad del Cabo Experience 2026",
+    "subtitle": "Tu próxima aventura comienza en Ciudad del Cabo.",
+    "location": {
+      "city": "Ciudad del Cabo",
+      "country": "Sudáfrica",
+      "airport": "CPT"
+    },
+    "category": "Aventura",
+    "tags": [
+      "Gastronomía",
+      "Cultural",
+      "Relax"
+    ],
+    "rating": {
+      "value": 4.6,
+      "reviewsCount": 3252
+    },
+    "duration": {
+      "nights": 5,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "ARS",
+      "finalPrice": 2670,
+      "pricePer": "persona",
+      "installments": {
+        "available": true
+      }
+    },
+    "availability": {
+      "startDate": "2026-05-01T00:00:00Z",
+      "endDate": "2026-09-21T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 6
+    },
+    "hotel": {
+      "name": "Ciudad del Cabo Grand Hotel",
+      "stars": 4,
+      "roomType": "Standard",
+      "amenities": [
+        "Spa",
+        "Bar",
+        "Gimnasio"
+      ]
+    },
+    "includes": [
+      "Excursiones",
+      "Traslados",
+      "Desayuno diario",
+      "Hotel"
+    ],
+    "notIncludes": [
+      "Propinas"
+    ],
+    "images": [
+      {
+        "id": "img-20-1",
+        "url": "https://picsum.photos/seed/ciudaddelcabo20/1200/800",
+        "alt": "Vista de Ciudad del Cabo",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Experiencia gastronómica",
+      "Atención personalizada",
+      "Ubicación estratégica"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": false,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035440Z",
+    "updatedAt": "2026-02-21T18:21:31.035442Z"
+  },
+  {
+    "id": "of-4021",
+    "slug": "lisboa-experience-2026-21",
+    "title": "Lisboa Experience 2026",
+    "subtitle": "Una combinación perfecta de historia y modernidad en Lisboa.",
+    "location": {
+      "city": "Lisboa",
+      "country": "Portugal",
+      "airport": "LIS"
+    },
+    "category": "Romántico",
+    "tags": [
+      "Lujo",
+      "Aventura",
+      "Relax"
+    ],
+    "rating": {
+      "value": 4.4,
+      "reviewsCount": 2721
+    },
+    "duration": {
+      "nights": 8,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "USD",
+      "originalPrice": 2979,
+      "discountPercentage": 25,
+      "finalPrice": 2234,
+      "pricePer": "persona",
+      "installments": {
+        "available": true,
+        "quantity": 6,
+        "amount": 372.33,
+        "interestFree": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-03-01T00:00:00Z",
+      "endDate": "2026-08-25T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 1
+    },
+    "hotel": {
+      "name": "Lisboa Grand Hotel",
+      "stars": 3,
+      "roomType": "Suite",
+      "amenities": [
+        "Desayuno incluido",
+        "Gimnasio",
+        "WiFi"
+      ]
+    },
+    "includes": [
+      "Desayuno diario",
+      "Hotel",
+      "Vuelos",
+      "Excursiones"
+    ],
+    "notIncludes": [
+      "Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-21-1",
+        "url": "https://picsum.photos/seed/lisboa21/1200/800",
+        "alt": "Vista de Lisboa",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Guía en español",
+      "Atención personalizada",
+      "Ubicación estratégica"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": false,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035477Z",
+    "updatedAt": "2026-02-21T18:21:31.035478Z"
+  },
+  {
+    "id": "of-4022",
+    "slug": "punta-cana-experience-2026-22",
+    "title": "Punta Cana Experience 2026",
+    "subtitle": "Lujo, cultura y aventura en el corazón de Punta Cana.",
+    "location": {
+      "city": "Punta Cana",
+      "country": "República Dominicana",
+      "airport": "PUJ"
+    },
+    "category": "Romántico",
+    "tags": [
+      "Playa",
+      "Lujo",
+      "Gastronomía"
+    ],
+    "rating": {
+      "value": 4.2,
+      "reviewsCount": 2769
+    },
+    "duration": {
+      "nights": 5,
+      "days": 5
+    },
+    "pricing": {
+      "currency": "ARS",
+      "price": 866,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-02-01T00:00:00Z",
+      "endDate": "2026-09-13T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 7
+    },
+    "hotel": {
+      "name": "Punta Cana Grand Hotel",
+      "stars": 4,
+      "roomType": "Suite",
+      "amenities": [
+        "Desayuno incluido",
+        "Vista al mar",
+        "Spa"
+      ]
+    },
+    "includes": [
+      "Hotel",
+      "Traslados",
+      "Vuelos",
+      "Seguro de viaje"
+    ],
+    "notIncludes": [
+      "Propinas"
+    ],
+    "images": [
+      {
+        "id": "img-22-1",
+        "url": "https://picsum.photos/seed/puntacana22/1200/800",
+        "alt": "Vista de Punta Cana",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Tour exclusivo",
+      "Atención personalizada",
+      "Guía en español"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035509Z",
+    "updatedAt": "2026-02-21T18:21:31.035511Z"
+  },
+  {
+    "id": "of-4023",
+    "slug": "nueva-york-experience-2026-23",
+    "title": "Nueva York Experience 2026",
+    "subtitle": "Explorá Nueva York y viví momentos que duran para siempre.",
+    "location": {
+      "city": "Nueva York",
+      "country": "Estados Unidos",
+      "airport": "JFK"
+    },
+    "category": "Internacional",
+    "tags": [
+      "Lujo",
+      "Cultural",
+      "Naturaleza"
+    ],
+    "rating": {
+      "value": 4.6,
+      "reviewsCount": 838
+    },
+    "duration": {
+      "nights": 6,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "EUR",
+      "originalPrice": 3243,
+      "discountPercentage": 21,
+      "finalPrice": 2561,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-04-01T00:00:00Z",
+      "endDate": "2026-10-23T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 12
+    },
+    "hotel": {
+      "name": "Nueva York Grand Hotel",
+      "stars": 5,
+      "roomType": "Standard",
+      "amenities": [
+        "Bar",
+        "Vista al mar",
+        "Spa"
+      ]
+    },
+    "includes": [
+      "Hotel",
+      "Excursiones",
+      "Desayuno diario",
+      "Vuelos"
+    ],
+    "notIncludes": [
+      "Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-23-1",
+        "url": "https://picsum.photos/seed/nuevayork23/1200/800",
+        "alt": "Vista de Nueva York",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Tour exclusivo",
+      "Experiencia gastronómica",
+      "Atención personalizada"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": false,
+    "isPopular": true,
+    "createdAt": "2026-02-21T18:21:31.035542Z",
+    "updatedAt": "2026-02-21T18:21:31.035544Z"
+  },
+  {
+    "id": "of-4024",
+    "slug": "cartagena-experience-2026-24",
+    "title": "Cartagena Experience 2026",
+    "subtitle": "Escapada soñada en Cartagena con experiencias únicas.",
+    "location": {
+      "city": "Cartagena",
+      "country": "Colombia",
+      "airport": "CTG"
+    },
+    "category": "Aventura",
+    "tags": [
+      "Cultural",
+      "Gastronomía",
+      "Naturaleza"
+    ],
+    "rating": {
+      "value": 4.6,
+      "reviewsCount": 2646
+    },
+    "duration": {
+      "nights": 7,
+      "days": 9
+    },
+    "pricing": {
+      "currency": "ARS",
+      "price": 4976,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-04-01T00:00:00Z",
+      "endDate": "2026-11-13T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 20
+    },
+    "hotel": {
+      "name": "Cartagena Grand Hotel",
+      "stars": 4,
+      "roomType": "Standard",
+      "amenities": [
+        "Desayuno incluido",
+        "Bar",
+        "Gimnasio"
+      ]
+    },
+    "includes": [
+      "Hotel",
+      "Traslados",
+      "Desayuno diario",
+      "Seguro de viaje"
+    ],
+    "notIncludes": [
+      "Comidas no especificadas"
+    ],
+    "images": [
+      {
+        "id": "img-24-1",
+        "url": "https://picsum.photos/seed/cartagena24/1200/800",
+        "alt": "Vista de Cartagena",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Atención personalizada",
+      "Guía en español",
+      "Ubicación estratégica"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035589Z",
+    "updatedAt": "2026-02-21T18:21:31.035592Z"
+  },
+  {
+    "id": "of-4025",
+    "slug": "cusco-experience-2026-25",
+    "title": "Cusco Experience 2026",
+    "subtitle": "Experiencia exclusiva en Cusco para viajeros exigentes.",
+    "location": {
+      "city": "Cusco",
+      "country": "Perú",
+      "airport": "CUZ"
+    },
+    "category": "Nacional",
+    "tags": [
+      "Naturaleza",
+      "Relax",
+      "Cultural"
+    ],
+    "rating": {
+      "value": 4.5,
+      "reviewsCount": 1186
+    },
+    "duration": {
+      "nights": 5,
+      "days": 11
+    },
+    "pricing": {
+      "currency": "EUR",
+      "price": 2905,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-03-01T00:00:00Z",
+      "endDate": "2026-10-27T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 6
+    },
+    "hotel": {
+      "name": "Cusco Grand Hotel",
+      "stars": 3,
+      "roomType": "Deluxe",
+      "amenities": [
+        "WiFi",
+        "Spa",
+        "Gimnasio"
+      ]
+    },
+    "includes": [
+      "Excursiones",
+      "Vuelos",
+      "Desayuno diario",
+      "Traslados"
+    ],
+    "notIncludes": [
+      "Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-25-1",
+        "url": "https://picsum.photos/seed/cusco25/1200/800",
+        "alt": "Vista de Cusco",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Guía en español",
+      "Ubicación estratégica",
+      "Experiencia gastronómica"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035625Z",
+    "updatedAt": "2026-02-21T18:21:31.035626Z"
+  },
+  {
+    "id": "of-4026",
+    "slug": "roma-experience-2026-26",
+    "title": "Roma Experience 2026",
+    "subtitle": "Escapada soñada en Roma con experiencias únicas.",
+    "location": {
+      "city": "Roma",
+      "country": "Italia",
+      "airport": "FCO"
+    },
+    "category": "Romántico",
+    "tags": [
+      "Aventura",
+      "Lujo",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.7,
+      "reviewsCount": 3035
+    },
+    "duration": {
+      "nights": 9,
+      "days": 6
+    },
+    "pricing": {
+      "currency": "EUR",
+      "finalPrice": 2884,
+      "pricePer": "persona",
+      "installments": {
+        "available": true
+      }
+    },
+    "availability": {
+      "startDate": "2026-01-01T00:00:00Z",
+      "endDate": "2026-08-02T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 20
+    },
+    "hotel": {
+      "name": "Roma Grand Hotel",
+      "stars": 5,
+      "roomType": "Suite",
+      "amenities": [
+        "Spa",
+        "Desayuno incluido",
+        "WiFi"
+      ]
+    },
+    "includes": [
+      "Desayuno diario",
+      "Vuelos",
+      "Hotel",
+      "Traslados"
+    ],
+    "notIncludes": [
+      "Comidas no especificadas"
+    ],
+    "images": [
+      {
+        "id": "img-26-1",
+        "url": "https://picsum.photos/seed/roma26/1200/800",
+        "alt": "Vista de Roma",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Ubicación estratégica",
+      "Tour exclusivo",
+      "Atención personalizada"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": false,
+    "isPopular": true,
+    "createdAt": "2026-02-21T18:21:31.035657Z",
+    "updatedAt": "2026-02-21T18:21:31.035658Z"
+  },
+  {
+    "id": "of-4027",
+    "slug": "madrid-experience-2026-27",
+    "title": "Madrid Experience 2026",
+    "subtitle": "Tu próxima aventura comienza en Madrid.",
+    "location": {
+      "city": "Madrid",
+      "country": "España",
+      "airport": "MAD"
+    },
+    "category": "Romántico",
+    "tags": [
+      "Premium",
+      "Naturaleza",
+      "Gastronomía"
+    ],
+    "rating": {
+      "value": 4.6,
+      "reviewsCount": 3052
+    },
+    "duration": {
+      "nights": 6,
+      "days": 8
+    },
+    "pricing": {
+      "currency": "USD",
+      "originalPrice": 1734,
+      "discountPercentage": 20,
+      "finalPrice": 1387,
+      "pricePer": "persona",
+      "installments": {
+        "available": true,
+        "quantity": 3,
+        "amount": 462.33,
+        "interestFree": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-02-01T00:00:00Z",
+      "endDate": "2026-07-24T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 16
+    },
+    "hotel": {
+      "name": "Madrid Grand Hotel",
+      "stars": 5,
+      "roomType": "Suite",
+      "amenities": [
+        "Vista al mar",
+        "Spa",
+        "WiFi"
+      ]
+    },
+    "includes": [
+      "Traslados",
+      "Hotel",
+      "Desayuno diario",
+      "Seguro de viaje"
+    ],
+    "notIncludes": [
+      "Comidas no especificadas"
+    ],
+    "images": [
+      {
+        "id": "img-27-1",
+        "url": "https://picsum.photos/seed/madrid27/1200/800",
+        "alt": "Vista de Madrid",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Experiencia gastronómica",
+      "Tour exclusivo",
+      "Guía en español"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": true,
+    "isPopular": true,
+    "createdAt": "2026-02-21T18:21:31.035692Z",
+    "updatedAt": "2026-02-21T18:21:31.035694Z"
+  },
+  {
+    "id": "of-4028",
+    "slug": "madrid-experience-2026-28",
+    "title": "Madrid Experience 2026",
+    "subtitle": "Una combinación perfecta de historia y modernidad en Madrid.",
+    "location": {
+      "city": "Madrid",
+      "country": "España",
+      "airport": "MAD"
+    },
+    "category": "Exótico",
+    "tags": [
+      "Playa",
+      "Lujo",
+      "Aventura"
+    ],
+    "rating": {
+      "value": 4.5,
+      "reviewsCount": 1129
+    },
+    "duration": {
+      "nights": 7,
+      "days": 9
+    },
+    "pricing": {
+      "currency": "EUR",
+      "finalPrice": 4696,
+      "pricePer": "persona",
+      "installments": {
+        "available": true
+      }
+    },
+    "availability": {
+      "startDate": "2026-03-01T00:00:00Z",
+      "endDate": "2026-09-27T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 7
+    },
+    "hotel": {
+      "name": "Madrid Grand Hotel",
+      "stars": 4,
+      "roomType": "Deluxe",
+      "amenities": [
+        "Piscina",
+        "Desayuno incluido",
+        "Vista al mar"
+      ]
+    },
+    "includes": [
+      "Traslados",
+      "Hotel",
+      "Desayuno diario",
+      "Excursiones"
+    ],
+    "notIncludes": [
+      "Comidas no especificadas"
+    ],
+    "images": [
+      {
+        "id": "img-28-1",
+        "url": "https://picsum.photos/seed/madrid28/1200/800",
+        "alt": "Vista de Madrid",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Guía en español",
+      "Experiencia gastronómica",
+      "Ubicación estratégica"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035725Z",
+    "updatedAt": "2026-02-21T18:21:31.035727Z"
+  },
+  {
+    "id": "of-4029",
+    "slug": "nueva-york-experience-2026-29",
+    "title": "Nueva York Experience 2026",
+    "subtitle": "Naturaleza, gastronomía y cultura en Nueva York.",
+    "location": {
+      "city": "Nueva York",
+      "country": "Estados Unidos",
+      "airport": "JFK"
+    },
+    "category": "Aventura",
+    "tags": [
+      "Cultural",
+      "Relax",
+      "Naturaleza"
+    ],
+    "rating": {
+      "value": 4.3,
+      "reviewsCount": 2057
+    },
+    "duration": {
+      "nights": 10,
+      "days": 9
+    },
+    "pricing": {
+      "currency": "EUR",
+      "price": 1580,
+      "pricePer": "pareja",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-05-01T00:00:00Z",
+      "endDate": "2026-09-20T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 4
+    },
+    "hotel": {
+      "name": "Nueva York Grand Hotel",
+      "stars": 3,
+      "roomType": "Deluxe",
+      "amenities": [
+        "Piscina",
+        "Vista al mar",
+        "WiFi"
+      ]
+    },
+    "includes": [
+      "Traslados",
+      "Desayuno diario",
+      "Excursiones",
+      "Hotel"
+    ],
+    "notIncludes": [
+      "Comidas no especificadas"
+    ],
+    "images": [
+      {
+        "id": "img-29-1",
+        "url": "https://picsum.photos/seed/nuevayork29/1200/800",
+        "alt": "Vista de Nueva York",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Tour exclusivo",
+      "Ubicación estratégica",
+      "Experiencia gastronómica"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": false,
+    "isPopular": true,
+    "createdAt": "2026-02-21T18:21:31.035756Z",
+    "updatedAt": "2026-02-21T18:21:31.035758Z"
+  },
+  {
+    "id": "of-4030",
+    "slug": "lisboa-experience-2026-30",
+    "title": "Lisboa Experience 2026",
+    "subtitle": "Explorá Lisboa y viví momentos que duran para siempre.",
+    "location": {
+      "city": "Lisboa",
+      "country": "Portugal",
+      "airport": "LIS"
+    },
+    "category": "Internacional",
+    "tags": [
+      "Aventura",
+      "Playa",
+      "Cultural"
+    ],
+    "rating": {
+      "value": 4.7,
+      "reviewsCount": 804
+    },
+    "duration": {
+      "nights": 10,
+      "days": 9
+    },
+    "pricing": {
+      "currency": "USD",
+      "price": 2269,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-06-01T00:00:00Z",
+      "endDate": "2026-10-08T00:00:00Z",
+      "limitedSpots": false,
+      "remainingSpots": 1
+    },
+    "hotel": {
+      "name": "Lisboa Grand Hotel",
+      "stars": 3,
+      "roomType": "Deluxe",
+      "amenities": [
+        "Bar",
+        "Piscina",
+        "Spa"
+      ]
+    },
+    "includes": [
+      "Excursiones",
+      "Seguro de viaje",
+      "Traslados",
+      "Desayuno diario"
+    ],
+    "notIncludes": [
+      "Comidas no especificadas"
+    ],
+    "images": [
+      {
+        "id": "img-30-1",
+        "url": "https://picsum.photos/seed/lisboa30/1200/800",
+        "alt": "Vista de Lisboa",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Ubicación estratégica",
+      "Tour exclusivo",
+      "Guía en español"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": false,
+    "isPopular": false,
+    "createdAt": "2026-02-21T18:21:31.035788Z",
+    "updatedAt": "2026-02-21T18:21:31.035790Z"
+  }
+]

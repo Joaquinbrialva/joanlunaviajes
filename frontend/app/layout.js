@@ -25,8 +25,10 @@ export default function RootLayout({ children }) {
 				className={`${inter.variable} ${fira.variable} font-sans antialiased`}
 			>
 				<ThemeProvider>
-					<Navbar />
-					{children}
+					<div className='space-y-4'>
+						<Navbar />
+						<div className='max-w-7xl mx-auto px-4'>{children}</div>
+					</div>
 				</ThemeProvider>
 			</body>
 		</html>
