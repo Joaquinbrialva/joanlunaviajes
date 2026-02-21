@@ -5,6 +5,7 @@ import { Button } from '@heroui/react';
 import { FaChevronRight } from 'react-icons/fa';
 
 export default function Offers() {
+  const quantity = offers.slice(0, 6);
   return (
     <div className='space-y-4'>
       <div className='flex items-end justify-between'>
@@ -18,7 +19,7 @@ export default function Offers() {
         </Button>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-        {offers.map((offer) => (
+        {quantity.map((offer) => (
           <Card key={offer.id} {...offer} />
         ))}
       </div>
