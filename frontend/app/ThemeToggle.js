@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@heroui/react';
-import { Moon, Sun } from 'lucide-react';
+import { MdDarkMode, MdLightMode } from 'react-icons/md';
 import { useTheme } from 'next-themes';
 
 export default function ThemeToggle() {
@@ -17,20 +17,18 @@ export default function ThemeToggle() {
 			onClick={() => setTheme(isDark ? 'light' : 'dark')}
 			className='relative h-10 w-10 p-0 transition-colors'
 		>
-			<Sun
+			<MdLightMode
 				className={`
           absolute transition-all duration-300
           ${isDark ? 'rotate-0 opacity-100' : 'rotate-90 opacity-0'}
         `}
-				size={18}
 			/>
 
-			<Moon
+			<MdDarkMode
 				className={`
           absolute transition-all duration-300
           ${isDark ? '-rotate-90 opacity-0' : 'rotate-0 opacity-100'}
         `}
-				size={18}
 			/>
 		</Button>
 	);
