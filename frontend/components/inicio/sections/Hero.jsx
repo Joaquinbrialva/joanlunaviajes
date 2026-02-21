@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 export default function Hero() {
   return (
-    <section className="m-6">
+    <section>
       <div className="relative h-[70vh] rounded-4xl overflow-hidden shadow-2xl">
 
         {/* Imagen optimizada */}
