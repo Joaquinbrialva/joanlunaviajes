@@ -12,9 +12,11 @@ export default function Home() {
 			<Hero />
 			<Offers />
 			<Destinies />
-			<WhyChoose />
-			<NewsLetter />
-      <Footer 
+			<div className='space-y-0'>
+				<WhyChoose />
+				<NewsLetter />
+				<Footer />
+			</div>
 		</div>
 	);
 }
