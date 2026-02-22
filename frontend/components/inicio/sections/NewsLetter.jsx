@@ -1,13 +1,19 @@
 import { Button, Input, InputGroup } from "@heroui/react";
-import { useState } from "react";
 import { FaEnvelope } from "react-icons/fa";
 
 export default function NewsLetter() {
 
   return (
     <div className="w-screen -mx-[calc((100vw-100%)/2)] py-16 bg-linear-to-b from-slate-800 to-slate-900 relative overflow-hidden">
-      {/* Patrón de puntos */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
+      {/* Patrón de puntos - Light mode */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none dark:hidden">
+        <div className="w-full h-full" style={{
+          backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)",
+          backgroundSize: "30px 30px"
+        }} />
+      </div>
+      {/* Patrón de puntos - Dark mode */}
+      <div className="absolute inset-0 hidden opacity-10 pointer-events-none dark:block">
         <div className="w-full h-full" style={{
           backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)",
           backgroundSize: "30px 30px"
@@ -29,7 +35,7 @@ export default function NewsLetter() {
             </InputGroup.Prefix>
             <InputGroup.Input className="w-full max-w-80" placeholder="nombre@email.com" />
           </InputGroup>
-          <Button>
+          <Button className="dark:bg-surface">
             Suscribirse
           </Button>
         </div>

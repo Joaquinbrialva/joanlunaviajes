@@ -7,15 +7,15 @@ function Feature({ Icon, title, children }) {
       <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center">
         <Icon className="text-orange-400 w-9 h-9" />
       </div>
-      <p className="font-semibold text-slate-800">{title}</p>
-      <p className="text-sm text-slate-500 max-w-xs">{children}</p>
+      <p className="font-semibold text-slate-800 dark:text-white">{title}</p>
+      <p className="text-sm text-slate-500 dark:text-gray-300 max-w-xs">{children}</p>
     </div>
   );
 }
 
 export default function WhyChoose() {
   return (
-    <section className="py-12">
+    <section className="w-screen -mx-[calc((100vw-100%)/2)] py-12 dark:bg-slate-800">
       <div className="max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <Feature Icon={PiShieldCheckFill} title="Seguridad Garantizada">
