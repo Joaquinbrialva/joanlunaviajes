@@ -51,7 +51,6 @@ export default function CollageGrid({ destinations = [] }) {
 }
 
 function CollageItem({ item, large = false, wide = false }) {
-  console.log(item)
   return (
     <div
       className={`

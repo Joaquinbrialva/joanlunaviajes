@@ -1,36 +1,37 @@
 ﻿import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { LuCalendarDays, LuGlobe, LuLandmark, LuShieldCheck, LuWallet } from 'react-icons/lu';
-import offers from '@/mocks/mock_offers_varied.json';
-import destinations from '@/mocks/mock_destinations_informative.json';
+import { LuGlobe, LuMapPin, LuWallet } from 'react-icons/lu';
 import { formatCurrency } from '@/util/utils';
-import { Button } from '@heroui/react';
 import Footer from '@/components/inicio/sections/Footer';
-
-function getDestination(slug) {
-  return destinations.find((item) => item.slug === slug);
-}
-
-function getRelatedCities(destination) {
-  return destinations
-    .filter((item) => item.slug !== destination.slug && item.continent === destination.continent)
-    .slice(0, 4);
-}
-
-function getRelatedOffers(destination) {
-  const byCountry = offers.filter((offer) => offer.location.country === destination.country);
-  if (byCountry.length > 0) return byCountry.slice(0, 3);
-  return offers.filter((offer) => offer.isFeatured).slice(0, 3);
-}
+import { readDestinations, readOffers } from '@/lib/mock-store';
 
 function getOfferPrice(offer) {
   return offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || 0;
 }
 
+async function getDestination(slug) {
+  const destinations = await readDestinations();
+  return destinations.find((item) => item.slug === slug);
+}
+
+async function getRelatedCities(destination) {
+  const destinations = await readDestinations();
+  return destinations
+    .filter((item) => item.slug !== destination.slug && item.continent === destination.continent)
+    .slice(0, 4);
+}
+
+async function getRelatedOffers(destination) {
+  const offers = await readOffers();
+  const byCountry = offers.filter((offer) => offer.location.country === destination.country);
+  if (byCountry.length > 0) return byCountry.slice(0, 3);
+  return offers.filter((offer) => offer.isFeatured).slice(0, 3);
+}
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const destination = getDestination(slug);
+  const destination = await getDestination(slug);
 
   if (!destination) {
     return { title: 'Destino no encontrado | Joanluna Viajes' };
@@ -44,14 +45,16 @@ export async function generateMetadata({ params }) {
 
 export default async function DestinationDetailPage({ params }) {
   const { slug } = await params;
-  const destination = getDestination(slug);
+  const destination = await getDestination(slug);
 
   if (!destination) {
     notFound();
   }
 
-  const relatedCities = getRelatedCities(destination);
-  const relatedOffers = getRelatedOffers(destination);
+  const [relatedCities, relatedOffers] = await Promise.all([
+    getRelatedCities(destination),
+    getRelatedOffers(destination),
+  ]);
 
   return (
     <div className='space-y-14 pb-12 overflow-x-hidden'>
@@ -61,7 +64,7 @@ export default async function DestinationDetailPage({ params }) {
 
         <div className='absolute inset-x-0 bottom-0 p-8 md:p-12 text-white'>
           <p className='inline-flex items-center rounded-full bg-white/20 backdrop-blur px-3 py-1 text-xs font-semibold mb-4'>
-            Destination Focus
+            Destino destacado
           </p>
           <h1 className='text-6xl md:text-7xl font-bold tracking-tight drop-shadow-sm'>{destination.name}</h1>
           <p className='mt-4 max-w-2xl text-lg text-white/90'>{destination.description}</p>
@@ -82,8 +85,8 @@ export default async function DestinationDetailPage({ params }) {
           subtitle='Uso frecuente en turismo'
         />
         <InfoCard
-          icon={<LuCalendarDays className='text-accent' />}
-          title='Mejor epoca'
+          icon={<LuMapPin className='text-accent' />}
+          title='Mejor época'
           value={destination.climate.bestMonthsToVisit.slice(0, 2).join(' - ')}
           subtitle={destination.climate.type}
         />
@@ -99,13 +102,13 @@ export default async function DestinationDetailPage({ params }) {
           />
         </div>
         <article className='space-y-4'>
-          <p className='text-xs uppercase tracking-[0.2em] text-accent font-semibold'>About the Region</p>
+          <p className='text-xs uppercase tracking-[0.2em] text-accent font-semibold'>Sobre la región</p>
           <h2 className='text-4xl font-bold leading-tight'>
             {destination.name}, una experiencia pensada para descubrir {destination.country}
           </h2>
           <p className='text-muted leading-relaxed'>{destination.description}</p>
           <p className='text-muted leading-relaxed'>
-            Aeropuerto principal {destination.travelInfo.airport}. Estadia recomendada: {destination.travelInfo.recommendedStayDays} dias.
+            Aeropuerto principal {destination.travelInfo.airport}. Estadía recomendada: {destination.travelInfo.recommendedStayDays} días.
             Seguridad estimada {destination.stats.safetyIndex}/100 y presupuesto medio diario de USD {destination.stats.averageDailyBudgetUSD}.
           </p>
           <Link
@@ -141,7 +144,7 @@ export default async function DestinationDetailPage({ params }) {
 
       <section className='space-y-6'>
         <div className='text-center space-y-2'>
-          <p className='text-xs uppercase tracking-[0.2em] text-accent font-semibold'>Curated experiences</p>
+          <p className='text-xs uppercase tracking-[0.2em] text-accent font-semibold'>Experiencias curadas</p>
           <h2 className='text-5xl font-bold'>Aventuras disponibles</h2>
           <p className='text-muted'>Paquetes seleccionados para viajar a {destination.country}.</p>
         </div>
@@ -156,7 +159,7 @@ export default async function DestinationDetailPage({ params }) {
                 <div className='relative h-52'>
                   <Image src={cover.url} alt={offer.title} fill className='object-cover' />
                   <span className='absolute top-3 right-3 bg-white/90 text-slate-900 text-xs px-2 py-1 rounded-md'>
-                    {offer.duration.days} dias
+                    {offer.duration.days} días
                   </span>
                 </div>
 
@@ -204,3 +207,4 @@ function InfoCard({ icon, title, value, subtitle }) {
     </article>
   );
 }
+
