@@ -1,13 +1,13 @@
 ﻿'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button, Input } from '@heroui/react';
 import { LuGlobe, LuMapPin, LuSearch } from 'react-icons/lu';
-import destinations from '@/mocks/mock_destinations_informative.json';
 import { Slider } from '@/components/ui/slider';
 import Footer from '@/components/inicio/sections/Footer';
+import HeroSelect from '@/components/ui/hero-select';
 import {
   Pagination,
   PaginationContent,
@@ -39,6 +39,7 @@ function getVisiblePages(currentPage, totalPages) {
 }
 
 export default function DestinationsPage() {
+  const [destinationsData, setDestinationsData] = useState([]);
   const [search, setSearch] = useState('');
   const [continent, setContinent] = useState('all');
   const [travelStyle, setTravelStyle] = useState('all');
@@ -46,25 +47,41 @@ export default function DestinationsPage() {
   const [budgetRange, setBudgetRange] = useState([MIN_BUDGET, MAX_BUDGET]);
   const [sortBy, setSortBy] = useState('popular');
   const [page, setPage] = useState(1);
+  useEffect(() => {
+    let active = true;
+    fetch('/api/destinos', { cache: 'no-store' })
+      .then((response) => response.json())
+      .then((data) => {
+        if (active && Array.isArray(data)) setDestinationsData(data);
+      })
+      .catch(() => {
+        if (active) setDestinationsData([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const featuredDestination = useMemo(
-    () => destinations.find((item) => item.isFeatured) || destinations[0],
-    []
+    () => destinationsData.find((item) => item.isFeatured) || destinationsData[0],
+    [destinationsData]
   );
 
   const continents = useMemo(
-    () => ['all', ...new Set(destinations.map((item) => item.continent))],
-    []
+    () => ['all', ...new Set(destinationsData.map((item) => item.continent))],
+    [destinationsData]
   );
 
   const styles = useMemo(
-    () => ['all', ...new Set(destinations.flatMap((item) => item.travelStyles))],
-    []
+    () => ['all', ...new Set(destinationsData.flatMap((item) => item.travelStyles))],
+    [destinationsData]
   );
 
   const filteredDestinations = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    let next = destinations.filter((destination) => {
+    let next = destinationsData.filter((destination) => {
       const searchMatch =
         query.length === 0 ||
         destination.name.toLowerCase().includes(query) ||
@@ -95,7 +112,7 @@ export default function DestinationsPage() {
     });
 
     return next;
-  }, [budgetRange, continent, search, sortBy, travelStyle, visaFilter]);
+  }, [budgetRange, continent, search, sortBy, travelStyle, visaFilter, destinationsData]);
 
   const totalPages = Math.max(1, Math.ceil(filteredDestinations.length / ITEMS_PER_PAGE));
   const safePage = Math.min(page, totalPages);
@@ -129,35 +146,31 @@ export default function DestinationsPage() {
             className='w-full'
           />
 
-          <select
+          <HeroSelect
             value={continent}
-            onChange={(event) => {
-              setContinent(event.target.value);
+            onValueChange={(value) => {
+              setContinent(value);
               setPage(1);
             }}
-            className='border border-default bg-surface text-foreground rounded-xl px-4 py-2'
-          >
-            {continents.map((item) => (
-              <option key={item} value={item}>
-                {item === 'all' ? 'Todos los continentes' : item}
-              </option>
-            ))}
-          </select>
+            options={continents.map((item) => ({
+              value: item,
+              label: item === 'all' ? 'Todos los continentes' : item,
+            }))}
+            triggerClassName='h-10 rounded-xl border border-default bg-surface px-4'
+          />
 
-          <select
+          <HeroSelect
             value={travelStyle}
-            onChange={(event) => {
-              setTravelStyle(event.target.value);
+            onValueChange={(value) => {
+              setTravelStyle(value);
               setPage(1);
             }}
-            className='border border-default bg-surface text-foreground rounded-xl px-4 py-2'
-          >
-            {styles.map((item) => (
-              <option key={item} value={item}>
-                {item === 'all' ? 'Todos los estilos' : item}
-              </option>
-            ))}
-          </select>
+            options={styles.map((item) => ({
+              value: item,
+              label: item === 'all' ? 'Todos los estilos' : item,
+            }))}
+            triggerClassName='h-10 rounded-xl border border-default bg-surface px-4'
+          />
 
           <Button className='bg-accent text-white font-semibold px-8' onClick={() => setPage(1)}>
             Buscar
@@ -229,12 +242,14 @@ export default function DestinationsPage() {
             <div className='absolute inset-0 bg-linear-to-t from-black/80 to-transparent p-4 flex flex-col justify-end'>
               <p className='text-xs uppercase tracking-[0.2em] text-orange-200'>Destino recomendado</p>
               <p className='text-white text-2xl font-bold'>Nuevas rutas 2026</p>
-              <Link
-                href={`/destinos/${featuredDestination.slug}`}
-                className='inline-flex items-center justify-center h-8 px-3 rounded-md w-fit mt-3 bg-accent text-white text-sm font-medium'
-              >
-                Ver destino
-              </Link>
+              {featuredDestination ? (
+                <Link
+                  href={`/destinos/${featuredDestination.slug}`}
+                  className='inline-flex items-center justify-center h-8 px-3 rounded-md w-fit mt-3 bg-accent text-white text-sm font-medium'
+                >
+                  Ver destino
+                </Link>
+              ) : null}
             </div>
           </div>
         </aside>
@@ -248,19 +263,21 @@ export default function DestinationsPage() {
 
             <div className='flex items-center gap-3'>
               <span className='text-muted'>Ordenar por:</span>
-              <select
+              <HeroSelect
                 value={sortBy}
-                onChange={(event) => {
-                  setSortBy(event.target.value);
+                onValueChange={(value) => {
+                  setSortBy(value);
                   setPage(1);
                 }}
-                className='border border-default bg-surface text-foreground rounded-xl px-4 py-2 min-w-56'
-              >
-                <option value='popular'>Mas populares</option>
-                <option value='budget-asc'>Presupuesto: Menor a Mayor</option>
-                <option value='budget-desc'>Presupuesto: Mayor a Menor</option>
-                <option value='safety-desc'>Mayor indice de seguridad</option>
-              </select>
+                options={[
+                  { value: 'popular', label: 'Más populares' },
+                  { value: 'budget-asc', label: 'Presupuesto: Menor a Mayor' },
+                  { value: 'budget-desc', label: 'Presupuesto: Mayor a Menor' },
+                  { value: 'safety-desc', label: 'Mayor índice de seguridad' },
+                ]}
+                className='min-w-56'
+                triggerClassName='h-10 rounded-xl border border-default bg-surface px-4'
+              />
             </div>
           </div>
 
@@ -274,7 +291,7 @@ export default function DestinationsPage() {
                   <Image src={destination.featuredImage} alt={destination.name} fill className='object-cover' />
                   {destination.isFeatured && (
                     <span className='absolute top-3 left-3 bg-accent text-white text-xs font-bold px-3 py-1 rounded-md'>
-                      Featured
+                      Destacado
                     </span>
                   )}
                 </div>

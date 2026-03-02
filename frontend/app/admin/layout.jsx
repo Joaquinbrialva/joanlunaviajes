@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { LuClipboardList, LuGlobe, LuLayoutDashboard, LuMapPin, LuPlus } from 'react-icons/lu';
 
 const links = [
-  { href: '/admin', label: 'Dashboard', icon: LuLayoutDashboard },
+  { href: '/admin', label: 'Panel', icon: LuLayoutDashboard },
   { href: '/admin/ofertas', label: 'Ofertas', icon: LuClipboardList },
   { href: '/admin/destinos', label: 'Destinos', icon: LuGlobe },
   { href: '/admin/destinos/nuevo', label: 'Nuevo destino', icon: LuPlus },
@@ -26,7 +26,7 @@ export default function AdminLayout({ children }) {
       <div className='grid grid-cols-1 md:grid-cols-[260px_1fr]'>
         <aside className='border-r border-default bg-surface p-4 md:p-6'>
           <div className='mb-6'>
-            <p className='text-sm uppercase tracking-[0.14em] text-muted'>Admin Panel</p>
+            <p className='text-sm uppercase tracking-[0.14em] text-muted'>Panel administrador</p>
             <h1 className='text-2xl font-bold'>Joan Luna Viajes</h1>
           </div>
 
@@ -55,8 +55,8 @@ export default function AdminLayout({ children }) {
         <div className='min-w-0'>
           <header className='h-16 border-b border-default bg-surface px-4 md:px-6 flex items-center justify-between'>
             <div>
-              <p className='text-sm text-muted'>Administracion</p>
-              <p className='font-semibold'>Gestion comercial</p>
+              <p className='text-sm text-muted'>Administración</p>
+              <p className='font-semibold'>Gestión comercial</p>
             </div>
             <div className='h-9 w-9 rounded-full bg-surface-secondary grid place-content-center text-sm font-bold'>
               A
