@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from 'react';
 import inquiries from '@/mocks/mock_inquiries_admin.json';
+import HeroSelect from '@/components/ui/hero-select';
 
 function formatUSD(value) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
 }
 
 export default function AdminInquiriesPage() {
@@ -28,28 +29,30 @@ export default function AdminInquiriesPage() {
 
       <section className='rounded-2xl border border-default bg-surface p-4 md:p-5 space-y-4'>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <select
-            className='h-10 px-3 rounded-lg border border-default bg-surface-secondary'
+          <HeroSelect
             value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
-          >
-            <option value='all'>Todos los estados</option>
-            <option value='new'>Nuevas</option>
-            <option value='in_progress'>En proceso</option>
-            <option value='quoted'>Cotizadas</option>
-            <option value='closed'>Cerradas</option>
-          </select>
+            onValueChange={(value) => setStatusFilter(value)}
+            options={[
+              { value: 'all', label: 'Todos los estados' },
+              { value: 'new', label: 'Nuevas' },
+              { value: 'in_progress', label: 'En proceso' },
+              { value: 'quoted', label: 'Cotizadas' },
+              { value: 'closed', label: 'Cerradas' },
+            ]}
+            triggerClassName='h-10 rounded-lg border border-default bg-surface-secondary px-3'
+          />
 
-          <select
-            className='h-10 px-3 rounded-lg border border-default bg-surface-secondary'
+          <HeroSelect
             value={priorityFilter}
-            onChange={(event) => setPriorityFilter(event.target.value)}
-          >
-            <option value='all'>Todas las prioridades</option>
-            <option value='high'>Alta</option>
-            <option value='medium'>Media</option>
-            <option value='low'>Baja</option>
-          </select>
+            onValueChange={(value) => setPriorityFilter(value)}
+            options={[
+              { value: 'all', label: 'Todas las prioridades' },
+              { value: 'high', label: 'Alta' },
+              { value: 'medium', label: 'Media' },
+              { value: 'low', label: 'Baja' },
+            ]}
+            triggerClassName='h-10 rounded-lg border border-default bg-surface-secondary px-3'
+          />
         </div>
 
         <div className='overflow-x-auto'>
@@ -60,7 +63,7 @@ export default function AdminInquiriesPage() {
                 <th className='text-left px-3 py-3 font-semibold'>Cliente</th>
                 <th className='text-left px-3 py-3 font-semibold'>Destino</th>
                 <th className='text-left px-3 py-3 font-semibold'>Viajeros</th>
-                <th className='text-left px-3 py-3 font-semibold'>Budget</th>
+                <th className='text-left px-3 py-3 font-semibold'>Presupuesto</th>
                 <th className='text-left px-3 py-3 font-semibold'>Estado</th>
                 <th className='text-left px-3 py-3 font-semibold'>Prioridad</th>
               </tr>

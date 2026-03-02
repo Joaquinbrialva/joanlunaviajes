@@ -16,7 +16,7 @@ import {
 import { FaCheckCircle, FaRegClock, FaRegStar } from 'react-icons/fa';
 import { LuCalendarDays, LuMapPin, LuShieldCheck, LuUsers } from 'react-icons/lu';
 import Footer from '@/components/inicio/sections/Footer';
-import offers from '@/mocks/mock_offers_varied.json';
+import { readOffers } from '@/lib/mock-store';
 import { formatCurrency } from '@/util/utils';
 
 const itineraryTitles = [
@@ -28,7 +28,8 @@ const itineraryTitles = [
   'Cierre del viaje y regreso',
 ];
 
-function getOffer(slug) {
+async function getOffer(slug) {
+  const offers = await readOffers();
   return offers.find((item) => item.slug === slug);
 }
 
@@ -75,7 +76,7 @@ function buildItinerary(offer) {
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const offer = getOffer(slug);
+  const offer = await getOffer(slug);
 
   if (!offer) {
     return {
@@ -91,7 +92,7 @@ export async function generateMetadata({ params }) {
 
 export default async function OfferDetailPage({ params }) {
   const { slug } = await params;
-  const offer = getOffer(slug);
+  const offer = await getOffer(slug);
 
   if (!offer) {
     notFound();
@@ -109,7 +110,7 @@ export default async function OfferDetailPage({ params }) {
     <div className='space-y-12 overflow-x-hidden'>
       <section className='space-y-6'>
         <Breadcrumbs size='sm' className='text-muted'>
-          <BreadcrumbsItem href='/'>Home</BreadcrumbsItem>
+          <BreadcrumbsItem href='/'>Inicio</BreadcrumbsItem>
           <BreadcrumbsItem href='/ofertas'>Ofertas</BreadcrumbsItem>
           <BreadcrumbsItem>{offer.title}</BreadcrumbsItem>
         </Breadcrumbs>
@@ -136,7 +137,7 @@ export default async function OfferDetailPage({ params }) {
           <div className='lg:col-span-2 lg:row-span-2 relative min-h-105 rounded-2xl overflow-hidden'>
             <Image src={gallery[0].src} alt={gallery[0].alt} fill className='object-cover' />
             {offer.isFeatured && (
-              <span className='absolute top-4 left-4 text-xs font-semibold bg-white/95 px-3 py-1 rounded-full'>BEST SELLER</span>
+              <span className='absolute top-4 left-4 text-xs font-semibold bg-white/95 px-3 py-1 rounded-full'>MÁS VENDIDA</span>
             )}
           </div>
 

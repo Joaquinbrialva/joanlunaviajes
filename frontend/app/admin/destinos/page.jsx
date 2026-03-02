@@ -1,12 +1,29 @@
 ﻿'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import destinations from '@/mocks/mock_destinations_informative.json';
+import HeroSelect from '@/components/ui/hero-select';
 
 export default function AdminDestinationsPage() {
+  const [destinations, setDestinations] = useState([]);
   const [search, setSearch] = useState('');
   const [continent, setContinent] = useState('all');
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/destinos', { cache: 'no-store' })
+      .then((response) => response.json())
+      .then((data) => {
+        if (active && Array.isArray(data)) setDestinations(data);
+      })
+      .catch(() => {
+        if (active) setDestinations([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const continents = useMemo(() => ['all', ...new Set(destinations.map((item) => item.continent))], []);
 
@@ -49,17 +66,15 @@ export default function AdminDestinationsPage() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
-          <select
-            className='h-10 px-3 rounded-lg border border-default bg-surface-secondary'
+          <HeroSelect
             value={continent}
-            onChange={(event) => setContinent(event.target.value)}
-          >
-            {continents.map((item) => (
-              <option key={item} value={item}>
-                {item === 'all' ? 'Todos los continentes' : item}
-              </option>
-            ))}
-          </select>
+            onValueChange={(value) => setContinent(value)}
+            options={continents.map((item) => ({
+              value: item,
+              label: item === 'all' ? 'Todos los continentes' : item,
+            }))}
+            triggerClassName='h-10 rounded-lg border border-default bg-surface-secondary px-3'
+          />
         </div>
 
         <div className='overflow-x-auto'>

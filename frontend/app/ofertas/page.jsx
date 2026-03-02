@@ -1,15 +1,15 @@
 ﻿'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button, Input, Label, Radio, RadioGroup } from '@heroui/react';
 import { FaHeart, FaRegHeart, FaStar } from 'react-icons/fa';
 import { LuCalendarDays, LuClock3, LuMapPin, LuSearch } from 'react-icons/lu';
-import offers from '@/mocks/mock_offers_varied.json';
 import { formatCurrency } from '@/util/utils';
 import { Slider } from '@/components/ui/slider';
 import Footer from '@/components/inicio/sections/Footer';
+import HeroSelect from '@/components/ui/hero-select';
 import {
   Pagination,
   PaginationContent,
@@ -71,14 +71,31 @@ function getVisiblePages(currentPage, totalPages) {
 }
 
 export default function OffersPage() {
+  const [offersData, setOffersData] = useState([]);
   const [sortBy, setSortBy] = useState('price-asc');
   const [durationFilter, setDurationFilter] = useState('all');
   const [priceRange, setPriceRange] = useState([MIN_PRICE, MAX_PRICE]);
   const [page, setPage] = useState(1);
 
+  useEffect(() => {
+    let active = true;
+    fetch('/api/ofertas', { cache: 'no-store' })
+      .then((response) => response.json())
+      .then((data) => {
+        if (active && Array.isArray(data)) setOffersData(data);
+      })
+      .catch(() => {
+        if (active) setOffersData([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const destinationStats = useMemo(() => {
     const map = new Map();
-    for (const offer of offers) {
+    for (const offer of offersData) {
       const key = offer.location.country;
       map.set(key, (map.get(key) || 0) + 1);
     }
@@ -87,15 +104,12 @@ export default function OffersPage() {
       .map(([country, count]) => ({ country, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 6);
-  }, []);
+  }, [offersData]);
 
-  const [selectedDestinations, setSelectedDestinations] = useState(() => {
-    const first = destinationStats[0]?.country;
-    return first ? [first] : [];
-  });
+  const [selectedDestinations, setSelectedDestinations] = useState([]);
 
   const filteredOffers = useMemo(() => {
-    let next = offers.filter((offer) => {
+    let next = offersData.filter((offer) => {
       const price = getOfferPrice(offer);
       const destinationMatch =
         selectedDestinations.length === 0 || selectedDestinations.includes(offer.location.country);
@@ -118,7 +132,7 @@ export default function OffersPage() {
     });
 
     return next;
-  }, [durationFilter, priceRange, selectedDestinations, sortBy]);
+  }, [durationFilter, priceRange, selectedDestinations, sortBy, offersData]);
 
   const totalPages = Math.max(1, Math.ceil(filteredOffers.length / ITEMS_PER_PAGE));
   const safePage = Math.min(page, totalPages);
@@ -297,18 +311,20 @@ export default function OffersPage() {
             </div>
             <div className='flex items-center gap-3'>
               <span className='text-muted'>Ordenar por:</span>
-              <select
+              <HeroSelect
                 value={sortBy}
-                onChange={(event) => {
-                  setSortBy(event.target.value);
+                onValueChange={(value) => {
+                  setSortBy(value);
                   setPage(1);
                 }}
-                className='border border-default bg-surface text-foreground rounded-xl px-4 py-2 min-w-56'
-              >
-                <option value='price-asc'>Precio: Menor a Mayor</option>
-                <option value='price-desc'>Precio: Mayor a Menor</option>
-                <option value='rating'>Mejor puntuadas</option>
-              </select>
+                options={[
+                  { value: 'price-asc', label: 'Precio: Menor a Mayor' },
+                  { value: 'price-desc', label: 'Precio: Mayor a Menor' },
+                  { value: 'rating', label: 'Mejor puntuadas' },
+                ]}
+                className='min-w-56'
+                triggerClassName='h-10 rounded-xl border border-default bg-surface px-4'
+              />
             </div>
           </div>
 
@@ -333,7 +349,7 @@ export default function OffersPage() {
                       </span>
                     ) : offer.isFeatured ? (
                       <span className='absolute top-3 left-3 bg-slate-900/90 text-white text-xs font-bold px-3 py-1 rounded-md'>
-                        Best Seller
+                        Más vendida
                       </span>
                     ) : null}
 
