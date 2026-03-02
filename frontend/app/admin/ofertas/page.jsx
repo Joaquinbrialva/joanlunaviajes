@@ -1,8 +1,8 @@
 ﻿'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import offers from '@/mocks/mock_offers_varied.json';
+import HeroSelect from '@/components/ui/hero-select';
 
 function getOfferPrice(offer) {
   return offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || 0;
@@ -19,8 +19,25 @@ function getStatus(offer) {
 }
 
 export default function AdminOffersPage() {
+  const [offers, setOffers] = useState([]);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/ofertas', { cache: 'no-store' })
+      .then((response) => response.json())
+      .then((data) => {
+        if (active && Array.isArray(data)) setOffers(data);
+      })
+      .catch(() => {
+        if (active) setOffers([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const rows = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -43,7 +60,7 @@ export default function AdminOffersPage() {
       <section className='flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
         <div>
           <h2 className='text-4xl font-bold'>Gestion de ofertas</h2>
-          <p className='text-muted'>Administra disponibilidad, pricing y estado comercial.</p>
+          <p className='text-muted'>Administra disponibilidad, precios y estado comercial.</p>
         </div>
         <Link href='/admin/ofertas/nueva' className='inline-flex items-center justify-center h-10 px-4 rounded-md bg-accent text-white font-semibold'>
           + Nueva oferta
@@ -59,16 +76,17 @@ export default function AdminOffersPage() {
             onChange={(event) => setSearch(event.target.value)}
           />
 
-          <select
-            className='h-10 px-3 rounded-lg border border-default bg-surface-secondary'
+          <HeroSelect
             value={status}
-            onChange={(event) => setStatus(event.target.value)}
-          >
-            <option value='all'>Todos los estados</option>
-            <option value='active'>Activas</option>
-            <option value='featured'>Featured</option>
-            <option value='low_stock'>Pocos cupos</option>
-          </select>
+            onValueChange={(value) => setStatus(value)}
+            options={[
+              { value: 'all', label: 'Todos los estados' },
+              { value: 'active', label: 'Activas' },
+              { value: 'featured', label: 'Destacadas' },
+              { value: 'low_stock', label: 'Pocos cupos' },
+            ]}
+            triggerClassName='h-10 rounded-lg border border-default bg-surface-secondary px-3'
+          />
         </div>
 
         <div className='overflow-x-auto'>
@@ -130,7 +148,7 @@ function StatusPill({ status }) {
 
   const label = {
     active: 'Activa',
-    featured: 'Featured',
+    featured: 'Destacada',
     low_stock: 'Pocos cupos',
   };
 
