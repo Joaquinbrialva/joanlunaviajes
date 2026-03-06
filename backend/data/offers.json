@@ -1,0 +1,391 @@
+[
+  {
+    "id": "of-4005",
+    "slug": "oferta-de-prueba-lima-peru",
+    "title": "Oferta de prueba",
+    "subtitle": "Experiencia destacada en Lima.",
+    "location": {
+      "city": "Lima",
+      "country": "Perú",
+      "airport": "LIM"
+    },
+    "category": "Internacional",
+    "tags": [
+      "Experiencia",
+      "Turismo",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.7,
+      "reviewsCount": 0
+    },
+    "duration": {
+      "nights": 7,
+      "days": 8
+    },
+    "pricing": {
+      "currency": "ARS",
+      "price": 350000,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-03-14",
+      "endDate": "2026-03-21",
+      "limitedSpots": false,
+      "remainingSpots": 12
+    },
+    "hotel": {
+      "name": "Perú Grand Hotel",
+      "stars": 4,
+      "roomType": "Standard",
+      "amenities": [
+        "WiFi",
+        "Desayuno incluido",
+        "Traslados"
+      ]
+    },
+    "includes": [
+      "Vuelos,Hotel,Traslados"
+    ],
+    "notIncludes": [
+      "Propinas,Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-of-4005-1",
+        "url": "https://picsum.photos/seed/oferta-de-prueba-lima-peru-1772816091214/1200/800",
+        "alt": "Vista de Perú",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Asistencia local,Coordinación integral,Experiencia curada"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-03-06T16:54:51.213Z",
+    "updatedAt": "2026-03-06T16:54:51.213Z"
+  },
+  {
+    "id": "of-4004",
+    "slug": "vuelos-nacionales-conoce-argentina-buenos-aires-argentina-3",
+    "title": "Vuelos nacionales, conoce Argentina",
+    "subtitle": "Experiencia destacada en Buenos Aires.",
+    "location": {
+      "city": "Buenos Aires",
+      "country": "Argentina",
+      "airport": "EZE"
+    },
+    "category": "Internacional",
+    "tags": [
+      "Experiencia",
+      "Turismo",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.7,
+      "reviewsCount": 0
+    },
+    "duration": {
+      "nights": 6,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "ARS",
+      "originalPrice": 800000,
+      "discountPercentage": 31,
+      "finalPrice": 550000,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-03-13",
+      "endDate": "2026-03-20",
+      "limitedSpots": false,
+      "remainingSpots": 12
+    },
+    "hotel": {
+      "name": "Argentina Grand Hotel",
+      "stars": 4,
+      "roomType": "Standard",
+      "amenities": [
+        "WiFi",
+        "Desayuno incluido",
+        "Traslados"
+      ]
+    },
+    "includes": [
+      "Vuelos,Hotel,Traslados"
+    ],
+    "notIncludes": [
+      "Propinas,Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-of-4004-1",
+        "url": "https://picsum.photos/seed/vuelos-nacionales-conoce-argentina-buenos-aires-argentina-3-1772806155972/1200/800",
+        "alt": "Vista de Argentina",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Asistencia local,Coordinación integral,Experiencia curada"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-03-06T14:09:15.972Z",
+    "updatedAt": "2026-03-06T14:09:15.972Z"
+  },
+  {
+    "id": "of-4003",
+    "slug": "vuelos-nacionales-conoce-argentina-buenos-aires-argentina-2",
+    "title": "Vuelos nacionales, conoce Argentina",
+    "subtitle": "Experiencia destacada en Buenos Aires.",
+    "location": {
+      "city": "Buenos Aires",
+      "country": "Argentina",
+      "airport": "EZE"
+    },
+    "category": "Internacional",
+    "tags": [
+      "Experiencia",
+      "Turismo",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.7,
+      "reviewsCount": 0
+    },
+    "duration": {
+      "nights": 6,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "ARS",
+      "originalPrice": 800000,
+      "discountPercentage": 31,
+      "finalPrice": 550000,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-03-13",
+      "endDate": "2026-03-20",
+      "limitedSpots": false,
+      "remainingSpots": 12
+    },
+    "hotel": {
+      "name": "Argentina Grand Hotel",
+      "stars": 4,
+      "roomType": "Standard",
+      "amenities": [
+        "WiFi",
+        "Desayuno incluido",
+        "Traslados"
+      ]
+    },
+    "includes": [
+      "Vuelos,Hotel,Traslados"
+    ],
+    "notIncludes": [
+      "Propinas,Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-of-4003-1",
+        "url": "https://picsum.photos/seed/vuelos-nacionales-conoce-argentina-buenos-aires-argentina-2-1772806117978/1200/800",
+        "alt": "Vista de Argentina",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Asistencia local,Coordinación integral,Experiencia curada"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-03-06T14:08:37.978Z",
+    "updatedAt": "2026-03-06T14:08:37.978Z"
+  },
+  {
+    "id": "of-4002",
+    "slug": "vuelos-nacionales-conoce-argentina-buenos-aires-argentina",
+    "title": "Vuelos nacionales, conoce Argentina",
+    "subtitle": "Experiencia destacada en Buenos Aires.",
+    "location": {
+      "city": "Buenos Aires",
+      "country": "Argentina",
+      "airport": "EZE"
+    },
+    "category": "Internacional",
+    "tags": [
+      "Experiencia",
+      "Turismo",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.7,
+      "reviewsCount": 0
+    },
+    "duration": {
+      "nights": 6,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "ARS",
+      "originalPrice": 800000,
+      "discountPercentage": 31,
+      "finalPrice": 550000,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-03-13",
+      "endDate": "2026-03-20",
+      "limitedSpots": false,
+      "remainingSpots": 12
+    },
+    "hotel": {
+      "name": "Argentina Grand Hotel",
+      "stars": 4,
+      "roomType": "Standard",
+      "amenities": [
+        "WiFi",
+        "Desayuno incluido",
+        "Traslados"
+      ]
+    },
+    "includes": [
+      "Vuelos,Hotel,Traslados"
+    ],
+    "notIncludes": [
+      "Propinas,Gastos personales"
+    ],
+    "images": [
+      {
+        "id": "img-of-4002-1",
+        "url": "https://picsum.photos/seed/vuelos-nacionales-conoce-argentina-buenos-aires-argentina-1772806114059/1200/800",
+        "alt": "Vista de Argentina",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Asistencia local,Coordinación integral,Experiencia curada"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-03-06T14:08:34.051Z",
+    "updatedAt": "2026-03-06T14:08:34.051Z"
+  },
+  {
+    "id": "of-4001",
+    "slug": "cusco-experience-2026",
+    "title": "Cusco Experience 2026",
+    "subtitle": "Lujo, cultura y aventura en el corazón de Cusco.",
+    "location": {
+      "city": "Cusco",
+      "country": "Perú",
+      "airport": "CUZ"
+    },
+    "category": "Internacional",
+    "tags": [
+      "Cultural",
+      "Naturaleza",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.4,
+      "reviewsCount": 538
+    },
+    "duration": {
+      "nights": 6,
+      "days": 7
+    },
+    "pricing": {
+      "currency": "USD",
+      "originalPrice": 3500,
+      "discountPercentage": 14,
+      "finalPrice": 3003,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-06-01T00:00:00Z",
+      "endDate": "2026-11-07T00:00:00Z",
+      "limitedSpots": true,
+      "remainingSpots": 4
+    },
+    "hotel": {
+      "name": "Palacio del Inca",
+      "stars": 5,
+      "roomType": "Deluxe",
+      "amenities": [
+        "Desayuno incluido",
+        "WiFi",
+        "Spa",
+        "Traslados"
+      ]
+    },
+    "includes": [
+      "Vuelo ida y vuelta",
+      "Seguro de viaje",
+      "Excursiones guiadas",
+      "Desayuno diario",
+      "Hotel 5 estrellas",
+      "Traslados aeropuerto"
+    ],
+    "notIncludes": [
+      "Propinas",
+      "Gastos personales",
+      "Almuerzo y cena"
+    ],
+    "images": [
+      {
+        "id": "img-of4001-1",
+        "url": "https://picsum.photos/seed/cusco-machu/1200/800",
+        "alt": "Vista de Cusco",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "Visita a Machu Picchu",
+      "Tour Valle Sagrado",
+      "Cena gourmet en Cusco",
+      "Guía bilingüe exclusivo"
+    ],
+    "cancellationPolicy": {
+      "refundable": true
+    },
+    "isFeatured": true,
+    "isPopular": true,
+    "createdAt": "2026-01-15T10:00:00Z",
+    "updatedAt": "2026-01-15T10:00:00Z"
+  }
+]

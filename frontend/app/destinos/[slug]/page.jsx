@@ -1,37 +1,18 @@
-﻿import Image from 'next/image';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { LuGlobe, LuMapPin, LuWallet } from 'react-icons/lu';
 import { formatCurrency } from '@/util/utils';
 import Footer from '@/components/inicio/sections/Footer';
-import { readDestinations, readOffers } from '@/lib/mock-store';
+import { fetchDestination, fetchDestinations, fetchOffers } from '@/lib/api';
 
 function getOfferPrice(offer) {
   return offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || 0;
 }
 
-async function getDestination(slug) {
-  const destinations = await readDestinations();
-  return destinations.find((item) => item.slug === slug);
-}
-
-async function getRelatedCities(destination) {
-  const destinations = await readDestinations();
-  return destinations
-    .filter((item) => item.slug !== destination.slug && item.continent === destination.continent)
-    .slice(0, 4);
-}
-
-async function getRelatedOffers(destination) {
-  const offers = await readOffers();
-  const byCountry = offers.filter((offer) => offer.location.country === destination.country);
-  if (byCountry.length > 0) return byCountry.slice(0, 3);
-  return offers.filter((offer) => offer.isFeatured).slice(0, 3);
-}
-
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const destination = await getDestination(slug);
+  const destination = await fetchDestination(slug);
 
   if (!destination) {
     return { title: 'Destino no encontrado | Joanluna Viajes' };
@@ -45,16 +26,25 @@ export async function generateMetadata({ params }) {
 
 export default async function DestinationDetailPage({ params }) {
   const { slug } = await params;
-  const destination = await getDestination(slug);
+
+  const [destination, allDestinations, allOffers] = await Promise.all([
+    fetchDestination(slug),
+    fetchDestinations(),
+    fetchOffers(),
+  ]);
 
   if (!destination) {
     notFound();
   }
 
-  const [relatedCities, relatedOffers] = await Promise.all([
-    getRelatedCities(destination),
-    getRelatedOffers(destination),
-  ]);
+  const relatedCities = allDestinations
+    .filter((item) => item.slug !== destination.slug && item.continent === destination.continent)
+    .slice(0, 4);
+
+  const byCountry = allOffers.filter((o) => o.location.country === destination.country);
+  const relatedOffers = byCountry.length > 0
+    ? byCountry.slice(0, 3)
+    : allOffers.filter((o) => o.isFeatured).slice(0, 3);
 
   return (
     <div className='space-y-14 pb-12 overflow-x-hidden'>
@@ -113,34 +103,36 @@ export default async function DestinationDetailPage({ params }) {
           </p>
           <Link
             href='/ofertas'
-            className='inline-flex items-center justify-center h-10 px-4 rounded-md bg-accent text-white font-semibold'
+            className='inline-flex items-center justify-center h-10 px-4 rounded-md bg-accent text-white font-semibold cursor-pointer'
           >
             Ver experiencias
           </Link>
         </article>
       </section>
 
-      <section className='space-y-4'>
-        <div>
-          <h2 className='text-4xl font-bold'>Ciudades populares</h2>
-          <p className='text-muted'>Destinos relacionados dentro de {destination.continent}.</p>
-        </div>
+      {relatedCities.length > 0 && (
+        <section className='space-y-4'>
+          <div>
+            <h2 className='text-4xl font-bold'>Ciudades populares</h2>
+            <p className='text-muted'>Destinos relacionados dentro de {destination.continent}.</p>
+          </div>
 
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5'>
-          {relatedCities.map((city) => (
-            <Link key={city.id} href={`/destinos/${city.slug}`} className='group'>
-              <article className='relative h-64 rounded-2xl overflow-hidden border border-default'>
-                <Image src={city.featuredImage} alt={city.name} fill className='object-cover group-hover:scale-105 transition-transform duration-300' />
-                <div className='absolute inset-0 bg-gradient-to-t from-black/80 to-transparent' />
-                <div className='absolute bottom-4 left-4 right-4 text-white'>
-                  <p className='text-2xl font-bold'>{city.name}</p>
-                  <p className='text-sm text-white/85'>{city.country}</p>
-                </div>
-              </article>
-            </Link>
-          ))}
-        </div>
-      </section>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5'>
+            {relatedCities.map((city) => (
+              <Link key={city.id} href={`/destinos/${city.slug}`} className='group cursor-pointer'>
+                <article className='relative h-64 rounded-2xl overflow-hidden border border-default'>
+                  <Image src={city.featuredImage} alt={city.name} fill className='object-cover group-hover:scale-105 transition-transform duration-300' />
+                  <div className='absolute inset-0 bg-gradient-to-t from-black/80 to-transparent' />
+                  <div className='absolute bottom-4 left-4 right-4 text-white'>
+                    <p className='text-2xl font-bold'>{city.name}</p>
+                    <p className='text-sm text-white/85'>{city.country}</p>
+                  </div>
+                </article>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className='space-y-6'>
         <div className='text-center space-y-2'>
@@ -176,7 +168,7 @@ export default async function DestinationDetailPage({ params }) {
                     </div>
                     <Link
                       href={`/ofertas/${offer.slug}`}
-                      className='inline-flex items-center justify-center h-10 px-4 rounded-md bg-slate-900 text-white'
+                      className='inline-flex items-center justify-center h-10 px-4 rounded-md bg-slate-900 text-white cursor-pointer'
                     >
                       Ver oferta
                     </Link>
@@ -207,4 +199,3 @@ function InfoCard({ icon, title, value, subtitle }) {
     </article>
   );
 }
-

@@ -1,12 +1,20 @@
-﻿'use client';
+'use client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Card from '@/components/inicio/ui/Card';
-import offers from '@/mocks/mock_offers_varied.json';
 import { Button } from '@heroui/react';
 import { FaChevronRight } from 'react-icons/fa';
 
 export default function Offers() {
-  const quantity = offers.slice(0, 6);
+  const [offers, setOffers] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/ofertas')
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setOffers(data.slice(0, 6)); })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className='space-y-4'>
       <div className='flex items-end justify-between'>
@@ -22,11 +30,10 @@ export default function Offers() {
         </Link>
       </div>
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center'>
-        {quantity.map((offer) => (
+        {offers.map((offer) => (
           <Card key={offer.id} {...offer} />
         ))}
       </div>
     </div>
   );
 }
-

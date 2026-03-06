@@ -1,0 +1,34 @@
+[
+  {
+    "id": "user-001",
+    "name": "Admin Principal",
+    "email": "admin@joanlunaviajes.com",
+    "password": "$2b$10$BhOUVWzg6K3IBoFBjWY.lOTU/aWt7SUXtwXtG2L6tALy2ZxPYx2OG",
+    "role": "admin",
+    "createdAt": "2026-03-06T12:23:05.430Z"
+  },
+  {
+    "id": "user-002",
+    "name": "Agente Comercial",
+    "email": "agente@joanlunaviajes.com",
+    "password": "$2b$10$BhOUVWzg6K3IBoFBjWY.lOTU/aWt7SUXtwXtG2L6tALy2ZxPYx2OG",
+    "role": "agent",
+    "createdAt": "2026-03-06T12:23:05.430Z"
+  },
+  {
+    "id": "user-003",
+    "name": "Diseñador Web",
+    "email": "diseno@joanlunaviajes.com",
+    "password": "$2b$10$BhOUVWzg6K3IBoFBjWY.lOTU/aWt7SUXtwXtG2L6tALy2ZxPYx2OG",
+    "role": "designer",
+    "createdAt": "2026-03-06T12:23:05.430Z"
+  },
+  {
+    "id": "user-004",
+    "name": "Cliente Demo",
+    "email": "cliente@demo.com",
+    "password": "$2b$10$BhOUVWzg6K3IBoFBjWY.lOTU/aWt7SUXtwXtG2L6tALy2ZxPYx2OG",
+    "role": "client",
+    "createdAt": "2026-03-06T12:23:05.430Z"
+  }
+]
