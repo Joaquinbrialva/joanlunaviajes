@@ -1,4 +1,4 @@
-﻿import Image from 'next/image';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import {
   Accordion,
@@ -16,7 +16,7 @@ import {
 import { FaCheckCircle, FaRegClock, FaRegStar } from 'react-icons/fa';
 import { LuCalendarDays, LuMapPin, LuShieldCheck, LuUsers } from 'react-icons/lu';
 import Footer from '@/components/inicio/sections/Footer';
-import { readOffers } from '@/lib/mock-store';
+import { fetchOffer } from '@/lib/api';
 import { formatCurrency } from '@/util/utils';
 
 const itineraryTitles = [
@@ -27,11 +27,6 @@ const itineraryTitles = [
   'Experiencia gastronomica',
   'Cierre del viaje y regreso',
 ];
-
-async function getOffer(slug) {
-  const offers = await readOffers();
-  return offers.find((item) => item.slug === slug);
-}
 
 function buildGallery(offer) {
   const cover = offer.images?.find((img) => img.isCover) || offer.images?.[0];
@@ -76,12 +71,10 @@ function buildItinerary(offer) {
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const offer = await getOffer(slug);
+  const offer = await fetchOffer(slug);
 
   if (!offer) {
-    return {
-      title: 'Oferta no encontrada | Joanluna Viajes',
-    };
+    return { title: 'Oferta no encontrada | Joanluna Viajes' };
   }
 
   return {
@@ -92,7 +85,7 @@ export async function generateMetadata({ params }) {
 
 export default async function OfferDetailPage({ params }) {
   const { slug } = await params;
-  const offer = await getOffer(slug);
+  const offer = await fetchOffer(slug);
 
   if (!offer) {
     notFound();
@@ -147,7 +140,7 @@ export default async function OfferDetailPage({ params }) {
               {index === 3 && (
                 <Button
                   size='sm'
-                  className='absolute bottom-3 right-3 text-sm bg-white/90 text-slate-900 rounded-lg'
+                  className='absolute bottom-3 right-3 text-sm bg-white/90 text-slate-900 rounded-lg cursor-pointer'
                 >
                   Ver todas las fotos
                 </Button>
@@ -245,7 +238,7 @@ export default async function OfferDetailPage({ params }) {
                   rows={4}
                   placeholder='Contanos que viaje te interesa...'
                 />
-                <Button className='md:col-span-2 w-fit bg-slate-900 text-white hover:bg-slate-800' type='button'>
+                <Button className='md:col-span-2 w-fit bg-slate-900 text-white hover:bg-slate-800 cursor-pointer' type='button'>
                   Enviar consulta
                 </Button>
               </form>
@@ -304,7 +297,7 @@ export default async function OfferDetailPage({ params }) {
                 </Select.Popover>
               </Select>
 
-              <label className='flex justify-between'>
+              <label className='flex justify-between cursor-pointer'>
                 <span className='text-sm text-muted inline-flex items-center gap-2'><LuUsers />Viajeros</span>
                 <Input type='number' min='1' defaultValue={String(travelers)} />
               </label>
@@ -316,7 +309,7 @@ export default async function OfferDetailPage({ params }) {
                 </strong>
               </div>
 
-              <Button className='w-full bg-accent text-white font-semibold' size='lg'>
+              <Button className='w-full bg-accent text-white font-semibold cursor-pointer' size='lg'>
                 Reservar ahora
               </Button>
 

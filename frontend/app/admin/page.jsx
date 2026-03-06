@@ -1,7 +1,8 @@
-﻿import Link from 'next/link';
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { LuClipboardList, LuGlobe, LuMessageSquare, LuTrendingUp } from 'react-icons/lu';
-import inquiries from '@/mocks/mock_inquiries_admin.json';
-import { readDestinations, readOffers } from '@/lib/mock-store';
 
 function getOfferPrice(offer) {
   return offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || 0;
@@ -11,14 +12,24 @@ function formatUSD(value) {
   return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
 }
 
-export default async function AdminDashboardPage() {
-  const [offers, destinations] = await Promise.all([readOffers(), readDestinations()]);
+export default function AdminDashboardPage() {
+  const [offers, setOffers] = useState([]);
+  const [destinations, setDestinations] = useState([]);
+  const [inquiries, setInquiries] = useState([]);
 
-  const activeOffers = offers.length;
-  const activeDestinations = destinations.length;
-  const totalInquiries = inquiries.length;
-  const monthlyRevenue = offers.slice(0, 8).reduce((sum, offer) => sum + getOfferPrice(offer), 0);
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/ofertas').then((r) => r.json()),
+      fetch('/api/destinos').then((r) => r.json()),
+      fetch('/api/cotizaciones').then((r) => r.json()),
+    ]).then(([o, d, i]) => {
+      if (Array.isArray(o)) setOffers(o);
+      if (Array.isArray(d)) setDestinations(d);
+      if (Array.isArray(i)) setInquiries(i);
+    }).catch(() => {});
+  }, []);
 
+  const monthlyRevenue = offers.slice(0, 8).reduce((sum, o) => sum + getOfferPrice(o), 0);
   const latestInquiries = [...inquiries]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
@@ -36,9 +47,9 @@ export default async function AdminDashboardPage() {
       </section>
 
       <section className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4'>
-        <StatCard title='Ofertas activas' value={activeOffers} icon={<LuClipboardList />} growth='+5.2%' />
-        <StatCard title='Destinos' value={activeDestinations} icon={<LuGlobe />} growth='+3.1%' />
-        <StatCard title='Cotizaciones' value={totalInquiries} icon={<LuMessageSquare />} growth='+12.5%' />
+        <StatCard title='Ofertas activas' value={offers.length} icon={<LuClipboardList />} growth='+5.2%' />
+        <StatCard title='Destinos' value={destinations.length} icon={<LuGlobe />} growth='+3.1%' />
+        <StatCard title='Cotizaciones' value={inquiries.length} icon={<LuMessageSquare />} growth='+12.5%' />
         <StatCard title='Ingresos estimados' value={formatUSD(monthlyRevenue)} icon={<LuTrendingUp />} growth='+8.4%' />
       </section>
 
@@ -107,15 +118,25 @@ function StatCard({ title, value, icon, growth }) {
 function StatusPill({ status }) {
   const map = {
     new: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+    pending: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
     in_progress: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+    contacted: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
     quoted: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
     closed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
   };
 
+  const labels = {
+    new: 'Nuevo',
+    pending: 'Pendiente',
+    in_progress: 'En progreso',
+    contacted: 'Contactado',
+    quoted: 'Cotizado',
+    closed: 'Cerrado',
+  };
+
   return (
     <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${map[status] || map.new}`}>
-      {status.replace('_', ' ')}
+      {labels[status] || status}
     </span>
   );
 }
-

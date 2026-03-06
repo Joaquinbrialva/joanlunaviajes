@@ -1,13 +1,17 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Button } from '@heroui/react';
 import { MdDarkMode, MdLightMode } from 'react-icons/md';
 import { useTheme } from 'next-themes';
 
 export default function ThemeToggle() {
 	const { resolvedTheme, setTheme } = useTheme();
+	const [mounted, setMounted] = useState(false);
 
-	if (!resolvedTheme) return null;
+	useEffect(() => setMounted(true), []);
+
+	if (!mounted) return <div className='h-10 w-10' />;
 
 	const isDark = resolvedTheme === 'dark';
 

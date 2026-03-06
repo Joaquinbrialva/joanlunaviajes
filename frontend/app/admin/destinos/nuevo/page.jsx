@@ -82,7 +82,7 @@ export default function AdminNewDestinationPage() {
     setError('');
     setGuardando(true);
     try {
-      const response = await fetch('/api/admin/destinos', {
+      const response = await fetch('/api/destinos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
