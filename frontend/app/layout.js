@@ -2,6 +2,7 @@ import { Inter, Fira_Code } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import Navbar from '@/components/inicio/ui/Navbar';
+import HeroUIToastProvider from '@/components/ui/heroui-toast-provider';
 
 const inter = Inter({
 	variable: '--font-sans',
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
 						<Navbar />
 						<div className='max-w-7xl mx-auto px-4'>{children}</div>
 					</div>
+					<HeroUIToastProvider />
 				</ThemeProvider>
 			</body>
 		</html>

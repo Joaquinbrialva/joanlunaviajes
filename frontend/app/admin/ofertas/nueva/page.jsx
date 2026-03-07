@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Checkbox, NumberField } from '@heroui/react';
+import { Button, Checkbox, NumberField, Spinner } from '@heroui/react';
 import { Minus, Plus } from 'lucide-react';
+import { toastError } from '@/lib/toast';
 import HeroSelect from '@/components/ui/hero-select';
 import AirlineCombobox from '@/components/ui/airline-combobox';
 import RangeDatePickerField from '@/components/ui/range-date-picker-field';
@@ -150,6 +151,8 @@ function LuggageCheck({ label, checked, onChange }) {
   );
 }
 
+const DRAFT_KEY = 'admin_nueva_oferta_draft';
+
 /* ─── Página principal ───────────────────────────────────────────────── */
 
 export default function AdminNewOfferPage() {
@@ -157,9 +160,21 @@ export default function AdminNewOfferPage() {
   const [paso, setPaso] = useState(1);
   const [maxStep, setMaxStep] = useState(1);
   const [guardando, setGuardando] = useState(false);
-  const [error, setError] = useState('');
   const [form, setForm] = useState(initialForm);
   const [showErrors, setShowErrors] = useState(false);
+
+  // Cargar borrador guardado al montar
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) setForm(JSON.parse(saved));
+    } catch { }
+  }, []);
+
+  // Guardar borrador en cada cambio del formulario
+  useEffect(() => {
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(form)); } catch { }
+  }, [form]);
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
   const goBack = () => { setShowErrors(false); setPaso((p) => Math.max(1, p - 1)); };
@@ -202,7 +217,7 @@ export default function AdminNewOfferPage() {
   }, [form, paso]);
 
   async function guardarOferta() {
-    setError('');
+    if (!form.status) { setShowErrors(true); return; }
     setGuardando(true);
     try {
       const res = await fetch('/api/ofertas', {
@@ -212,10 +227,11 @@ export default function AdminNewOfferPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'No se pudo guardar la oferta.');
+      try { localStorage.removeItem(DRAFT_KEY); } catch { }
       router.push('/admin/ofertas');
       router.refresh();
     } catch (err) {
-      setError(err.message);
+      toastError(err, 'No se pudo guardar la oferta');
     } finally {
       setGuardando(false);
     }
@@ -607,8 +623,9 @@ export default function AdminNewOfferPage() {
                   value={form.status}
                   onValueChange={(v) => update('status', v)}
                   options={opcionesEstado}
-                  triggerClassName='h-10 rounded-lg border border-default bg-surface-secondary'
+                  triggerClassName={`h-10 rounded-lg border bg-surface-secondary ${showErrors && !form.status ? 'border-rose-500' : 'border-default'}`}
                 />
+                {showErrors && !form.status && <p className='text-xs text-rose-500 mt-1'>Seleccioná un estado.</p>}
               </Field>
               <LuggageCheck
                 label='Marcar como oferta destacada'
@@ -619,16 +636,13 @@ export default function AdminNewOfferPage() {
           </div>
         )}
 
-        {/* Error */}
-        {error && <p className='text-sm text-rose-600 bg-rose-50 dark:bg-rose-950/30 px-3 py-2 rounded-lg'>{error}</p>}
-
         {/* Navegación */}
         <div className='pt-4 border-t border-default flex items-center justify-between'>
           <Button
             type='button'
             onClick={goBack}
             disabled={paso === 1 || guardando}
-            className='h-10 px-5 rounded-lg border border-default bg-surface hover:bg-surface-secondary disabled:opacity-40 text-sm font-medium transition-colors'
+            className='h-10 px-5 rounded-lg border border-default bg-surface hover:bg-surface-secondary disabled:opacity-40 text-sm font-medium text-foreground transition-colors'
           >
             Atrás
           </Button>
@@ -644,15 +658,21 @@ export default function AdminNewOfferPage() {
           ) : (
             <Button
               type='button'
-              isLoading={guardando}
+              isPending={guardando}
               onClick={guardarOferta}
               className='h-10 px-5 bg-accent text-white font-semibold text-sm'
             >
-              Publicar oferta
+              {({ isPending }) => (
+                <>
+                  {isPending && <Spinner color='current' size='sm' />}
+                  {isPending ? 'Publicando' : 'Publicar oferta'}
+                </>
+              )}
             </Button>
           )}
         </div>
       </section>
+
     </div>
   );
 }

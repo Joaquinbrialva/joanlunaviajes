@@ -108,6 +108,67 @@ router.post('/', async (req, res) => {
   }
 });
 
+// PATCH /api/destinos/:id
+router.patch('/:id', async (req, res) => {
+  try {
+    const destinations = await db.destinations.read();
+    const idx = destinations.findIndex((d) => d.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ error: 'Destino no encontrado.' });
+
+    const existing = destinations[idx];
+    const body = req.body;
+    const now = new Date().toISOString();
+
+    const updated = {
+      ...existing,
+      name: String(body.name || existing.name).trim(),
+      country: String(body.country || existing.country).trim(),
+      continent: String(body.continent || existing.continent),
+      description: String(body.description || existing.description).trim(),
+      shortDescription: String(body.shortDescription || existing.shortDescription).trim(),
+      travelInfo: {
+        airport: String(body.airport || existing.travelInfo.airport).trim(),
+        currency: String(body.currency || existing.travelInfo.currency),
+        language: String(body.language || existing.travelInfo.language).trim(),
+        timezone: String(body.timezone || existing.travelInfo.timezone).trim(),
+        visaRequired: Boolean(body.visaRequired),
+        recommendedStayDays: Math.max(1, Number(body.recommendedStayDays || existing.travelInfo.recommendedStayDays)),
+      },
+      climate: {
+        type: String(body.climateType || existing.climate.type).trim(),
+        averageTemperatureC: Number(body.averageTemperatureC ?? existing.climate.averageTemperatureC),
+        bestMonthsToVisit: splitComma(body.bestMonthsToVisit).length > 0
+          ? splitComma(body.bestMonthsToVisit)
+          : existing.climate.bestMonthsToVisit,
+      },
+      highlights: splitLines(body.highlights).length > 0 ? splitLines(body.highlights) : existing.highlights,
+      travelStyles: splitLines(body.travelStyles).length > 0 ? splitLines(body.travelStyles) : existing.travelStyles,
+      featuredImage: String(body.featuredImage || existing.featuredImage).trim(),
+      gallery: splitLines(body.gallery).length > 0 ? splitLines(body.gallery) : existing.gallery,
+      stats: {
+        annualVisitorsMillions: Number(body.annualVisitorsMillions ?? existing.stats.annualVisitorsMillions),
+        safetyIndex: Math.min(100, Math.max(0, Number(body.safetyIndex ?? existing.stats.safetyIndex))),
+        averageDailyBudgetUSD: Math.max(1, Number(body.averageDailyBudgetUSD ?? existing.stats.averageDailyBudgetUSD)),
+      },
+      seo: {
+        metaTitle: String(body.metaTitle || existing.seo.metaTitle).trim(),
+        metaDescription: String(body.metaDescription || existing.seo.metaDescription).trim(),
+      },
+      isPopular: Boolean(body.isPopular),
+      isFeatured: Boolean(body.isFeatured),
+      status: String(body.status || existing.status),
+      updatedAt: now,
+    };
+
+    destinations[idx] = updated;
+    await db.destinations.write(destinations);
+    res.json(updated);
+  } catch (err) {
+    console.error('[PATCH /api/destinos]', err);
+    res.status(500).json({ error: 'No se pudo actualizar el destino.' });
+  }
+});
+
 // DELETE /api/destinos/:id
 router.delete('/:id', async (req, res) => {
   try {

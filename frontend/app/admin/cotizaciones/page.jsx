@@ -1,8 +1,9 @@
-﻿'use client';
+'use client';
 
 import { useMemo, useState } from 'react';
 import inquiries from '@/mocks/mock_inquiries_admin.json';
 import HeroSelect from '@/components/ui/hero-select';
+import { Table } from '@heroui/react';
 
 function formatUSD(value) {
   return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
@@ -23,7 +24,7 @@ export default function AdminInquiriesPage() {
   return (
     <div className='space-y-5'>
       <section>
-        <h2 className='text-4xl font-bold'>Solicitudes de cotizacion</h2>
+        <h2 className='text-4xl font-bold'>Solicitudes de cotización</h2>
         <p className='text-muted'>Gestiona pipeline comercial, prioridades y seguimiento.</p>
       </section>
 
@@ -41,7 +42,6 @@ export default function AdminInquiriesPage() {
             ]}
             triggerClassName='h-10 rounded-lg border border-default bg-surface-secondary px-3'
           />
-
           <HeroSelect
             value={priorityFilter}
             onValueChange={(value) => setPriorityFilter(value)}
@@ -55,37 +55,44 @@ export default function AdminInquiriesPage() {
           />
         </div>
 
-        <div className='overflow-x-auto'>
-          <table className='w-full text-sm'>
-            <thead className='bg-surface-secondary text-muted'>
-              <tr>
-                <th className='text-left px-3 py-3 font-semibold'>Fecha</th>
-                <th className='text-left px-3 py-3 font-semibold'>Cliente</th>
-                <th className='text-left px-3 py-3 font-semibold'>Destino</th>
-                <th className='text-left px-3 py-3 font-semibold'>Viajeros</th>
-                <th className='text-left px-3 py-3 font-semibold'>Presupuesto</th>
-                <th className='text-left px-3 py-3 font-semibold'>Estado</th>
-                <th className='text-left px-3 py-3 font-semibold'>Prioridad</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((item) => (
-                <tr key={item.id} className='border-t border-default'>
-                  <td className='px-3 py-3'>{new Date(item.createdAt).toLocaleDateString('es-AR')}</td>
-                  <td className='px-3 py-3'>
-                    <p className='font-semibold'>{item.fullName}</p>
-                    <p className='text-xs text-muted'>{item.email}</p>
-                  </td>
-                  <td className='px-3 py-3'>{item.destination}</td>
-                  <td className='px-3 py-3'>{item.travelers}</td>
-                  <td className='px-3 py-3'>{formatUSD(item.budgetUSD)}</td>
-                  <td className='px-3 py-3'><StatusPill status={item.status} /></td>
-                  <td className='px-3 py-3'><PriorityPill priority={item.priority} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <Table.ScrollContainer minWidth={600}>
+            <Table.Content aria-label='Solicitudes de cotización'>
+              <Table.Header>
+                <Table.Column>Fecha</Table.Column>
+                <Table.Column isRowHeader>Cliente</Table.Column>
+                <Table.Column>Destino</Table.Column>
+                <Table.Column>Viajeros</Table.Column>
+                <Table.Column>Presupuesto</Table.Column>
+                <Table.Column>Estado</Table.Column>
+                <Table.Column>Prioridad</Table.Column>
+              </Table.Header>
+              <Table.Body
+                items={rows}
+                renderEmptyState={() => (
+                  <p className='py-10 text-center text-sm text-muted'>
+                    No hay solicitudes que coincidan con los filtros.
+                  </p>
+                )}
+              >
+                {(item) => (
+                  <Table.Row id={item.id}>
+                    <Table.Cell>{new Date(item.createdAt).toLocaleDateString('es-AR')}</Table.Cell>
+                    <Table.Cell>
+                      <p className='font-semibold'>{item.fullName}</p>
+                      <p className='text-xs text-muted'>{item.email}</p>
+                    </Table.Cell>
+                    <Table.Cell>{item.destination}</Table.Cell>
+                    <Table.Cell>{item.travelers}</Table.Cell>
+                    <Table.Cell className='font-medium'>{formatUSD(item.budgetUSD)}</Table.Cell>
+                    <Table.Cell><StatusPill status={item.status} /></Table.Cell>
+                    <Table.Cell><PriorityPill priority={item.priority} /></Table.Cell>
+                  </Table.Row>
+                )}
+              </Table.Body>
+            </Table.Content>
+          </Table.ScrollContainer>
+        </Table>
       </section>
     </div>
   );
@@ -98,8 +105,12 @@ function StatusPill({ status }) {
     quoted: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
     closed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
   };
-
-  return <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${map[status]}`}>{status.replace('_', ' ')}</span>;
+  const label = { new: 'Nueva', in_progress: 'En proceso', quoted: 'Cotizada', closed: 'Cerrada' };
+  return (
+    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${map[status]}`}>
+      {label[status] ?? status}
+    </span>
+  );
 }
 
 function PriorityPill({ priority }) {
@@ -108,6 +119,10 @@ function PriorityPill({ priority }) {
     medium: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
     low: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
   };
-
-  return <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${map[priority]}`}>{priority}</span>;
+  const label = { high: 'Alta', medium: 'Media', low: 'Baja' };
+  return (
+    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${map[priority]}`}>
+      {label[priority] ?? priority}
+    </span>
+  );
 }

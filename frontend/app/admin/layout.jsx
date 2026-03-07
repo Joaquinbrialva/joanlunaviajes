@@ -34,7 +34,7 @@ export default function AdminLayout({ children }) {
     fetch('/api/auth/me')
       .then((r) => r.ok ? r.json() : null)
       .then((data) => { if (data?.user) setUser(data.user); })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   async function handleLogout() {
@@ -48,8 +48,8 @@ export default function AdminLayout({ children }) {
     : 'A';
 
   return (
-    <div className='w-screen -mx-[calc((100vw-100%)/2)] bg-background min-h-[calc(100vh-5rem)]'>
-      <div className='grid grid-cols-1 md:grid-cols-[260px_1fr]'>
+    <div className='w-screen -mx-[calc((100vw-100%)/2)] -mt-4 bg-background'>
+      <div className='grid grid-cols-1 md:grid-cols-[260px_1fr] min-h-[calc(100vh-5rem)]'>
         <aside className='border-r border-default bg-surface p-4 md:p-6 flex flex-col'>
           <div className='mb-6'>
             <p className='text-sm uppercase tracking-[0.14em] text-muted'>Panel administrador</p>
@@ -64,11 +64,10 @@ export default function AdminLayout({ children }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                    active
-                      ? 'bg-accent text-white'
-                      : 'text-foreground hover:bg-surface-secondary'
-                  }`}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${active
+                    ? 'bg-accent text-white'
+                    : 'text-foreground hover:bg-surface-secondary'
+                    }`}
                 >
                   <Icon className='h-4 w-4' />
                   {item.label}
