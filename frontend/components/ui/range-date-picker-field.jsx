@@ -1,23 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  RangeCalendar,
-  CalendarGrid,
-  CalendarGridHeader,
-  CalendarHeaderCell,
-  CalendarGridBody,
-  CalendarCell,
-  Button,
-  Heading,
-} from 'react-aria-components';
-import { Popover } from '@heroui/react';
+import { RangeCalendar, Popover } from '@heroui/react';
 import { parseDate } from '@internationalized/date';
-import { CalendarIcon, ChevronLeft, ChevronRight, X } from 'lucide-react';
-
-function cn(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
+import { CalendarIcon, X } from 'lucide-react';
 
 function formatDate(dateStr) {
   if (!dateStr) return null;
@@ -92,88 +78,30 @@ export default function RangeDatePickerField({ startDate, endDate, onChange, tri
       <Popover.Content>
         <Popover.Dialog>
           <RangeCalendar
+            aria-label='Fechas de vuelo'
             value={value}
             onChange={handleChange}
-            className='flex flex-col rounded-xl bg-surface p-4'
-            style={{ width: 288 }}
           >
-            {/* Header con nav */}
-            <header className='flex items-center justify-between mb-4 px-1'>
-              <Button
-                slot='previous'
-                className='rounded-lg p-1.5 hover:bg-surface-secondary transition-colors text-foreground outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer'
-              >
-                <ChevronLeft size={16} />
-              </Button>
-              <Heading className='text-base font-semibold text-foreground tracking-tight' />
-              <Button
-                slot='next'
-                className='rounded-lg p-1.5 hover:bg-surface-secondary transition-colors text-foreground outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer'
-              >
-                <ChevronRight size={16} />
-              </Button>
-            </header>
-
-            {/* Grilla del calendario */}
-            <CalendarGrid className='w-full border-separate border-spacing-0'>
-              <CalendarGridHeader>
-                {(day) => (
-                  <CalendarHeaderCell className='text-xs font-medium text-muted text-center pb-2 w-9 h-8'>
-                    {day}
-                  </CalendarHeaderCell>
-                )}
-              </CalendarGridHeader>
-              <CalendarGridBody>
-                {(date) => (
-                  <CalendarCell
-                    date={date}
-                    className={({ isSelected, isSelectionStart, isSelectionEnd, isOutsideMonth }) =>
-                      cn(
-                        'relative p-0 text-center h-9 w-9',
-                        // franja de fondo para el rango
-                        isSelected && !isOutsideMonth && 'bg-accent/15',
-                        // redondear extremos de la franja
-                        isSelectionStart && !isOutsideMonth && 'rounded-l-full',
-                        isSelectionEnd && !isOutsideMonth && 'rounded-r-full',
-                        // si es inicio Y fin (un solo día seleccionado)
-                        isSelectionStart && isSelectionEnd && 'rounded-full',
-                      )
-                    }
-                  >
-                    {({ isSelected, isSelectionStart, isSelectionEnd, isOutsideMonth, formattedDate, isFocusVisible, isDisabled }) => (
-                      <span
-                        className={cn(
-                          'h-9 w-9 rounded-full text-sm font-medium outline-none transition-all',
-                          'inline-flex items-center justify-center',
-                          // estado base
-                          !isSelected && !isOutsideMonth && !isDisabled && 'hover:bg-surface-secondary cursor-pointer',
-                          // en el rango pero no en los extremos
-                          isSelected && !isSelectionStart && !isSelectionEnd && 'hover:bg-accent/25',
-                          // extremos: círculo lleno accent
-                          (isSelectionStart || isSelectionEnd) && !isOutsideMonth && 'bg-accent text-white hover:bg-accent/90',
-                          // fuera del mes actual
-                          isOutsideMonth && 'text-muted/30 cursor-default',
-                          // días deshabilitados
-                          isDisabled && !isOutsideMonth && 'text-muted/40 cursor-not-allowed',
-                          // foco visible
-                          isFocusVisible && 'ring-2 ring-accent ring-offset-1',
-                        )}
-                      >
-                        {formattedDate}
-                      </span>
-                    )}
-                  </CalendarCell>
-                )}
-              </CalendarGridBody>
-            </CalendarGrid>
-
-            {/* Leyenda */}
-            {startDate && !endDate && (
-              <p className='text-xs text-muted text-center mt-3'>
-                Ahora seleccioná la fecha de {endLabel.toLowerCase()}
-              </p>
-            )}
+            <RangeCalendar.Header>
+              <RangeCalendar.Heading />
+              <RangeCalendar.NavButton slot='previous' />
+              <RangeCalendar.NavButton slot='next' />
+            </RangeCalendar.Header>
+            <RangeCalendar.Grid>
+              <RangeCalendar.GridHeader>
+                {(day) => <RangeCalendar.HeaderCell>{day}</RangeCalendar.HeaderCell>}
+              </RangeCalendar.GridHeader>
+              <RangeCalendar.GridBody>
+                {(date) => <RangeCalendar.Cell date={date} />}
+              </RangeCalendar.GridBody>
+            </RangeCalendar.Grid>
           </RangeCalendar>
+
+          {startDate && !endDate && (
+            <p className='text-xs text-muted text-center mt-3 px-4 pb-2'>
+              Ahora seleccioná la fecha de {endLabel.toLowerCase()}
+            </p>
+          )}
         </Popover.Dialog>
       </Popover.Content>
     </Popover>
