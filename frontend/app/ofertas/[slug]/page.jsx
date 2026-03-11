@@ -7,17 +7,12 @@ import {
   Button,
   Card,
   CardContent,
-  Input,
-  Label,
-  ListBox,
-  Select,
-  TextArea,
 } from '@heroui/react';
 import { FaCheckCircle, FaRegClock, FaRegStar } from 'react-icons/fa';
-import { LuCalendarDays, LuMapPin, LuShieldCheck, LuUsers } from 'react-icons/lu';
+import { LuMapPin } from 'react-icons/lu';
 import Footer from '@/components/inicio/sections/Footer';
 import { fetchOffer } from '@/lib/api';
-import { formatCurrency } from '@/util/utils';
+import QuoteForm from '@/components/inicio/ui/QuoteForm';
 
 const itineraryTitles = [
   'Llegada y bienvenida',
@@ -39,25 +34,6 @@ function buildGallery(offer) {
     { src: `https://picsum.photos/seed/${offer.slug}-c/900/900`, alt: `${offer.location.city} 3` },
     { src: `https://picsum.photos/seed/${offer.slug}-d/900/900`, alt: `${offer.location.city} 4` },
   ];
-}
-
-function buildDepartureOptions(offer) {
-  const start = new Date(offer.availability.startDate);
-
-  return Array.from({ length: 3 }).map((_, index) => {
-    const optionDate = new Date(start);
-    optionDate.setDate(start.getDate() + index * 14);
-    return optionDate;
-  });
-}
-
-function formatDate(dateLike) {
-  return new Intl.DateTimeFormat('es-AR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(dateLike));
 }
 
 function buildItinerary(offer) {
@@ -92,15 +68,10 @@ export default async function OfferDetailPage({ params }) {
   }
 
   const gallery = buildGallery(offer);
-  const departureDates = buildDepartureOptions(offer);
   const itinerary = buildItinerary(offer);
 
-  const price = offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || 0;
-  const travelers = 2;
-  const total = price * travelers;
-
   return (
-    <div className='space-y-12 overflow-x-hidden'>
+    <div className='space-y-12'>
       <section className='space-y-6'>
         <Breadcrumbs size='sm' className='text-muted'>
           <BreadcrumbsItem href='/'>Inicio</BreadcrumbsItem>
@@ -225,108 +196,9 @@ export default async function OfferDetailPage({ params }) {
             </Accordion>
           </article>
 
-          <Card className='border border-default bg-surface' shadow='none'>
-            <CardContent className='p-6 space-y-4'>
-              <h2 className='text-2xl font-semibold'>Tenes preguntas?</h2>
-              <p className='text-sm text-muted'>Nuestro equipo suele responder dentro de 2 horas habiles.</p>
-
-              <form className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                <Input className='md:col-span-1' placeholder='Nombre completo' />
-                <Input className='md:col-span-1' placeholder='Email' type='email' />
-                <TextArea
-                  className='md:col-span-2'
-                  rows={4}
-                  placeholder='Contanos que viaje te interesa...'
-                />
-                <Button className='md:col-span-2 w-fit bg-slate-900 text-white hover:bg-slate-800 cursor-pointer' type='button'>
-                  Enviar consulta
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
         </div>
 
-        <aside className='xl:sticky xl:top-24 space-y-4'>
-          <Card className='border border-default bg-surface' shadow='none'>
-            <CardContent className='p-5 space-y-5'>
-              <div>
-                <p className='text-xs uppercase tracking-wider text-muted mb-1'>Desde</p>
-                <p className='text-4xl font-bold text-foreground'>
-                  {formatCurrency({ amount: price, currency: offer.pricing.currency })}
-                  <span className='text-base font-normal text-muted'> / {offer.pricing.pricePer || 'persona'}</span>
-                </p>
-              </div>
-
-              <div className='grid grid-cols-2 gap-3'>
-                <div className='border border-default rounded-xl p-3'>
-                  <p className='text-xs text-muted uppercase'>Duracion</p>
-                  <p className='font-medium'>{offer.duration.days} dias</p>
-                </div>
-                <div className='border border-default rounded-xl p-3'>
-                  <p className='text-xs text-muted uppercase'>Cupos</p>
-                  <p className='font-medium'>Max {offer.availability.remainingSpots}</p>
-                </div>
-              </div>
-
-              <Select
-                className='w-full'
-                variant='primary'
-                defaultSelectedKeys={[departureDates[0].toISOString()]}
-              >
-                <Label className='text-sm text-muted inline-flex items-center gap-2'>
-                  <LuCalendarDays />
-                  Fecha de salida
-                </Label>
-                <Select.Trigger>
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    {departureDates.map((date) => {
-                      const id = date.toISOString();
-                      const label = `${formatDate(date)} - Disponible`;
-                      return (
-                        <ListBox.Item key={id} id={id} textValue={label}>
-                          {label}
-                          <ListBox.ItemIndicator />
-                        </ListBox.Item>
-                      );
-                    })}
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-
-              <label className='flex justify-between cursor-pointer'>
-                <span className='text-sm text-muted inline-flex items-center gap-2'><LuUsers />Viajeros</span>
-                <Input type='number' min='1' defaultValue={String(travelers)} />
-              </label>
-
-              <div className='flex items-end justify-between border-t border-default pt-3'>
-                <span className='text-muted'>Total estimado</span>
-                <strong className='text-xl text-accent'>
-                  {formatCurrency({ amount: total, currency: offer.pricing.currency })}
-                </strong>
-              </div>
-
-              <Button className='w-full bg-accent text-white font-semibold cursor-pointer' size='lg'>
-                Reservar ahora
-              </Button>
-
-              <div className='grid grid-cols-2 gap-2 text-xs text-muted'>
-                <p className='inline-flex items-center gap-1'><LuShieldCheck />Reserva segura</p>
-                <p className='text-right'>Soporte 24/7</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className='border border-default bg-surface' shadow='none'>
-            <CardContent className='p-4'>
-              <p className='text-sm font-semibold'>Necesitas ayuda para reservar?</p>
-              <p className='text-sm text-muted'>Llamanos al +54 11 2334-5678</p>
-            </CardContent>
-          </Card>
-        </aside>
+        <QuoteForm offer={offer} />
       </section>
 
       <Footer />

@@ -2,16 +2,24 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { LuClipboardList, LuGlobe, LuLayoutDashboard, LuLogOut, LuMapPin, LuPlus } from 'react-icons/lu';
+import { useEffect, useRef, useState } from 'react';
+import ThemeToggle from '@/app/ThemeToggle';
+import {
+  LuChevronUp,
+  LuClipboardList,
+  LuGlobe,
+  LuLayoutDashboard,
+  LuLogOut,
+  LuMapPin,
+  LuSettings,
+  LuUser,
+} from 'react-icons/lu';
 
 const links = [
   { href: '/admin', label: 'Panel', icon: LuLayoutDashboard },
   { href: '/admin/ofertas', label: 'Ofertas', icon: LuClipboardList },
   { href: '/admin/destinos', label: 'Destinos', icon: LuGlobe },
-  { href: '/admin/destinos/nuevo', label: 'Nuevo destino', icon: LuPlus },
   { href: '/admin/cotizaciones', label: 'Cotizaciones', icon: LuMapPin },
-  { href: '/admin/ofertas/nueva', label: 'Nueva oferta', icon: LuPlus },
 ];
 
 const ROLE_LABELS = {
@@ -29,16 +37,32 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     fetch('/api/auth/me')
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => { if (data?.user) setUser(data.user); })
-      .catch(() => { });
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.user) setUser(data.user);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
+    setMenuOpen(false);
     router.push('/login');
     router.refresh();
   }
@@ -48,26 +72,28 @@ export default function AdminLayout({ children }) {
     : 'A';
 
   return (
-    <div className='w-screen -mx-[calc((100vw-100%)/2)] -mt-4 bg-background'>
-      <div className='grid grid-cols-1 md:grid-cols-[260px_1fr] min-h-[calc(100vh-5rem)]'>
-        <aside className='border-r border-default bg-surface p-4 md:p-6 flex flex-col'>
+    <div className='w-screen -mx-[calc((100vw-100%)/2)] bg-background'>
+      <div className='grid min-h-dvh grid-cols-1 md:grid-cols-[260px_1fr]'>
+        <aside className='flex flex-col border-r border-default bg-surface p-4 md:sticky md:top-0 md:h-dvh md:p-6'>
           <div className='mb-6'>
             <p className='text-sm uppercase tracking-[0.14em] text-muted'>Panel administrador</p>
             <h1 className='text-2xl font-bold'>Joan Luna Viajes</h1>
           </div>
 
-          <nav className='space-y-1 flex-1'>
+          <nav className='flex-1 space-y-1'>
             {links.map((item) => {
               const Icon = item.icon;
               const active = isActive(pathname, item.href);
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${active
-                    ? 'bg-accent text-white'
-                    : 'text-foreground hover:bg-surface-secondary'
-                    }`}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+                    active
+                      ? 'bg-accent text-white'
+                      : 'text-foreground hover:bg-surface-secondary'
+                  }`}
                 >
                   <Icon className='h-4 w-4' />
                   {item.label}
@@ -76,47 +102,60 @@ export default function AdminLayout({ children }) {
             })}
           </nav>
 
-          {/* User info + logout */}
           {user && (
-            <div className='mt-6 pt-4 border-t border-default'>
-              <div className='flex items-center gap-3'>
-                <div className='h-8 w-8 rounded-full bg-accent/10 text-accent grid place-content-center text-xs font-bold shrink-0'>
+            <div className='relative mt-auto border-t border-default pt-4' ref={menuRef}>
+              {menuOpen && (
+                <div className='absolute inset-x-0 bottom-[calc(100%+0.75rem)] rounded-2xl border border-default bg-surface p-1.5 shadow-xl'>
+                  <div className='flex items-center justify-between rounded-xl px-3 py-2'>
+                    <span className='text-sm text-foreground'>Tema</span>
+                    <ThemeToggle />
+                  </div>
+                  <Link
+                    href='/cuenta'
+                    onClick={() => setMenuOpen(false)}
+                    className='flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-surface-secondary'
+                  >
+                    <LuUser className='h-4 w-4 text-accent' />
+                    Mi perfil
+                  </Link>
+                  <button
+                    type='button'
+                    onClick={() => setMenuOpen(false)}
+                    className='flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-surface-secondary'
+                  >
+                    <LuSettings className='h-4 w-4 text-accent' />
+                    Ajustes
+                  </button>
+                  <button
+                    type='button'
+                    onClick={handleLogout}
+                    className='flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-danger transition-colors hover:bg-danger/10'
+                  >
+                    <LuLogOut className='h-4 w-4' />
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+
+              <button
+                type='button'
+                onClick={() => setMenuOpen((prev) => !prev)}
+                className='flex w-full items-center gap-3 rounded-2xl px-2 py-2 text-left transition-colors hover:bg-surface-secondary'
+              >
+                <div className='grid h-10 w-10 shrink-0 place-content-center rounded-full bg-accent/10 text-sm font-bold text-accent'>
                   {initials}
                 </div>
                 <div className='min-w-0 flex-1'>
-                  <p className='text-sm font-semibold truncate'>{user.name}</p>
+                  <p className='truncate text-sm font-semibold'>{user.name}</p>
                   <p className='text-xs text-muted'>{ROLE_LABELS[user.role] || user.role}</p>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className='text-muted hover:text-danger transition-colors p-1 rounded-lg hover:bg-danger/10'
-                  title='Cerrar sesión'
-                >
-                  <LuLogOut className='h-4 w-4' />
-                </button>
-              </div>
+                <LuChevronUp className={`h-4 w-4 text-muted transition-transform ${menuOpen ? 'rotate-0' : 'rotate-180'}`} />
+              </button>
             </div>
           )}
         </aside>
 
         <div className='min-w-0'>
-          <header className='h-16 border-b border-default bg-surface px-4 md:px-6 flex items-center justify-between'>
-            <div>
-              <p className='text-sm text-muted'>Administración</p>
-              <p className='font-semibold'>Gestión comercial</p>
-            </div>
-            <div className='flex items-center gap-3'>
-              {user && (
-                <span className='text-sm text-muted hidden sm:block'>
-                  Hola, <span className='font-medium text-foreground'>{user.name.split(' ')[0]}</span>
-                </span>
-              )}
-              <div className='h-9 w-9 rounded-full bg-accent/10 text-accent grid place-content-center text-sm font-bold'>
-                {initials}
-              </div>
-            </div>
-          </header>
-
           <main className='p-4 md:p-6'>{children}</main>
         </div>
       </div>

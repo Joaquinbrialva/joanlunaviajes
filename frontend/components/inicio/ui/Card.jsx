@@ -25,7 +25,15 @@ export default function Card({
 
   return (
     <Link href={`/ofertas/${slug}`} className="group block w-full max-w-sm h-full">
-      <article className="bg-surface w-full h-full rounded-2xl overflow-hidden flex flex-col shadow-lg hover:shadow-xl/30 hover:-translate-y-1 transition-all duration-200">
+      <article
+        className="
+    bg-surface w-full h-full rounded-2xl overflow-hidden flex flex-col
+    shadow-lg
+    transition-all duration-400
+    ease-[cubic-bezier(0.16,1,0.3,1)]
+    hover:-translate-y-1 hover:shadow-xl
+  "
+      >
         <div className="relative">
           <Image
             src={cover.url}

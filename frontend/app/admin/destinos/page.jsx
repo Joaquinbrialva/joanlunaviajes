@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import HeroSelect from '@/components/ui/hero-select';
-import { AlertDialog, Button, Table, toast } from '@heroui/react';
+import { AlertDialog, Button, Checkbox, Table, toast } from '@heroui/react';
 import { Eye, PenLine, Trash2 } from 'lucide-react';
 import DestinationPreviewDrawer from '@/components/admin/destination-preview-drawer';
 
@@ -21,40 +21,40 @@ export default function AdminDestinationsPage() {
     let active = true;
     fetch('/api/destinos', { cache: 'no-store' })
       .then((r) => r.json())
-      .then((data) => { if (active && Array.isArray(data)) setDestinations(data); })
-      .catch(() => { if (active) setDestinations([]); });
-    return () => { active = false; };
+      .then((data) => {
+        if (active && Array.isArray(data)) setDestinations(data);
+      })
+      .catch(() => {
+        if (active) setDestinations([]);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const continents = useMemo(
-    () => ['all', ...new Set(destinations.map((d) => d.continent))],
+    () => ['all', ...new Set(destinations.map((destination) => destination.continent))],
     [destinations]
   );
 
   const rows = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return destinations.filter((d) => {
+    return destinations.filter((destination) => {
       const searchMatch =
         query.length === 0 ||
-        d.name.toLowerCase().includes(query) ||
-        d.country.toLowerCase().includes(query);
-      const continentMatch = continent === 'all' || d.continent === continent;
+        destination.name.toLowerCase().includes(query) ||
+        destination.country.toLowerCase().includes(query);
+      const continentMatch = continent === 'all' || destination.continent === continent;
       return searchMatch && continentMatch;
     });
   }, [destinations, continent, search]);
 
-  const allRowsSelected = rows.length > 0 && rows.every((d) => selected.has(d.id));
-
-  function toggleAll() {
-    setSelected(allRowsSelected ? new Set() : new Set(rows.map((d) => d.id)));
-  }
-
-  function toggleOne(id) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  function handleSelectionChange(keys) {
+    if (keys === 'all') {
+      setSelected(new Set(rows.map((destination) => destination.id)));
+      return;
+    }
+    setSelected(new Set([...keys]));
   }
 
   function executeDelete() {
@@ -65,14 +65,18 @@ export default function AdminDestinationsPage() {
     const deleteFn = async () => {
       if (toDelete.type === 'batch') {
         const results = await Promise.all(selectedIds.map((id) => fetch(`/api/destinos/${id}`, { method: 'DELETE' })));
-        if (results.some((r) => !r.ok)) throw new Error('Alguna eliminación falló');
-        setDestinations((prev) => prev.filter((d) => !selectedIds.includes(d.id)));
+        if (results.some((r) => !r.ok)) throw new Error('Alguna eliminacion fallo');
+        setDestinations((prev) => prev.filter((destination) => !selectedIds.includes(destination.id)));
         setSelected(new Set());
       } else {
         const res = await fetch(`/api/destinos/${toDelete.id}`, { method: 'DELETE' });
         if (!res.ok) throw new Error('No se pudo eliminar el destino');
-        setDestinations((prev) => prev.filter((d) => d.id !== toDelete.id));
-        setSelected((prev) => { const next = new Set(prev); next.delete(toDelete.id); return next; });
+        setDestinations((prev) => prev.filter((destination) => destination.id !== toDelete.id));
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(toDelete.id);
+          return next;
+        });
       }
     };
 
@@ -107,7 +111,7 @@ export default function AdminDestinationsPage() {
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className='text-sm text-muted'>
-                  Estás por eliminar <strong>{deleteLabel}</strong>. Esta acción no se puede deshacer.
+                  Estas por eliminar <strong>{deleteLabel}</strong>. Esta accion no se puede deshacer.
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer className='flex justify-end gap-2'>
@@ -119,40 +123,37 @@ export default function AdminDestinationsPage() {
         </AlertDialog.Backdrop>
       </AlertDialog>
 
-      <section className='flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+      <section className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
         <div>
-          <h2 className='text-4xl font-bold'>Gestión de destinos</h2>
+          <h2 className='text-4xl font-bold'>Gestion de destinos</h2>
           <p className='text-muted'>Controla contenido, metadata SEO y visibilidad comercial.</p>
         </div>
-        <Link
-          href='/admin/destinos/nuevo'
-          className='inline-flex h-10 items-center justify-center rounded-lg bg-accent px-4 text-sm font-semibold text-white'
-        >
+        <Link href='/admin/destinos/nuevo' className='inline-flex h-10 items-center justify-center rounded-lg bg-accent px-4 text-sm font-semibold text-white'>
           + Nuevo destino
         </Link>
       </section>
 
-      <section className='rounded-2xl border border-default bg-surface p-4 md:p-5 space-y-4'>
-        <div className='grid grid-cols-1 md:grid-cols-[1fr_240px] gap-3'>
+      <section className='space-y-4 rounded-2xl border border-default bg-surface p-4 md:p-5'>
+        <div className='grid grid-cols-1 gap-3 md:grid-cols-[1fr_240px]'>
           <input
-            className='h-10 px-3 rounded-lg border border-default bg-surface-secondary text-sm'
-            placeholder='Buscar por nombre o país...'
+            className='h-10 rounded-lg border border-default bg-surface-secondary px-3 text-sm'
+            placeholder='Buscar por nombre o pais...'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           <HeroSelect
             value={continent}
-            onValueChange={(v) => setContinent(v)}
-            options={continents.map((c) => ({
-              value: c,
-              label: c === 'all' ? 'Todos los continentes' : c,
+            onValueChange={(value) => setContinent(value)}
+            options={continents.map((item) => ({
+              value: item,
+              label: item === 'all' ? 'Todos los continentes' : item,
             }))}
             triggerClassName='h-10 rounded-lg border border-default bg-surface-secondary px-3'
           />
         </div>
 
         {selected.size > 0 && (
-          <div className='flex items-center gap-3 px-3 py-2 rounded-lg bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-800'>
+          <div className='flex items-center gap-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 dark:border-rose-800 dark:bg-rose-900/10'>
             <span className='text-sm font-medium text-rose-700 dark:text-rose-400'>
               {selected.size} seleccionado(s)
             </span>
@@ -170,18 +171,18 @@ export default function AdminDestinationsPage() {
 
         <Table>
           <Table.ScrollContainer minWidth={600}>
-            <Table.Content aria-label='Gestión de destinos'>
+            <Table.Content
+              aria-label='Gestion de destinos'
+              selectionMode='multiple'
+              selectedKeys={selected}
+              onSelectionChange={handleSelectionChange}
+            >
               <Table.Header>
                 <Table.Column className='w-10'>
-                  <input
-                    type='checkbox'
-                    checked={allRowsSelected}
-                    onChange={toggleAll}
-                    className='cursor-pointer' style={{ accentColor: 'var(--accent)' }}
-                  />
+                  <SelectionCheckbox ariaLabel='Seleccionar todos los destinos' />
                 </Table.Column>
                 <Table.Column isRowHeader>Destino</Table.Column>
-                <Table.Column>País</Table.Column>
+                <Table.Column>Pais</Table.Column>
                 <Table.Column>Continente</Table.Column>
                 <Table.Column>Budget diario</Table.Column>
                 <Table.Column>Popular</Table.Column>
@@ -191,7 +192,7 @@ export default function AdminDestinationsPage() {
                 items={rows}
                 renderEmptyState={() => (
                   <p className='py-10 text-center text-sm text-muted'>
-                    No hay destinos que coincidan con la búsqueda.
+                    No hay destinos que coincidan con la busqueda.
                   </p>
                 )}
               >
@@ -203,12 +204,7 @@ export default function AdminDestinationsPage() {
                       className={`transition-colors ${isSelected ? 'bg-orange-100 dark:bg-orange-900/20' : 'hover:bg-zinc-100 dark:hover:bg-white/5'}`}
                     >
                       <Table.Cell>
-                        <input
-                          type='checkbox'
-                          checked={isSelected}
-                          onChange={() => toggleOne(destination.id)}
-                          className='cursor-pointer' style={{ accentColor: 'var(--accent)' }}
-                        />
+                        <SelectionCheckbox ariaLabel={`Seleccionar destino ${destination.name}`} />
                       </Table.Cell>
                       <Table.Cell>
                         <p className='font-semibold'>{destination.name}</p>
@@ -218,30 +214,33 @@ export default function AdminDestinationsPage() {
                       <Table.Cell>{destination.continent}</Table.Cell>
                       <Table.Cell className='font-medium'>USD {destination.stats.averageDailyBudgetUSD}</Table.Cell>
                       <Table.Cell>
-                        {destination.isPopular
-                          ? <span className='inline-flex px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'>Popular</span>
-                          : <span className='text-muted text-xs'>—</span>
-                        }
+                        {destination.isPopular ? (
+                          <span className='inline-flex rounded-full bg-orange-100 px-2 py-0.5 text-xs font-semibold text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'>
+                            Popular
+                          </span>
+                        ) : (
+                          <span className='text-xs text-muted'>-</span>
+                        )}
                       </Table.Cell>
                       <Table.Cell>
                         <div className='flex items-center justify-end gap-1'>
                           <button
                             onClick={() => setPreviewDest(destination)}
-                            className='w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:bg-surface-secondary hover:text-foreground transition-colors'
+                            className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground'
                             title='Ver resumen'
                           >
                             <Eye size={15} />
                           </button>
                           <button
                             onClick={() => router.push(`/admin/destinos/${destination.slug}/editar`)}
-                            className='w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:bg-surface-secondary hover:text-foreground transition-colors'
+                            className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground'
                             title='Editar'
                           >
                             <PenLine size={15} />
                           </button>
                           <button
                             onClick={() => setPendingDelete({ type: 'single', id: destination.id })}
-                            className='w-8 h-8 rounded-lg flex items-center justify-center text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors'
+                            className='flex h-8 w-8 items-center justify-center rounded-lg text-rose-500 transition-colors hover:bg-rose-50 dark:hover:bg-rose-900/20'
                             title='Eliminar'
                           >
                             <Trash2 size={15} />
@@ -257,5 +256,16 @@ export default function AdminDestinationsPage() {
         </Table>
       </section>
     </div>
+  );
+}
+
+function SelectionCheckbox({ ariaLabel }) {
+  return (
+    <Checkbox slot='selection' aria-label={ariaLabel} className='inline-flex cursor-pointer items-center'>
+      <Checkbox.Control className='flex h-5 w-5 items-center justify-center rounded-md border border-default bg-surface transition-colors data-selected:border-accent data-selected:bg-accent'>
+        <Checkbox.Indicator className='text-white' />
+      </Checkbox.Control>
+      <Checkbox.Content className='sr-only'>{ariaLabel}</Checkbox.Content>
+    </Checkbox>
   );
 }

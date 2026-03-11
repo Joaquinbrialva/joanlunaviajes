@@ -18,16 +18,19 @@
     "climate": {
       "type": "Mediterráneo",
       "averageTemperatureC": 20,
-      "bestMonthsToVisit": ["Abril", "Mayo", "Septiembre", "Octubre"]
+      "bestMonthsToVisit": [
+        "Abril",
+        "Mayo",
+        "Septiembre",
+        "Octubre"
+      ]
     },
     "highlights": [
-      "Coliseo Romano",
-      "Ciudad del Vaticano",
-      "Fontana di Trevi",
-      "Foro Romano",
-      "Galería Borghese"
+      "Coliseo Romano,Ciudad del Vaticano,Fontana di Trevi,Foro Romano,Galería Borghese"
     ],
-    "travelStyles": ["Cultural", "Histórico", "Gastronómico", "Urbano"],
+    "travelStyles": [
+      "Cultural,Histórico,Gastronómico,Urbano"
+    ],
     "featuredImage": "https://picsum.photos/seed/roma-coliseo/1200/800",
     "gallery": [
       "https://picsum.photos/seed/roma-vaticano/1200/800",
@@ -44,9 +47,10 @@
       "metaDescription": "Descubrí Roma con Joan Luna Viajes. Paquetes con hotel, vuelo y excursiones al Coliseo, Vaticano y más."
     },
     "isPopular": true,
-    "isFeatured": true,
+    "isFeatured": false,
     "status": "published",
     "createdAt": "2026-01-10T09:00:00Z",
-    "updatedAt": "2026-01-10T09:00:00Z"
+    "updatedAt": "2026-03-09T01:14:19.921Z",
+    "isRecommended": true
   }
 ]

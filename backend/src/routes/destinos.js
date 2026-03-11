@@ -52,6 +52,12 @@ router.post('/', async (req, res) => {
     const now = new Date().toISOString();
     const coverSeed = slugify(`${slug}-${Date.now()}`);
 
+    const isRecommended = Boolean(body.isRecommended);
+    let updatedDestinations = destinations;
+    if (isRecommended) {
+      updatedDestinations = destinations.map((d) => ({ ...d, isRecommended: false }));
+    }
+
     const newDestination = {
       id,
       slug,
@@ -96,12 +102,13 @@ router.post('/', async (req, res) => {
       },
       isPopular: Boolean(body.isPopular),
       isFeatured: Boolean(body.isFeatured),
+      isRecommended,
       status: String(body.status || 'draft'),
       createdAt: now,
       updatedAt: now,
     };
 
-    await db.destinations.write([newDestination, ...destinations]);
+    await db.destinations.write([newDestination, ...updatedDestinations]);
     res.status(201).json(newDestination);
   } catch {
     res.status(500).json({ error: 'No se pudo guardar el destino.' });
@@ -118,6 +125,13 @@ router.patch('/:id', async (req, res) => {
     const existing = destinations[idx];
     const body = req.body;
     const now = new Date().toISOString();
+
+    const isRecommended = Boolean(body.isRecommended);
+    if (isRecommended) {
+      for (let i = 0; i < destinations.length; i++) {
+        if (destinations[i].id !== req.params.id) destinations[i] = { ...destinations[i], isRecommended: false };
+      }
+    }
 
     const updated = {
       ...existing,
@@ -156,6 +170,7 @@ router.patch('/:id', async (req, res) => {
       },
       isPopular: Boolean(body.isPopular),
       isFeatured: Boolean(body.isFeatured),
+      isRecommended,
       status: String(body.status || existing.status),
       updatedAt: now,
     };
