@@ -89,6 +89,7 @@ const initialForm = {
   seats: 12,
   status: 'draft',
   featured: false,
+  isSpecialOffer: false,
   summary: '',
   includes: ['Vuelos', 'Hotel', 'Traslados'],
   notIncludes: ['Propinas', 'Gastos personales'],
@@ -617,6 +618,12 @@ export default function AdminNewOfferPage() {
               )}
             </div>
 
+            {form.isSpecialOffer && (
+              <div className='rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-2 text-sm text-amber-700 dark:text-amber-300'>
+                Esta oferta será marcada como oferta especial (la anterior será desactivada automáticamente).
+              </div>
+            )}
+
             <div className='grid grid-cols-1 md:grid-cols-[220px_1fr] gap-4 items-center pt-1'>
               <Field label='Estado de publicación'>
                 <HeroSelect
@@ -632,6 +639,14 @@ export default function AdminNewOfferPage() {
                 checked={form.featured}
                 onChange={(v) => update('featured', v)}
               />
+              <div className='space-y-0.5'>
+                <LuggageCheck
+                  label='Marcar como oferta especial'
+                  checked={form.isSpecialOffer}
+                  onChange={(v) => update('isSpecialOffer', v)}
+                />
+                <p className='text-xs text-muted ml-7'>Solo puede haber una a la vez. Marcar aquí desactivará la anterior.</p>
+              </div>
             </div>
           </div>
         )}

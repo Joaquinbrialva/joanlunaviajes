@@ -20,21 +20,24 @@ router.post('/', async (req, res) => {
     const inquiries = await db.inquiries.read();
 
     const name = String(body.name || '').trim();
-    const email = String(body.email || '').trim();
+    const phone = String(body.phone || '').trim();
 
-    if (!name || !email) {
-      return res.status(400).json({ error: 'Completá nombre y email.' });
+    if (!name || !phone) {
+      return res.status(400).json({ error: 'Completá nombre y teléfono.' });
     }
 
     const now = new Date().toISOString();
     const newInquiry = {
       id: nextInquiryId(inquiries),
       name,
-      email,
-      phone: String(body.phone || '').trim(),
+      email: String(body.email || '').trim(),
+      phone,
+      passengers: Math.max(1, Number(body.passengers || 1)),
       message: String(body.message || '').trim(),
       offerSlug: String(body.offerSlug || '').trim() || null,
+      offerTitle: String(body.offerTitle || '').trim() || null,
       destinationSlug: String(body.destinationSlug || '').trim() || null,
+      notes: '',
       status: 'pending',
       createdAt: now,
     };
@@ -46,7 +49,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PATCH /api/cotizaciones/:id — actualizar estado
+// PATCH /api/cotizaciones/:id — actualizar estado y/o notas
 router.patch('/:id', async (req, res) => {
   try {
     const inquiries = await db.inquiries.read();
@@ -59,11 +62,30 @@ router.patch('/:id', async (req, res) => {
       return res.status(400).json({ error: `Estado inválido. Opciones: ${allowed.join(', ')}.` });
     }
 
-    inquiries[index] = { ...inquiries[index], ...(status && { status }), updatedAt: new Date().toISOString() };
+    const updates = { updatedAt: new Date().toISOString() };
+    if (status) updates.status = status;
+    if (req.body.notes !== undefined) updates.notes = String(req.body.notes);
+
+    inquiries[index] = { ...inquiries[index], ...updates };
     await db.inquiries.write(inquiries);
     res.json(inquiries[index]);
   } catch {
     res.status(500).json({ error: 'No se pudo actualizar la cotización.' });
+  }
+});
+
+// DELETE /api/cotizaciones/:id
+router.delete('/:id', async (req, res) => {
+  try {
+    const inquiries = await db.inquiries.read();
+    const filtered = inquiries.filter((i) => i.id !== req.params.id);
+    if (filtered.length === inquiries.length) {
+      return res.status(404).json({ error: 'Cotización no encontrada.' });
+    }
+    await db.inquiries.write(filtered);
+    res.status(204).send();
+  } catch {
+    res.status(500).json({ error: 'No se pudo eliminar la cotización.' });
   }
 });
 

@@ -49,7 +49,7 @@ const initialForm = {
   airline: '', airlineIata: '', flightType: 'direct',
   luggagePersonal: true, luggageCarryOn: true, luggageChecked: false,
   currency: 'ARS', price: null, originalPrice: null, priceNote: 'por persona',
-  seats: 12, status: 'draft', featured: false, summary: '',
+  seats: 12, status: 'draft', featured: false, isSpecialOffer: false, summary: '',
   includes: [], notIncludes: [], highlights: [],
   coverImage: '', hotelName: '',
 };
@@ -84,6 +84,7 @@ function offerToForm(offer) {
     seats: avail.remainingSpots || 12,
     status: offer.status || 'draft',
     featured: offer.isFeatured || false,
+    isSpecialOffer: offer.isSpecialOffer ?? false,
     summary: offer.subtitle || '',
     includes: Array.isArray(offer.includes) ? offer.includes : [],
     notIncludes: Array.isArray(offer.notIncludes) ? offer.notIncludes : [],
@@ -443,6 +444,14 @@ export default function EditOfferPage() {
                 {showErrors && !form.status && <p className='text-xs text-rose-500 mt-1'>Seleccioná un estado.</p>}
               </Field>
               <LuggageCheck label='Oferta destacada' checked={form.featured} onChange={(v) => update('featured', v)} />
+              <div className='space-y-0.5'>
+                <LuggageCheck
+                  label='Marcar como oferta especial'
+                  checked={form.isSpecialOffer}
+                  onChange={(v) => update('isSpecialOffer', v)}
+                />
+                <p className='text-xs text-muted ml-7'>Solo puede haber una a la vez. Marcar aquí desactivará la anterior.</p>
+              </div>
             </div>
           </div>
         )}

@@ -8,19 +8,21 @@ export default function AdminDrawer({ isOpen, onClose, title, children }) {
     if (!isOpen) return;
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.body.style.overflow = '';
+    };
   }, [isOpen, onClose]);
 
   return (
     <>
-      {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-200 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-40 bg-black/30 backdrop-blur-[3px] transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
-      {/* Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-xl bg-surface z-50 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-3 bottom-3 right-3 z-50 flex h-auto w-[calc(100%-1.5rem)] max-w-xl flex-col overflow-hidden rounded-3xl border border-default bg-surface shadow-2xl transition-all duration-300 ease-out sm:top-4 sm:bottom-4 sm:right-4 sm:w-full ${isOpen ? 'translate-x-0 opacity-100' : 'translate-x-6 opacity-0 pointer-events-none'}`}
       >
         <div className='flex items-center justify-between px-5 py-4 border-b border-default shrink-0'>
           <h2 className='font-semibold text-base'>{title}</h2>

@@ -50,13 +50,10 @@
       ]
     },
     "includes": [
-      "Vuelos",
-      "Hotel",
-      "Traslados"
+      "a"
     ],
     "notIncludes": [
-      "Propinas",
-      "Gastos personales"
+      "a"
     ],
     "images": [
       {
@@ -68,17 +65,33 @@
       }
     ],
     "highlights": [
-      "Asistencia local",
-      "Coordinación integral",
-      "Experiencia curada"
+      "a"
     ],
     "cancellationPolicy": {
       "refundable": false
     },
-    "isFeatured": true,
+    "isFeatured": false,
     "isPopular": false,
     "createdAt": "2026-03-07T14:00:53.906Z",
-    "updatedAt": "2026-03-07T18:26:08.967Z"
+    "updatedAt": "2026-03-08T23:45:03.346Z",
+    "origin": {
+      "city": "Buenos Aires",
+      "country": "Argentina"
+    },
+    "airline": {
+      "name": "LATAM Airlines",
+      "iata": "LA"
+    },
+    "flight": {
+      "type": "direct"
+    },
+    "luggage": {
+      "personal": true,
+      "carryOn": true,
+      "checked": false
+    },
+    "status": "published",
+    "isSpecialOffer": false
   },
   {
     "id": "of-4004",
@@ -154,7 +167,7 @@
     "isFeatured": true,
     "isPopular": false,
     "createdAt": "2026-03-06T14:09:15.972Z",
-    "updatedAt": "2026-03-07T18:51:23.453Z",
+    "updatedAt": "2026-03-09T00:59:29.841Z",
     "origin": {
       "city": "Buenos Aires",
       "country": "Argentina"
@@ -171,6 +184,7 @@
       "carryOn": true,
       "checked": false
     },
-    "status": "published"
+    "status": "published",
+    "isSpecialOffer": true
   }
 ]

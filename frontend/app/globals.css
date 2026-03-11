@@ -1,6 +1,6 @@
 ﻿@import 'tailwindcss';
 @plugin 'tailwindcss-animate';
-@import '@heroui/styles';
+@import '@heroui/styles/css';
 
 @custom-variant dark (&:is(.dark *, [data-theme='dark'] *));
 
@@ -11,9 +11,9 @@
 [data-theme='default'] {
 	color-scheme: light;
 	/* Brand */
-	--accent: #ff7d2d8a;
+	--accent: #ff7d2d;
 	--accent-foreground: #ffffff;
-	--focus: #ff7e2d;
+	--focus: #ff7d2da4;
 
 	/* App colors */
 	--background: #f5f6f8;

@@ -61,10 +61,17 @@ router.post('/', async (req, res) => {
     const originalPrice = Number(body.originalPrice || 0);
     const hasDiscount = originalPrice > price && price > 0;
 
+    const isSpecialOffer = Boolean(body.isSpecialOffer);
+    let updatedOffers = offers;
+    if (isSpecialOffer) {
+      updatedOffers = offers.map((o) => ({ ...o, isSpecialOffer: false }));
+    }
+
     const newOffer = {
       id,
       slug,
       title,
+      isSpecialOffer,
       subtitle: String(body.summary || '').trim() || `Experiencia destacada en ${body.destinationCity || destinationCountry}.`,
       location: {
         city: isMulti
@@ -142,7 +149,7 @@ router.post('/', async (req, res) => {
       updatedAt: now,
     };
 
-    await db.offers.write([newOffer, ...offers]);
+    await db.offers.write([newOffer, ...updatedOffers]);
     res.status(201).json(newOffer);
   } catch (err) {
     console.error('[POST /api/ofertas]', err);
@@ -172,9 +179,17 @@ router.patch('/:id', async (req, res) => {
     const originalPrice = Number(body.originalPrice || 0);
     const hasDiscount = originalPrice > price && price > 0;
 
+    const isSpecialOffer = Boolean(body.isSpecialOffer);
+    if (isSpecialOffer) {
+      for (let i = 0; i < offers.length; i++) {
+        if (offers[i].id !== req.params.id) offers[i] = { ...offers[i], isSpecialOffer: false };
+      }
+    }
+
     const updated = {
       ...existing,
       title,
+      isSpecialOffer,
       subtitle: String(body.summary || '').trim() || existing.subtitle,
       location: {
         city: isMulti

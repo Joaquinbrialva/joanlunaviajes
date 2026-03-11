@@ -9,7 +9,8 @@
       "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); print\\(list\\(p.get\\(''exports'',{}\\).keys\\(\\)\\)[:30]\\)\")",
       "Bash(ls /c/joanlunaviajes/frontend/node_modules/@internationalized/date/dist/*.mjs)",
       "Bash(grep -l \"CalendarGridBody\" /c/joanlunaviajes/frontend/node_modules/react-aria-components/dist/*.d.ts)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(xargs grep:*)"
     ]
   }
 }

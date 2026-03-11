@@ -1,8 +1,8 @@
 import { Inter, Fira_Code } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from 'next-themes';
-import Navbar from '@/components/inicio/ui/Navbar';
 import HeroUIToastProvider from '@/components/ui/heroui-toast-provider';
+import RootShell from '@/components/ui/root-shell';
 
 const inter = Inter({
 	variable: '--font-sans',
@@ -26,10 +26,7 @@ export default function RootLayout({ children }) {
 				className={`${inter.variable} ${fira.variable} font-sans antialiased`}
 			>
 				<ThemeProvider attribute='class' defaultTheme='light' enableSystem>
-					<div className='space-y-4 mt-20'>
-						<Navbar />
-						<div className='max-w-7xl mx-auto px-4'>{children}</div>
-					</div>
+					<RootShell>{children}</RootShell>
 					<HeroUIToastProvider />
 				</ThemeProvider>
 			</body>

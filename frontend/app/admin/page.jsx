@@ -3,6 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { LuClipboardList, LuGlobe, LuMessageSquare, LuTrendingUp } from 'react-icons/lu';
+import {
+  normalizeInquiry,
+  INQUIRY_STATUS_CLASS,
+  INQUIRY_STATUS_LABEL,
+} from '@/lib/inquiries';
 
 function getOfferPrice(offer) {
   return offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || 0;
@@ -25,7 +30,7 @@ export default function AdminDashboardPage() {
     ]).then(([o, d, i]) => {
       if (Array.isArray(o)) setOffers(o);
       if (Array.isArray(d)) setDestinations(d);
-      if (Array.isArray(i)) setInquiries(i);
+      if (Array.isArray(i)) setInquiries(i.map(normalizeInquiry));
     }).catch(() => {});
   }, []);
 
@@ -69,9 +74,8 @@ export default function AdminDashboardPage() {
             <thead className='bg-surface-secondary text-muted'>
               <tr>
                 <th className='text-left px-4 py-3 font-semibold'>Cliente</th>
-                <th className='text-left px-4 py-3 font-semibold'>Destino</th>
+                <th className='text-left px-4 py-3 font-semibold'>Solicitud</th>
                 <th className='text-left px-4 py-3 font-semibold'>Viajeros</th>
-                <th className='text-left px-4 py-3 font-semibold'>Presupuesto</th>
                 <th className='text-left px-4 py-3 font-semibold'>Estado</th>
               </tr>
             </thead>
@@ -79,12 +83,14 @@ export default function AdminDashboardPage() {
               {latestInquiries.map((item) => (
                 <tr key={item.id} className='border-t border-default'>
                   <td className='px-4 py-3'>
-                    <p className='font-semibold'>{item.fullName}</p>
+                    <p className='font-semibold'>{item.name}</p>
                     <p className='text-muted text-xs'>{item.email}</p>
                   </td>
-                  <td className='px-4 py-3'>{item.destination}</td>
-                  <td className='px-4 py-3'>{item.travelers}</td>
-                  <td className='px-4 py-3'>{formatUSD(item.budgetUSD)}</td>
+                  <td className='px-4 py-3'>
+                    <p>{item.requestTitle}</p>
+                    <p className='text-muted text-xs'>{item.requestMeta}</p>
+                  </td>
+                  <td className='px-4 py-3'>{item.passengers ?? '—'}</td>
                   <td className='px-4 py-3'>
                     <StatusPill status={item.status} />
                   </td>
@@ -116,27 +122,9 @@ function StatCard({ title, value, icon, growth }) {
 }
 
 function StatusPill({ status }) {
-  const map = {
-    new: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-    pending: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-    in_progress: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-    contacted: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-    quoted: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-    closed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-  };
-
-  const labels = {
-    new: 'Nuevo',
-    pending: 'Pendiente',
-    in_progress: 'En progreso',
-    contacted: 'Contactado',
-    quoted: 'Cotizado',
-    closed: 'Cerrado',
-  };
-
   return (
-    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${map[status] || map.new}`}>
-      {labels[status] || status}
+    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${INQUIRY_STATUS_CLASS[status] || INQUIRY_STATUS_CLASS.pending}`}>
+      {INQUIRY_STATUS_LABEL[status] || status}
     </span>
   );
 }
