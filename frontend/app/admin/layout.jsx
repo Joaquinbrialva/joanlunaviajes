@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import ThemeToggle from '@/app/ThemeToggle';
+import { Switch } from '@heroui/react';
+import { useTheme } from 'next-themes';
+import NotificationBell from '@/components/admin/notification-bell';
 import {
   LuChevronUp,
   LuClipboardList,
@@ -39,6 +41,10 @@ export default function AdminLayout({ children }) {
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -55,7 +61,6 @@ export default function AdminLayout({ children }) {
         setMenuOpen(false);
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -74,14 +79,19 @@ export default function AdminLayout({ children }) {
   return (
     <div className='w-screen -mx-[calc((100vw-100%)/2)] bg-background'>
       <div className='grid min-h-dvh grid-cols-1 md:grid-cols-[260px_1fr]'>
-        <aside className='flex flex-col border-r border-default bg-surface p-4 md:sticky md:top-0 md:h-dvh md:p-6'>
-          <div className='mb-6'>
-            <p className='text-sm uppercase tracking-[0.14em] text-muted'>Panel administrador</p>
-            <h1 className='text-2xl font-bold'>Joan Luna Viajes</h1>
+        <aside className='flex flex-col border-r border-default bg-surface p-4 md:sticky md:top-0 md:h-dvh md:overflow-visible md:p-6'>
+          <div className='mb-6 flex items-start justify-between gap-2'>
+            <div>
+              <p className='text-sm uppercase tracking-[0.14em] text-muted'>Panel administrador</p>
+              <h1 className='text-2xl font-bold'>Joan Luna Viajes</h1>
+            </div>
+            <NotificationBell />
           </div>
 
           <nav className='flex-1 space-y-1'>
-            {links.map((item) => {
+            {links
+              .filter((item) => !(item.href === '/admin/cotizaciones' && user?.role === 'designer'))
+              .map((item) => {
               const Icon = item.icon;
               const active = isActive(pathname, item.href);
 
@@ -106,26 +116,34 @@ export default function AdminLayout({ children }) {
             <div className='relative mt-auto border-t border-default pt-4' ref={menuRef}>
               {menuOpen && (
                 <div className='absolute inset-x-0 bottom-[calc(100%+0.75rem)] rounded-2xl border border-default bg-surface p-1.5 shadow-xl'>
-                  <div className='flex items-center justify-between rounded-xl px-3 py-2'>
-                    <span className='text-sm text-foreground'>Tema</span>
-                    <ThemeToggle />
-                  </div>
+                  {mounted && (
+                    <Switch
+                      isSelected={resolvedTheme === 'dark'}
+                      onChange={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                      className='flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 hover:bg-surface-secondary'
+                    >
+                      <Switch.Content className='text-sm text-foreground'>Modo oscuro</Switch.Content>
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                    </Switch>
+                  )}
                   <Link
-                    href='/cuenta'
+                    href='/admin/perfil'
                     onClick={() => setMenuOpen(false)}
                     className='flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-surface-secondary'
                   >
                     <LuUser className='h-4 w-4 text-accent' />
                     Mi perfil
                   </Link>
-                  <button
-                    type='button'
+                  <Link
+                    href='/admin/ajustes'
                     onClick={() => setMenuOpen(false)}
-                    className='flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-surface-secondary'
+                    className='flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-surface-secondary'
                   >
                     <LuSettings className='h-4 w-4 text-accent' />
                     Ajustes
-                  </button>
+                  </Link>
                   <button
                     type='button'
                     onClick={handleLogout}

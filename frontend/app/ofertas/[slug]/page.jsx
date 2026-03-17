@@ -10,7 +10,6 @@ import {
 } from '@heroui/react';
 import { FaCheckCircle, FaRegClock, FaRegStar } from 'react-icons/fa';
 import { LuMapPin } from 'react-icons/lu';
-import Footer from '@/components/inicio/sections/Footer';
 import { fetchOffer } from '@/lib/api';
 import QuoteForm from '@/components/inicio/ui/QuoteForm';
 
@@ -201,7 +200,6 @@ export default async function OfferDetailPage({ params }) {
         <QuoteForm offer={offer} />
       </section>
 
-      <Footer />
     </div>
   );
 }

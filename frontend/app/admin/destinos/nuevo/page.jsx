@@ -2,12 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Button, Checkbox, NumberField, Spinner } from '@heroui/react';
 import { Minus, Plus } from 'lucide-react';
 import { toastError } from '@/lib/toast';
 import HeroSelect from '@/components/ui/hero-select';
 import ItemListInput from '@/components/ui/item-list-input';
 import CountryCombobox from '@/components/ui/country-combobox';
+import CoverImageInput from '@/components/ui/cover-image-input';
+import GalleryEditor from '@/components/ui/gallery-editor';
 
 /* ─── Opciones estáticas ─────────────────────────────────────────────── */
 
@@ -199,6 +202,9 @@ export default function AdminNewDestinationPage() {
       {/* Encabezado */}
       <section className='flex flex-col md:flex-row md:items-start md:justify-between gap-3'>
         <div>
+          <p className='text-sm text-muted mb-1'>
+            <Link href='/admin/destinos' className='hover:underline'>Destinos</Link> / Nuevo
+          </p>
           <h2 className='text-4xl font-bold'>Nuevo destino</h2>
           <p className='text-muted text-sm mt-1'>Completá los datos para publicar un destino turístico.</p>
         </div>
@@ -273,13 +279,8 @@ export default function AdminNewDestinationPage() {
                 />
               </Field>
 
-              <Field label='Imagen destacada (URL)'>
-                <input
-                  className='h-10 px-3 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent'
-                  value={form.featuredImage}
-                  onChange={(e) => update('featuredImage', e.target.value)}
-                  placeholder='https://...'
-                />
+              <Field label='Imagen destacada'>
+                <CoverImageInput value={form.featuredImage} onChange={(url) => update('featuredImage', url)} />
               </Field>
             </div>
           </div>
@@ -415,12 +416,11 @@ export default function AdminNewDestinationPage() {
               />
             </div>
 
-            <Field label='URLs galería (una por línea)'>
-              <textarea
-                className='min-h-24 px-3 py-2 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent resize-y'
-                value={form.gallery}
-                onChange={(e) => update('gallery', e.target.value)}
-                placeholder='https://...'
+            <Field label='Galería de imágenes'>
+              <p className='text-xs text-muted mb-2'>Imágenes adicionales que se muestran en la página del destino.</p>
+              <GalleryEditor
+                images={form.gallery ? form.gallery.split('\n').map((s) => s.trim()).filter(Boolean) : []}
+                onChange={(arr) => update('gallery', arr.join('\n'))}
               />
             </Field>
           </div>

@@ -11,6 +11,8 @@ import AirlineCombobox from '@/components/ui/airline-combobox';
 import RangeDatePickerField from '@/components/ui/range-date-picker-field';
 import ItemListInput from '@/components/ui/item-list-input';
 import CountryCombobox from '@/components/ui/country-combobox';
+import CoverImageInput from '@/components/ui/cover-image-input';
+import GalleryEditor from '@/components/ui/gallery-editor';
 
 const pasos = [
   { id: 1, label: 'Información general' },
@@ -51,7 +53,7 @@ const initialForm = {
   currency: 'ARS', price: null, originalPrice: null, priceNote: 'por persona',
   seats: 12, status: 'draft', featured: false, isSpecialOffer: false, summary: '',
   includes: [], notIncludes: [], highlights: [],
-  coverImage: '', hotelName: '',
+  coverImage: '', hotelName: '', galleryImages: [],
 };
 
 function offerToForm(offer) {
@@ -91,6 +93,9 @@ function offerToForm(offer) {
     highlights: Array.isArray(offer.highlights) ? offer.highlights : [],
     coverImage: offer.images?.find((i) => i.isCover)?.url || '',
     hotelName: offer.hotel?.name || '',
+    galleryImages: Array.isArray(offer.images)
+      ? offer.images.filter((i) => !i.isCover).map((i) => i.url)
+      : [],
   };
 }
 
@@ -168,6 +173,93 @@ function ReviewRow({ label, value }) {
   );
 }
 
+/* ─── Vista multimedia para diseñadores ─────────────────────────────── */
+
+function DesignerMediaView({ slug, offerId, form, update }) {
+  const router = useRouter();
+  const [guardando, setGuardando] = useState(false);
+
+  async function guardarImagen() {
+    if (!offerId) return;
+    if (!form.coverImage) {
+      toastError('Seleccioná una imagen antes de guardar.');
+      return;
+    }
+    setGuardando(true);
+    try {
+      const res = await fetch(`/api/ofertas/${offerId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'No se pudo guardar.');
+      toastSuccess('Imagen actualizada correctamente.');
+      router.push('/admin/ofertas');
+      router.refresh();
+    } catch (err) {
+      toastError(err, 'Error al guardar');
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  return (
+    <div className='space-y-6 max-w-xl'>
+      <section>
+        <p className='text-sm text-muted mb-1'>
+          <Link href='/admin/ofertas' className='hover:underline'>Ofertas</Link> / Multimedia
+        </p>
+        <h2 className='text-4xl font-bold'>Editar multimedia</h2>
+        <p className='text-muted text-sm mt-1 font-mono text-xs'>{slug}</p>
+      </section>
+
+      <div className='rounded-2xl border border-default bg-surface p-5 md:p-7 space-y-6'>
+        {!form.coverImage && (
+          <div className='rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300'>
+            Esta oferta aún no tiene imagen de portada. Subí una para que se publique automáticamente.
+          </div>
+        )}
+
+        {/* Portada */}
+        <div className='space-y-2'>
+          <h3 className='text-base font-semibold'>Imagen de portada</h3>
+          <CoverImageInput
+            value={form.coverImage}
+            onChange={(url) => update('coverImage', url)}
+          />
+        </div>
+
+        {/* Galería adicional */}
+        <div className='space-y-2'>
+          <h3 className='text-base font-semibold'>Galería de imágenes</h3>
+          <p className='text-sm text-muted'>Imágenes adicionales que se muestran en la página de la oferta.</p>
+          <GalleryEditor
+            images={form.galleryImages || []}
+            onChange={(imgs) => update('galleryImages', imgs)}
+          />
+        </div>
+
+        <div className='pt-2 border-t border-default flex justify-end'>
+          <Button
+            type='button'
+            isPending={guardando}
+            onClick={guardarImagen}
+            className='h-10 px-5 bg-accent text-white font-semibold text-sm'
+          >
+            {({ isPending }) => (
+              <>
+                {isPending && <Spinner color='current' size='sm' />}
+                {isPending ? 'Guardando...' : 'Guardar imágenes'}
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EditOfferPage() {
   const params = useParams();
   const router = useRouter();
@@ -180,6 +272,14 @@ export default function EditOfferPage() {
   const [guardando, setGuardando] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [showErrors, setShowErrors] = useState(false);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.user) setRole(data.user.role); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!slug) return;
@@ -250,6 +350,18 @@ export default function EditOfferPage() {
       <div className='flex items-center justify-center h-64'>
         <Spinner size='lg' />
       </div>
+    );
+  }
+
+  // Designers only see the multimedia editing view
+  if (role === 'designer') {
+    return (
+      <DesignerMediaView
+        slug={slug}
+        offerId={offerId}
+        form={form}
+        update={(key, value) => setForm((prev) => ({ ...prev, [key]: value }))}
+      />
     );
   }
 
@@ -346,8 +458,15 @@ export default function EditOfferPage() {
                 </Field>
               </div>
             )}
-            <Field label='Imagen de portada (URL)'>
-              <input className='h-10 px-3 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent' value={form.coverImage} onChange={(e) => update('coverImage', e.target.value)} placeholder='https://...' />
+            <Field label='Imagen de portada'>
+              <CoverImageInput value={form.coverImage} onChange={(url) => update('coverImage', url)} />
+            </Field>
+            <Field label='Galería de imágenes'>
+              <p className='text-xs text-muted mb-2'>Imágenes adicionales que se muestran en la página de la oferta.</p>
+              <GalleryEditor
+                images={form.galleryImages || []}
+                onChange={(imgs) => update('galleryImages', imgs)}
+              />
             </Field>
           </div>
         )}

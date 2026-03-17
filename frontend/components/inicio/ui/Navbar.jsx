@@ -12,8 +12,8 @@ const ROLE_LABELS = { admin: 'Administrador', agent: 'Agente', designer: 'Diseñ
 const NAV_LINKS = [
   { name: "Destinos", url: "/destinos" },
   { name: "Ofertas", url: "/ofertas" },
-  { name: "Sobre nosotros", url: "#" },
-  { name: "Contacto", url: "#" },
+  { name: "Sobre nosotros", url: "/nosotros" },
+  { name: "Contacto", url: "/contacto" },
 ];
 
 export default function Navbar() {

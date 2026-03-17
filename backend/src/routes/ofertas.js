@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { db, nextOfferId, uniqueSlug, slugify } from '../store/db.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
+import { createNotification } from '../store/notifications.js';
 
 const router = Router();
 
@@ -34,8 +36,8 @@ router.get('/:slug', async (req, res) => {
   }
 });
 
-// POST /api/ofertas
-router.post('/', async (req, res) => {
+// POST /api/ofertas  (admin y agent únicamente)
+router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
     const body = req.body;
     const offers = await db.offers.read();
@@ -56,6 +58,7 @@ router.post('/', async (req, res) => {
     const now = new Date().toISOString();
     const id = nextOfferId(offers);
     const coverSeed = slugify(`${slug}-${Date.now()}`);
+    const coverImageUrl = String(body.coverImage || '').trim();
 
     const price = Number(body.price || 0);
     const originalPrice = Number(body.originalPrice || 0);
@@ -71,6 +74,7 @@ router.post('/', async (req, res) => {
       id,
       slug,
       title,
+      mediaReady: Boolean(coverImageUrl),
       isSpecialOffer,
       subtitle: String(body.summary || '').trim() || `Experiencia destacada en ${body.destinationCity || destinationCountry}.`,
       location: {
@@ -116,11 +120,18 @@ router.post('/', async (req, res) => {
       images: [
         {
           id: `img-${id}-1`,
-          url: String(body.coverImage || `https://picsum.photos/seed/${coverSeed}/1200/800`),
+          url: coverImageUrl || `https://picsum.photos/seed/${coverSeed}/1200/800`,
           alt: `Vista de ${destinationCountry}`,
           isCover: true,
           order: 0,
         },
+        ...normalizeList(body.galleryImages).map((url, i) => ({
+          id: `img-${id}-${i + 2}`,
+          url: String(url),
+          alt: `Vista de ${destinationCountry}`,
+          isCover: false,
+          order: i + 1,
+        })),
       ],
       highlights: normalizeList(body.highlights).length > 0
         ? normalizeList(body.highlights)
@@ -150,6 +161,20 @@ router.post('/', async (req, res) => {
     };
 
     await db.offers.write([newOffer, ...updatedOffers]);
+
+    // Si la oferta se creó sin imagen, notificar a los diseñadores
+    if (!coverImageUrl) {
+      createNotification({
+        type: 'pending_media',
+        title: 'Nueva oferta pendiente de imagen',
+        body: `La oferta "${newOffer.title}" fue creada y está esperando su imagen de portada.`,
+        forRoles: ['designer'],
+        offerId: newOffer.id,
+        offerSlug: newOffer.slug,
+        offerTitle: newOffer.title,
+      }).catch(() => {});
+    }
+
     res.status(201).json(newOffer);
   } catch (err) {
     console.error('[POST /api/ofertas]', err);
@@ -157,8 +182,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PATCH /api/ofertas/:id
-router.patch('/:id', async (req, res) => {
+// PATCH /api/ofertas/:id  (todos los roles autenticados)
+router.patch('/:id', requireAuth, async (req, res) => {
   try {
     const offers = await db.offers.read();
     const idx = offers.findIndex((o) => o.id === req.params.id);
@@ -250,17 +275,56 @@ router.patch('/:id', async (req, res) => {
       updatedAt: now,
     };
 
-    if (body.coverImage) {
+    const isDesignerMediaUpload =
+      req.user?.role === 'designer' &&
+      Boolean(body.coverImage) &&
+      existing.mediaReady === false;
+
+    const hasCoverChange = Boolean(body.coverImage);
+    const hasGalleryChange = Array.isArray(body.galleryImages);
+
+    if (hasCoverChange || hasGalleryChange) {
+      const coverUrl = body.coverImage || existing.images?.[0]?.url || '';
+      const galleryUrls = hasGalleryChange
+        ? body.galleryImages.map(String).filter(Boolean)
+        : (existing.images?.filter((i) => !i.isCover).map((i) => i.url) || []);
+
       updated.images = [
         {
           id: existing.images?.[0]?.id || `img-${existing.id}-1`,
-          url: String(body.coverImage),
+          url: String(coverUrl),
           alt: `Vista de ${destinationCountry || existing.location.country}`,
           isCover: true,
           order: 0,
         },
-        ...(existing.images?.slice(1) || []),
+        ...galleryUrls.map((url, i) => ({
+          id: existing.images?.[i + 1]?.id || `img-${existing.id}-${i + 2}`,
+          url: String(url),
+          alt: `Vista de ${destinationCountry || existing.location.country}`,
+          isCover: false,
+          order: i + 1,
+        })),
       ];
+
+      if (hasCoverChange) {
+        updated.mediaReady = true;
+        if (isDesignerMediaUpload) {
+          updated.status = 'published';
+          createNotification({
+            type: 'media_uploaded',
+            title: 'Imagen subida por el diseñador',
+            body: `El diseñador subió la imagen para "${updated.title}". La oferta fue publicada automáticamente.`,
+            forRoles: ['admin', 'agent'],
+            offerId: existing.id,
+            offerSlug: existing.slug,
+            offerTitle: updated.title,
+          }).catch(() => {});
+        }
+      } else {
+        updated.mediaReady = existing.mediaReady ?? false;
+      }
+    } else {
+      updated.mediaReady = existing.mediaReady ?? false;
     }
 
     offers[idx] = updated;
@@ -272,8 +336,8 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/ofertas/:id
-router.delete('/:id', async (req, res) => {
+// DELETE /api/ofertas/:id  (admin y agent únicamente)
+router.delete('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
     const offers = await db.offers.read();
     const filtered = offers.filter((o) => o.id !== req.params.id);

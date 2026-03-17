@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Button, Checkbox, NumberField, Spinner } from '@heroui/react';
 import { Minus, Plus } from 'lucide-react';
 import { toastError } from '@/lib/toast';
@@ -10,6 +11,8 @@ import AirlineCombobox from '@/components/ui/airline-combobox';
 import RangeDatePickerField from '@/components/ui/range-date-picker-field';
 import ItemListInput from '@/components/ui/item-list-input';
 import CountryCombobox from '@/components/ui/country-combobox';
+import CoverImageInput from '@/components/ui/cover-image-input';
+import GalleryEditor from '@/components/ui/gallery-editor';
 
 /* ─── Opciones estáticas ─────────────────────────────────────────────── */
 
@@ -95,6 +98,7 @@ const initialForm = {
   notIncludes: ['Propinas', 'Gastos personales'],
   highlights: ['Asistencia local', 'Coordinación integral', 'Experiencia curada'],
   coverImage: '',
+  galleryImages: [],
   hotelName: '',
 };
 
@@ -163,6 +167,14 @@ export default function AdminNewOfferPage() {
   const [guardando, setGuardando] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [showErrors, setShowErrors] = useState(false);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.user) setRole(data.user.role); })
+      .catch(() => {});
+  }, []);
 
   // Cargar borrador guardado al montar
   useEffect(() => {
@@ -238,11 +250,32 @@ export default function AdminNewOfferPage() {
     }
   }
 
+  // Designers are not allowed to create offers
+  if (role === 'designer') {
+    return (
+      <div className='flex flex-col items-center justify-center gap-4 py-20 text-center'>
+        <div className='grid h-14 w-14 place-content-center rounded-2xl bg-rose-100 text-rose-500 dark:bg-rose-900/30'>
+          <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10'/><line x1='12' y1='8' x2='12' y2='12'/><line x1='12' y1='16' x2='12.01' y2='16'/></svg>
+        </div>
+        <div>
+          <h2 className='text-2xl font-bold'>Sin permiso</h2>
+          <p className='text-muted mt-1'>Los diseñadores no pueden crear ofertas. Esa acción corresponde a administradores o agentes.</p>
+        </div>
+        <Link href='/admin/ofertas' className='inline-flex h-10 items-center rounded-xl bg-accent px-5 text-sm font-semibold text-white'>
+          Volver a ofertas
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className='space-y-6 max-w-4xl'>
       {/* Encabezado */}
       <section className='flex flex-col md:flex-row md:items-start md:justify-between gap-3'>
         <div>
+          <p className='text-sm text-muted mb-1'>
+            <Link href='/admin/ofertas' className='hover:underline'>Ofertas</Link> / Nueva
+          </p>
           <h2 className='text-4xl font-bold'>Nueva oferta</h2>
           <p className='text-muted text-sm mt-1'>Completá los datos para publicar una propuesta comercial.</p>
         </div>
@@ -344,12 +377,14 @@ export default function AdminNewOfferPage() {
               </div>
             )}
 
-            <Field label='Imagen de portada (URL)'>
-              <input
-                className='h-10 px-3 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent'
-                value={form.coverImage}
-                onChange={(e) => update('coverImage', e.target.value)}
-                placeholder='https://...'
+            <Field label='Imagen de portada'>
+              <CoverImageInput value={form.coverImage} onChange={(url) => update('coverImage', url)} />
+            </Field>
+            <Field label='Galería de imágenes'>
+              <p className='text-xs text-muted mb-2'>Imágenes adicionales que se muestran en la página de la oferta.</p>
+              <GalleryEditor
+                images={form.galleryImages || []}
+                onChange={(imgs) => update('galleryImages', imgs)}
               />
             </Field>
           </div>

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { db, nextDestinationId, uniqueSlug, slugify } from '../store/db.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -9,6 +10,12 @@ function splitLines(value) {
 
 function splitComma(value) {
   return String(value || '').split(',').map((s) => s.trim()).filter(Boolean);
+}
+
+// Acepta tanto array como string separado por newlines
+function normalizeList(value) {
+  if (Array.isArray(value)) return value.map(String).filter(Boolean);
+  return splitLines(value);
 }
 
 // GET /api/destinos
@@ -33,8 +40,8 @@ router.get('/:slug', async (req, res) => {
   }
 });
 
-// POST /api/destinos
-router.post('/', async (req, res) => {
+// POST /api/destinos  (admin y agent únicamente)
+router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
     const body = req.body;
     const destinations = await db.destinations.read();
@@ -88,7 +95,7 @@ router.post('/', async (req, res) => {
       featuredImage:
         String(body.featuredImage || '').trim() ||
         `https://picsum.photos/seed/${coverSeed}/1200/800`,
-      gallery: splitLines(body.gallery),
+      gallery: normalizeList(body.gallery),
       stats: {
         annualVisitorsMillions: Number(body.annualVisitorsMillions || 0),
         safetyIndex: Math.min(100, Math.max(0, Number(body.safetyIndex || 50))),
@@ -115,8 +122,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PATCH /api/destinos/:id
-router.patch('/:id', async (req, res) => {
+// PATCH /api/destinos/:id  (todos los roles autenticados)
+router.patch('/:id', requireAuth, async (req, res) => {
   try {
     const destinations = await db.destinations.read();
     const idx = destinations.findIndex((d) => d.id === req.params.id);
@@ -158,7 +165,7 @@ router.patch('/:id', async (req, res) => {
       highlights: splitLines(body.highlights).length > 0 ? splitLines(body.highlights) : existing.highlights,
       travelStyles: splitLines(body.travelStyles).length > 0 ? splitLines(body.travelStyles) : existing.travelStyles,
       featuredImage: String(body.featuredImage || existing.featuredImage).trim(),
-      gallery: splitLines(body.gallery).length > 0 ? splitLines(body.gallery) : existing.gallery,
+      gallery: normalizeList(body.gallery).length > 0 ? normalizeList(body.gallery) : existing.gallery,
       stats: {
         annualVisitorsMillions: Number(body.annualVisitorsMillions ?? existing.stats.annualVisitorsMillions),
         safetyIndex: Math.min(100, Math.max(0, Number(body.safetyIndex ?? existing.stats.safetyIndex))),
@@ -184,8 +191,8 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/destinos/:id
-router.delete('/:id', async (req, res) => {
+// DELETE /api/destinos/:id  (admin y agent únicamente)
+router.delete('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
     const destinations = await db.destinations.read();
     const filtered = destinations.filter((d) => d.id !== req.params.id);

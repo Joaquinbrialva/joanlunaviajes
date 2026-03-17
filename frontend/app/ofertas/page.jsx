@@ -1,13 +1,14 @@
 ﻿'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button, Chip, Spinner } from '@heroui/react';
 import { FaStar } from 'react-icons/fa';
 import { LuClock3, LuMapPin, LuSearch, LuSlidersHorizontal, LuX } from 'react-icons/lu';
-import Footer from '@/components/inicio/sections/Footer';
 import HeroSelect from '@/components/ui/hero-select';
+import DatePickerField from '@/components/ui/date-picker-field';
 
 const ITEMS_PER_PAGE = 9;
 
@@ -44,14 +45,24 @@ function getVisiblePages(current, total) {
   return [1, '…', current - 1, current, current + 1, '…', total];
 }
 
-export default function OffersPage() {
+export default function OffersPageWrapper() {
+  return (
+    <Suspense>
+      <OffersPage />
+    </Suspense>
+  );
+}
+
+function OffersPage() {
+  const searchParams = useSearchParams();
   const [offersData, setOffersData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('price-asc');
-  const [durationFilter, setDurationFilter] = useState('all');
+  const [durationFilter, setDurationFilter] = useState(() => searchParams.get('dur') || 'all');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => searchParams.get('q') || '');
+  const [dateFilter, setDateFilter] = useState(() => searchParams.get('date') || '');
   const [page, setPage] = useState(1);
   const [selectedDestinations, setSelectedDestinations] = useState([]);
   const [onlyDirect, setOnlyDirect] = useState(false);
@@ -90,7 +101,7 @@ export default function OffersPage() {
   const parsedMin = minPrice !== '' ? Number(minPrice) : globalMin;
   const parsedMax = maxPrice !== '' ? Number(maxPrice) : globalMax;
 
-  const hasActiveFilters = durationFilter !== 'all' || selectedDestinations.length > 0 || minPrice !== '' || maxPrice !== '' || search !== '' || onlyDirect || onlyDiscount || onlyFeatured;
+  const hasActiveFilters = durationFilter !== 'all' || selectedDestinations.length > 0 || minPrice !== '' || maxPrice !== '' || search !== '' || onlyDirect || onlyDiscount || onlyFeatured || dateFilter !== '';
 
   const activeFilterCount =
     (durationFilter !== 'all' ? 1 : 0) +
@@ -99,10 +110,12 @@ export default function OffersPage() {
     (search ? 1 : 0) +
     (onlyDirect ? 1 : 0) +
     (onlyDiscount ? 1 : 0) +
-    (onlyFeatured ? 1 : 0);
+    (onlyFeatured ? 1 : 0) +
+    (dateFilter ? 1 : 0);
 
   const filteredOffers = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const normalize = (s) => s?.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '') ?? '';
+    const q = normalize(search.trim());
     let next = offersData.filter((offer) => {
       const price = getOfferPrice(offer);
       const destMatch = selectedDestinations.length === 0 || selectedDestinations.includes(offer.location.country);
@@ -110,16 +123,19 @@ export default function OffersPage() {
       const priceMatch = price >= parsedMin && price <= parsedMax;
       const searchMatch =
         q.length === 0 ||
-        offer.title?.toLowerCase().includes(q) ||
-        offer.subtitle?.toLowerCase().includes(q) ||
-        offer.location?.city?.toLowerCase().includes(q) ||
-        offer.location?.country?.toLowerCase().includes(q) ||
-        offer.airline?.name?.toLowerCase().includes(q) ||
-        offer.includes?.some((s) => s.toLowerCase().includes(q));
+        normalize(offer.title).includes(q) ||
+        normalize(offer.subtitle).includes(q) ||
+        normalize(offer.location?.city).includes(q) ||
+        normalize(offer.location?.country).includes(q) ||
+        normalize(offer.airline?.name).includes(q) ||
+        offer.includes?.some((s) => normalize(s).includes(q));
       const directMatch = !onlyDirect || offer.flight?.type === 'direct';
       const discountMatch = !onlyDiscount || (offer.pricing?.discountPercentage > 0);
       const featuredMatch = !onlyFeatured || offer.isFeatured;
-      return destMatch && durMatch && priceMatch && searchMatch && directMatch && discountMatch && featuredMatch;
+      const dateMatch = !dateFilter ||
+        (offer.availability?.startDate && offer.availability?.endDate &&
+          dateFilter >= offer.availability.startDate && dateFilter <= offer.availability.endDate);
+      return destMatch && durMatch && priceMatch && searchMatch && directMatch && discountMatch && featuredMatch && dateMatch;
     });
     return [...next].sort((a, b) => {
       if (sortBy === 'price-asc') return getOfferPrice(a) - getOfferPrice(b);
@@ -129,7 +145,7 @@ export default function OffersPage() {
       if (sortBy === 'duration-desc') return b.duration.days - a.duration.days;
       return 0;
     });
-  }, [durationFilter, parsedMin, parsedMax, selectedDestinations, sortBy, offersData, search, onlyDirect, onlyDiscount, onlyFeatured]);
+  }, [durationFilter, parsedMin, parsedMax, selectedDestinations, sortBy, offersData, search, onlyDirect, onlyDiscount, onlyFeatured, dateFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredOffers.length / ITEMS_PER_PAGE));
   const safePage = Math.min(page, totalPages);
@@ -141,6 +157,7 @@ export default function OffersPage() {
     setMaxPrice('');
     setSelectedDestinations([]);
     setSearch('');
+    setDateFilter('');
     setOnlyDirect(false);
     setOnlyDiscount(false);
     setOnlyFeatured(false);
@@ -163,6 +180,16 @@ export default function OffersPage() {
             <LuX size={11} /> Limpiar
           </button>
         )}
+      </div>
+
+      {/* Fecha de viaje */}
+      <div className='space-y-2'>
+        <p className='text-xs font-semibold uppercase tracking-wider text-muted'>Fecha de viaje</p>
+        <DatePickerField
+          value={dateFilter}
+          onChange={(v) => { setDateFilter(v); setPage(1); }}
+          placeholder='Cualquier fecha'
+        />
       </div>
 
       {/* Duración */}
@@ -367,6 +394,11 @@ export default function OffersPage() {
                   Precio personalizado ✕
                 </Chip>
               )}
+              {dateFilter && (
+                <Chip className='bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6' onClick={() => setDateFilter('')}>
+                  {new Date(dateFilter + 'T00:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })} ✕
+                </Chip>
+              )}
               {onlyDirect && <Chip className='bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6' onClick={() => setOnlyDirect(false)}>Vuelo directo ✕</Chip>}
               {onlyDiscount && <Chip className='bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6' onClick={() => setOnlyDiscount(false)}>Con descuento ✕</Chip>}
               {onlyFeatured && <Chip className='bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6' onClick={() => setOnlyFeatured(false)}>Destacadas ✕</Chip>}
@@ -422,7 +454,6 @@ export default function OffersPage() {
         </main>
       </section>
 
-      <Footer />
     </div >
   );
 }

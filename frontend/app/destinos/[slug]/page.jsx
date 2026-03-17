@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { LuGlobe, LuMapPin, LuWallet } from 'react-icons/lu';
 import { formatCurrency } from '@/util/utils';
-import Footer from '@/components/inicio/sections/Footer';
 import { fetchDestination, fetchDestinations, fetchOffers } from '@/lib/api';
 
 function getOfferPrice(offer) {
@@ -47,7 +46,7 @@ export default async function DestinationDetailPage({ params }) {
     : allOffers.filter((o) => o.isFeatured).slice(0, 3);
 
   return (
-    <div className='space-y-14 pb-12 overflow-x-hidden'>
+    <div className='space-y-14 pb-12'>
       <section className='relative rounded-3xl overflow-hidden min-h-[480px]'>
         <Image src={destination.featuredImage} alt={destination.name} fill className='object-cover' priority />
         <div className='absolute inset-0 bg-gradient-to-b from-black/45 via-black/35 to-black/65' />
@@ -180,7 +179,6 @@ export default async function DestinationDetailPage({ params }) {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 }

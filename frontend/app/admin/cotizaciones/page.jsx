@@ -160,7 +160,7 @@ export default function AdminInquiriesPage() {
         </div>
 
         <Table>
-          <Table.ScrollContainer minWidth={700}>
+          <Table.ScrollContainer style={{ minWidth: 700 }}>
             <Table.Content aria-label='Solicitudes de cotización'>
               <Table.Header>
                 <Table.Column>Fecha</Table.Column>
