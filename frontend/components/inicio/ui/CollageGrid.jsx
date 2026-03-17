@@ -1,97 +1,63 @@
 'use client';
 
-import Image from "next/image";
-import { useMemo } from "react";
-
-function shuffleArray(array) {
-  const newArray = [...array];
-
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-
-  return newArray;
-}
+import Image from 'next/image';
+import Link from 'next/link';
+import { useMemo } from 'react';
+import { LuMapPin } from 'react-icons/lu';
 
 export default function CollageGrid({ destinations = [] }) {
-
-  const processed = useMemo(() => {
-    if (!destinations.length) return [];
-
-    // Prioridad visual: popular o featured primero
+  const items = useMemo(() => {
     const sorted = [...destinations].sort((a, b) => {
-      if (a.isPopular) return -1;
-      if (b.isPopular) return 1;
-      if (a.isFeatured) return -1;
-      if (b.isFeatured) return 1;
+      if (a.isPopular && !b.isPopular) return -1;
+      if (!a.isPopular && b.isPopular) return 1;
+      if (a.isFeatured && !b.isFeatured) return -1;
+      if (!a.isFeatured && b.isFeatured) return 1;
       return 0;
     });
-
-    const shuffledRest = shuffleArray(sorted.slice(1));
-
-    return [sorted[0], ...shuffledRest].slice(0, 4);
+    return sorted.slice(0, 4);
   }, [destinations]);
 
-  if (processed.length < 4) return null;
+  if (!items.length) return null;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[190px] gap-4">
-
-      {/* Imagen grande */}
-      <CollageItem item={processed[0]} large />
-
-      {/* Derecha */}
-      <CollageItem item={processed[1]} />
-      <CollageItem item={processed[2]} />
-      <CollageItem item={processed[3]} wide />
-
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center">
+      {items.map((dest) => (
+        <DestinationCard key={dest.id} destination={dest} />
+      ))}
     </div>
   );
 }
 
-function CollageItem({ item, large = false, wide = false }) {
+function DestinationCard({ destination: dest }) {
   return (
-    <div
-      className={`
-        relative rounded-2xl overflow-hidden
-        group cursor-pointer
-        transition-all duration-500 ease-out
-        animate-fadeIn
-        ${large ? "col-span-2 row-span-2" : ""}
-        ${wide ? "col-span-2" : ""}
-      `}
-    >
-      <Image
-        src={item.featuredImage}
-        alt={item.slug}
-        fill
-        className="
-          object-cover
-          transition-transform duration-700 ease-out
-          group-hover:scale-110
-        "
-      />
-
-      {/* Overlay adaptable a dark mode */}
-      <div className="
-        absolute inset-0
-        bg-linear-to-t
-        from-black/70 via-black/30 to-transparent
-        dark:from-black/80
-      " />
-
-      <div className="absolute bottom-4 left-4 text-white">
-        <h3 className={`font-bold ${large ? "text-2xl" : "text-lg"}`}>
-          {item.name}, {item.country}
-        </h3>
-
-        {item.shortDescription && (large || wide) && (
-          <p className="text-sm opacity-90 mt-1 max-w-xs">
-            {item.shortDescription}
+    <Link href={`/destinos/${dest.slug}`} className="group block w-full max-w-sm">
+      <article className="bg-surface w-full rounded-2xl overflow-hidden flex flex-col shadow-lg transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-xl">
+        <div className="relative">
+          <Image
+            src={dest.featuredImage}
+            alt={dest.name}
+            width={400}
+            height={250}
+            className="w-full h-56 object-cover"
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute bottom-3 left-3 flex items-center gap-1 text-white text-sm font-semibold">
+            <LuMapPin className="h-4 w-4 shrink-0" />
+            {dest.name}, {dest.country}
+          </div>
+          {dest.isPopular && (
+            <span className="absolute top-3 left-3 bg-accent text-white text-xs font-semibold px-3 py-1 rounded-full">
+              Popular
+            </span>
+          )}
+        </div>
+        <div className="p-4 flex flex-col grow">
+          <p className="text-sm text-muted line-clamp-2">{dest.shortDescription}</p>
+          <p className="mt-3 text-xs text-accent font-semibold uppercase tracking-wide group-hover:underline">
+            Explorar destino →
           </p>
-        )}
-      </div>
-    </div>
+        </div>
+      </article>
+    </Link>
   );
 }

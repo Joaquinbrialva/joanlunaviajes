@@ -2,11 +2,10 @@
 
 import { useState } from 'react';
 import { Calendar, Popover } from '@heroui/react';
-import { CalendarGridBody } from 'react-aria-components';
 import { parseDate } from '@internationalized/date';
 import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function DatePickerField({ label, value, onChange }) {
+export default function DatePickerField({ label, value, onChange, placeholder = 'Seleccionar fecha', triggerClassName }) {
   const [open, setOpen] = useState(false);
 
   const calValue = (() => {
@@ -19,7 +18,9 @@ export default function DatePickerField({ label, value, onChange }) {
         month: 'long',
         year: 'numeric',
       })
-    : 'Seleccionar fecha';
+    : placeholder;
+
+  const defaultTriggerClass = 'h-10 px-3 rounded-lg border border-default w-full flex items-center gap-2 text-sm text-left hover:bg-surface-secondary transition-colors';
 
   return (
     <label className='space-y-1 block'>
@@ -28,10 +29,10 @@ export default function DatePickerField({ label, value, onChange }) {
         <Popover.Trigger>
           <button
             type='button'
-            className='h-10 px-3 rounded-lg border border-default w-full flex items-center gap-2 text-sm text-left hover:bg-surface-secondary transition-colors'
+            className={triggerClassName ?? defaultTriggerClass}
           >
-            <CalendarIcon size={14} className='text-muted flex-shrink-0' />
-            <span className={calValue ? '' : 'text-muted'}>{displayLabel}</span>
+            <CalendarIcon size={14} className='flex-shrink-0' />
+            <span className={calValue ? '' : 'opacity-60'}>{displayLabel}</span>
           </button>
         </Popover.Trigger>
         <Popover.Content>
@@ -56,9 +57,9 @@ export default function DatePickerField({ label, value, onChange }) {
                 <Calendar.GridHeader>
                   {(day) => <Calendar.HeaderCell>{day}</Calendar.HeaderCell>}
                 </Calendar.GridHeader>
-                <CalendarGridBody>
+                <Calendar.GridBody>
                   {(date) => <Calendar.Cell date={date} />}
-                </CalendarGridBody>
+                </Calendar.GridBody>
               </Calendar.Grid>
             </Calendar>
           </Popover.Dialog>

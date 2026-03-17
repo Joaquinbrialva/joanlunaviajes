@@ -67,4 +67,46 @@ router.get('/me', requireAuth, async (req, res) => {
   }
 });
 
+// PATCH /api/auth/me
+router.patch('/me', requireAuth, async (req, res) => {
+  try {
+    const { name, email, currentPassword, newPassword } = req.body;
+    const users = await db.users.read();
+    const index = users.findIndex((u) => u.id === req.user.id);
+    if (index === -1) return res.status(404).json({ error: 'Usuario no encontrado.' });
+
+    const user = { ...users[index] };
+
+    if (name !== undefined) {
+      const trimmed = String(name).trim();
+      if (!trimmed) return res.status(400).json({ error: 'El nombre no puede estar vacío.' });
+      user.name = trimmed;
+    }
+
+    if (email !== undefined) {
+      const trimmed = String(email).trim().toLowerCase();
+      if (!trimmed) return res.status(400).json({ error: 'El email no puede estar vacío.' });
+      const taken = users.some((u, i) => i !== index && u.email.toLowerCase() === trimmed);
+      if (taken) return res.status(409).json({ error: 'Ese email ya está en uso.' });
+      user.email = trimmed;
+    }
+
+    if (newPassword) {
+      if (!currentPassword) return res.status(400).json({ error: 'Ingresá tu contraseña actual.' });
+      const valid = await bcrypt.compare(String(currentPassword), user.password);
+      if (!valid) return res.status(401).json({ error: 'Contraseña actual incorrecta.' });
+      if (String(newPassword).length < 6) {
+        return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 6 caracteres.' });
+      }
+      user.password = await bcrypt.hash(String(newPassword), 10);
+    }
+
+    users[index] = user;
+    await db.users.write(users);
+    res.json({ user: sanitizeUser(user) });
+  } catch {
+    res.status(500).json({ error: 'Error al actualizar el perfil.' });
+  }
+});
+
 export default router;

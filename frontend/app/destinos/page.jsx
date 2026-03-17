@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button, Chip, Spinner } from '@heroui/react';
 import { LuGlobe, LuMapPin, LuSearch, LuSlidersHorizontal, LuX } from 'react-icons/lu';
-import Footer from '@/components/inicio/sections/Footer';
 import HeroSelect from '@/components/ui/hero-select';
 
 const ITEMS_PER_PAGE = 9;
@@ -87,15 +86,16 @@ export default function DestinationsPage() {
     (onlySafe ? 1 : 0);
 
   const filteredDestinations = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const normalize = (s) => s?.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '') ?? '';
+    const q = normalize(search.trim());
     let next = destinationsData.filter((d) => {
       const searchMatch =
         q.length === 0 ||
-        d.name?.toLowerCase().includes(q) ||
-        d.country?.toLowerCase().includes(q) ||
-        d.shortDescription?.toLowerCase().includes(q) ||
-        d.continent?.toLowerCase().includes(q) ||
-        normalizeStyles(d.travelStyles).some((s) => s.toLowerCase().includes(q));
+        normalize(d.name).includes(q) ||
+        normalize(d.country).includes(q) ||
+        normalize(d.shortDescription).includes(q) ||
+        normalize(d.continent).includes(q) ||
+        normalizeStyles(d.travelStyles).some((s) => normalize(s).includes(q));
 
       const contMatch = continent === 'all' || d.continent === continent;
 
@@ -415,7 +415,6 @@ export default function DestinationsPage() {
         </main>
       </section>
 
-      <Footer />
     </div >
   );
 }

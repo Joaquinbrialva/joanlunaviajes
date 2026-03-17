@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import HeroSelect from '@/components/ui/hero-select';
-import { AlertDialog, Button, Checkbox, Table, toast } from '@heroui/react';
+import { AlertDialog, Button, toast } from '@heroui/react';
 import { Eye, PenLine, Star, Trash2 } from 'lucide-react';
 import OfferPreviewDrawer from '@/components/admin/offer-preview-drawer';
 import { toastError } from '@/lib/toast';
@@ -31,7 +31,15 @@ export default function AdminOffersPage() {
   const [selected, setSelected] = useState(new Set());
   const [pendingDelete, setPendingDelete] = useState(null);
   const [previewOffer, setPreviewOffer] = useState(null);
+  const [role, setRole] = useState(null);
   const router = useRouter();
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.user) setRole(data.user.role); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -86,14 +94,6 @@ export default function AdminOffersPage() {
   }, [offers, search, status]);
 
   const allRowsSelected = rows.length > 0 && rows.every((offer) => selected.has(offer.id));
-
-  function handleSelectionChange(keys) {
-    if (keys === 'all') {
-      setSelected(new Set(rows.map((offer) => offer.id)));
-      return;
-    }
-    setSelected(new Set([...keys]));
-  }
 
   function executeDelete() {
     if (!pendingDelete) return;
@@ -164,11 +164,17 @@ export default function AdminOffersPage() {
       <section className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
         <div>
           <h2 className='text-4xl font-bold'>Gestion de ofertas</h2>
-          <p className='text-muted'>Administra disponibilidad, precios y estado comercial.</p>
+          <p className='text-muted'>
+            {role === 'designer'
+              ? 'Subí la imagen de portada de las ofertas pendientes.'
+              : 'Administra disponibilidad, precios y estado comercial.'}
+          </p>
         </div>
-        <Link href='/admin/ofertas/nueva' className='inline-flex h-10 items-center justify-center rounded-lg bg-accent px-4 text-sm font-semibold text-white'>
-          + Nueva oferta
-        </Link>
+        {role !== null && role !== 'designer' && (
+          <Link href='/admin/ofertas/nueva' className='inline-flex h-10 items-center justify-center rounded-lg bg-accent px-4 text-sm font-semibold text-white'>
+            + Nueva oferta
+          </Link>
+        )}
       </section>
 
       <section className='space-y-3 rounded-2xl border border-default bg-surface p-4 md:p-5'>
@@ -211,6 +217,17 @@ export default function AdminOffersPage() {
       </section>
 
       <section className='space-y-4 rounded-2xl border border-default bg-surface p-4 md:p-5'>
+        {role !== 'designer' && selected.size > 0 && (
+          <div className='flex items-center gap-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 dark:border-rose-800 dark:bg-rose-900/10'>
+            <span className='text-sm font-medium text-rose-700 dark:text-rose-400'>
+              {selected.size} seleccionada(s)
+            </span>
+            <Button size='sm' variant='danger-soft' color='danger' onPress={() => setPendingDelete({ type: 'batch' })} startContent={<Trash2 size={14} />}>
+              Eliminar seleccionadas
+            </Button>
+          </div>
+        )}
+
         <div className='grid grid-cols-1 gap-3 md:grid-cols-[1fr_220px]'>
           <input
             className='h-10 rounded-lg border border-default bg-surface-secondary px-3 text-sm'
@@ -231,94 +248,92 @@ export default function AdminOffersPage() {
           />
         </div>
 
-        {selected.size > 0 && (
-          <div className='flex items-center gap-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 dark:border-rose-800 dark:bg-rose-900/10'>
-            <span className='text-sm font-medium text-rose-700 dark:text-rose-400'>
-              {selected.size} seleccionada(s)
-            </span>
-            <Button
-              size='sm'
-              variant='danger-soft'
-              color='danger'
-              onPress={() => setPendingDelete({ type: 'batch' })}
-              startContent={<Trash2 size={14} />}
-            >
-              Eliminar seleccionadas
-            </Button>
-          </div>
-        )}
-
-        <Table>
-          <Table.ScrollContainer minWidth={640}>
-            <Table.Content
-              aria-label='Gestion de ofertas'
-              selectionMode='multiple'
-              selectedKeys={selected}
-              onSelectionChange={handleSelectionChange}
-            >
-              <Table.Header>
-                <Table.Column className='w-10'>
-                  <SelectionCheckbox ariaLabel='Seleccionar todas las ofertas' />
-                </Table.Column>
-                <Table.Column isRowHeader>Oferta</Table.Column>
-                <Table.Column>Destino</Table.Column>
-                <Table.Column>Duracion</Table.Column>
-                <Table.Column>Precio</Table.Column>
-                <Table.Column>Estado</Table.Column>
-                <Table.Column>Especial</Table.Column>
-                <Table.Column> </Table.Column>
-              </Table.Header>
-              <Table.Body
-                items={rows}
-                renderEmptyState={() => (
-                  <p className='py-10 text-center text-sm text-muted'>
-                    No hay ofertas que coincidan con la busqueda.
-                  </p>
+        <div className='overflow-x-auto rounded-xl border border-default'>
+          <table className='w-full min-w-[640px] text-sm'>
+            <thead>
+              <tr className='border-b border-default bg-surface-secondary text-left text-xs font-medium text-muted'>
+                {role !== 'designer' && (
+                  <th className='w-10 px-4 py-3'>
+                    <SquareCheckbox
+                      checked={allRowsSelected}
+                      onChange={(v) => setSelected(v ? new Set(rows.map((o) => o.id)) : new Set())}
+                    />
+                  </th>
                 )}
-              >
-                {(offer) => {
-                  const price = getOfferPrice(offer);
-                  const offerStatus = getStatus(offer);
-                  const isSelected = selected.has(offer.id);
-                  return (
-                    <Table.Row
-                      id={offer.id}
-                      className={`transition-colors ${isSelected ? 'bg-orange-100 dark:bg-orange-900/20' : 'hover:bg-zinc-100 dark:hover:bg-white/5'}`}
-                    >
-                      <Table.Cell>
-                        <SelectionCheckbox ariaLabel={`Seleccionar oferta ${offer.title}`} />
-                      </Table.Cell>
-                      <Table.Cell>
-                        <p className='font-semibold'>{offer.title}</p>
-                        <p className='text-xs text-muted'>{offer.id}</p>
-                      </Table.Cell>
-                      <Table.Cell>{offer.location.city}, {offer.location.country}</Table.Cell>
-                      <Table.Cell>{offer.duration.days}d / {offer.duration.nights}n</Table.Cell>
-                      <Table.Cell className='font-medium'>{formatPrice(price, offer.pricing.currency)}</Table.Cell>
-                      <Table.Cell><StatusPill status={offerStatus} /></Table.Cell>
-                      <Table.Cell>
-                        {offer.isSpecialOffer && (
-                          <span className='inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'>
-                            <Star size={10} className='fill-current' /> Especial
-                          </span>
-                        )}
-                      </Table.Cell>
-                      <Table.Cell>
-                        <div className='flex items-center justify-end gap-1'>
-                          <button
-                            onClick={() => setPreviewOffer(offer)}
-                            className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground'
-                            title='Ver resumen'
-                          >
-                            <Eye size={15} />
-                          </button>
-                          <button
-                            onClick={() => router.push(`/admin/ofertas/${offer.slug}/editar`)}
-                            className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground'
-                            title='Editar'
-                          >
-                            <PenLine size={15} />
-                          </button>
+                <th className='px-4 py-3'>Oferta</th>
+                <th className='px-4 py-3'>Destino</th>
+                <th className='px-4 py-3'>Duración</th>
+                <th className='px-4 py-3'>Precio</th>
+                <th className='px-4 py-3'>Estado</th>
+                <th className='px-4 py-3'>Especial</th>
+                <th className='px-4 py-3'>Multimedia</th>
+                <th className='px-4 py-3'></th>
+              </tr>
+            </thead>
+            <tbody className='divide-y divide-default'>
+              {rows.length === 0 ? (
+                <tr>
+                  <td colSpan={role !== 'designer' ? 9 : 8} className='px-4 py-10 text-center text-muted'>
+                    No hay ofertas que coincidan con la búsqueda.
+                  </td>
+                </tr>
+              ) : rows.map((offer) => {
+                const price = getOfferPrice(offer);
+                const offerStatus = getStatus(offer);
+                const isSelected = selected.has(offer.id);
+                return (
+                  <tr key={offer.id} className={`transition-colors ${isSelected ? 'bg-orange-50 dark:bg-orange-900/20' : 'hover:bg-surface-secondary/50'}`}>
+                    {role !== 'designer' && (
+                      <td className='px-4 py-3'>
+                        <SquareCheckbox
+                          checked={isSelected}
+                          onChange={(v) => {
+                            const next = new Set(selected);
+                            v ? next.add(offer.id) : next.delete(offer.id);
+                            setSelected(next);
+                          }}
+                        />
+                      </td>
+                    )}
+                    <td className='px-4 py-3'>
+                      <p className='font-semibold'>{offer.title}</p>
+                      <p className='text-xs text-muted'>{offer.id}</p>
+                    </td>
+                    <td className='px-4 py-3 text-muted'>{offer.location.city}, {offer.location.country}</td>
+                    <td className='px-4 py-3 text-muted'>{offer.duration.days}d / {offer.duration.nights}n</td>
+                    <td className='px-4 py-3 font-medium'>{formatPrice(price, offer.pricing.currency)}</td>
+                    <td className='px-4 py-3'><StatusPill status={offerStatus} /></td>
+                    <td className='px-4 py-3'>
+                      {offer.isSpecialOffer && (
+                        <span className='inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'>
+                          <Star size={10} className='fill-current' /> Especial
+                        </span>
+                      )}
+                    </td>
+                    <td className='px-4 py-3'>
+                      {offer.mediaReady === false && (
+                        <span className='inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'>
+                          Pendiente
+                        </span>
+                      )}
+                    </td>
+                    <td className='px-4 py-3'>
+                      <div className='flex items-center justify-end gap-1'>
+                        <button
+                          onClick={() => setPreviewOffer(offer)}
+                          className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground'
+                          title='Ver resumen'
+                        >
+                          <Eye size={15} />
+                        </button>
+                        <button
+                          onClick={() => router.push(`/admin/ofertas/${offer.slug}/editar`)}
+                          className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground'
+                          title='Editar'
+                        >
+                          <PenLine size={15} />
+                        </button>
+                        {role !== 'designer' && (
                           <button
                             onClick={() => setPendingDelete({ type: 'single', id: offer.id })}
                             className='flex h-8 w-8 items-center justify-center rounded-lg text-rose-500 transition-colors hover:bg-rose-50 dark:hover:bg-rose-900/20'
@@ -326,15 +341,15 @@ export default function AdminOffersPage() {
                           >
                             <Trash2 size={15} />
                           </button>
-                        </div>
-                      </Table.Cell>
-                    </Table.Row>
-                  );
-                }}
-              </Table.Body>
-            </Table.Content>
-          </Table.ScrollContainer>
-        </Table>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   );
@@ -354,13 +369,18 @@ function StatusPill({ status }) {
   );
 }
 
-function SelectionCheckbox({ ariaLabel }) {
+function SquareCheckbox({ checked, onChange }) {
   return (
-    <Checkbox slot='selection' aria-label={ariaLabel} className='inline-flex cursor-pointer items-center'>
-      <Checkbox.Control className='flex h-5 w-5 items-center justify-center rounded-md border border-default bg-surface transition-colors data-selected:border-accent data-selected:bg-accent'>
-        <Checkbox.Indicator className='text-white' />
-      </Checkbox.Control>
-      <Checkbox.Content className='sr-only'>{ariaLabel}</Checkbox.Content>
-    </Checkbox>
+    <label className='inline-flex cursor-pointer'>
+      <input type='checkbox' className='sr-only' checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <span className={`flex h-4 w-4 items-center justify-center rounded-sm border transition-colors ${checked ? 'border-accent bg-accent' : 'border-default bg-surface'}`}>
+        {checked && (
+          <svg width='10' height='8' viewBox='0 0 10 8' fill='none'>
+            <path d='M1 4l3 3 5-6' stroke='white' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />
+          </svg>
+        )}
+      </span>
+    </label>
   );
 }
+

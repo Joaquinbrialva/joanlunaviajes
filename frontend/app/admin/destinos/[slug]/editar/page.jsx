@@ -9,6 +9,8 @@ import { toastError, toastSuccess } from '@/lib/toast';
 import HeroSelect from '@/components/ui/hero-select';
 import ItemListInput from '@/components/ui/item-list-input';
 import CountryCombobox from '@/components/ui/country-combobox';
+import CoverImageInput from '@/components/ui/cover-image-input';
+import GalleryEditor from '@/components/ui/gallery-editor';
 
 /* ─── Opciones estáticas ─────────────────────────────────────────────── */
 
@@ -166,6 +168,14 @@ export default function EditDestinationPage() {
   const [guardando, setGuardando] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [showErrors, setShowErrors] = useState(false);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.user) setRole(data.user.role); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!slug) return;
@@ -223,6 +233,17 @@ export default function EditDestinationPage() {
       <div className='flex items-center justify-center h-64'>
         <Spinner size='lg' />
       </div>
+    );
+  }
+
+  if (role === 'designer') {
+    return (
+      <DesignerMediaViewDestino
+        slug={slug}
+        destId={destId}
+        form={form}
+        update={(key, value) => setForm((prev) => ({ ...prev, [key]: value }))}
+      />
     );
   }
 
@@ -303,13 +324,8 @@ export default function EditDestinationPage() {
                 />
               </Field>
 
-              <Field label='Imagen destacada (URL)'>
-                <input
-                  className='h-10 px-3 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent'
-                  value={form.featuredImage}
-                  onChange={(e) => update('featuredImage', e.target.value)}
-                  placeholder='https://...'
-                />
+              <Field label='Imagen destacada'>
+                <CoverImageInput value={form.featuredImage} onChange={(url) => update('featuredImage', url)} />
               </Field>
             </div>
           </div>
@@ -438,11 +454,11 @@ export default function EditDestinationPage() {
               />
             </div>
 
-            <Field label='URLs galería (una por línea)'>
-              <textarea
-                className='min-h-24 px-3 py-2 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent resize-y'
-                value={form.gallery}
-                onChange={(e) => update('gallery', e.target.value)}
+            <Field label='Galería de imágenes'>
+              <p className='text-xs text-muted mb-2'>Imágenes adicionales que se muestran en la página del destino.</p>
+              <GalleryEditor
+                images={form.gallery ? form.gallery.split('\n').map((s) => s.trim()).filter(Boolean) : []}
+                onChange={(arr) => update('gallery', arr.join('\n'))}
               />
             </Field>
           </div>
@@ -551,6 +567,95 @@ export default function EditDestinationPage() {
           )}
         </div>
       </section>
+    </div>
+  );
+}
+
+/* ─── Vista multimedia para diseñadores ─────────────────────────────── */
+
+function DesignerMediaViewDestino({ slug, destId, form, update }) {
+  const router = useRouter();
+  const [guardando, setGuardando] = useState(false);
+
+  // gallery como array derivado del string newline-separated del form
+  const galleryArray = form.gallery
+    ? form.gallery.split('\n').map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  function setGalleryArray(arr) {
+    update('gallery', arr.join('\n'));
+  }
+
+  async function guardarImagenes() {
+    if (!destId) return;
+    setGuardando(true);
+    try {
+      const res = await fetch(`/api/destinos/${destId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          gallery: galleryArray, // enviar como array para que normalizeList lo acepte
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'No se pudo guardar.');
+      toastSuccess('Imágenes actualizadas correctamente.');
+      router.push('/admin/destinos');
+      router.refresh();
+    } catch (err) {
+      toastError(err, 'Error al guardar');
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  return (
+    <div className='space-y-6 max-w-xl'>
+      <section>
+        <p className='text-sm text-muted mb-1'>
+          <Link href='/admin/destinos' className='hover:underline'>Destinos</Link> / Multimedia
+        </p>
+        <h2 className='text-4xl font-bold'>Editar multimedia</h2>
+        <p className='text-muted text-sm mt-1 font-mono text-xs'>{slug}</p>
+      </section>
+
+      <div className='rounded-2xl border border-default bg-surface p-5 md:p-7 space-y-6'>
+        {/* Imagen destacada */}
+        <div className='space-y-2'>
+          <h3 className='text-base font-semibold'>Imagen destacada (portada)</h3>
+          <CoverImageInput
+            value={form.featuredImage}
+            onChange={(url) => update('featuredImage', url)}
+          />
+        </div>
+
+        {/* Galería */}
+        <div className='space-y-2'>
+          <h3 className='text-base font-semibold'>Galería de imágenes</h3>
+          <p className='text-sm text-muted'>Imágenes adicionales del destino.</p>
+          <GalleryEditor
+            images={galleryArray}
+            onChange={setGalleryArray}
+          />
+        </div>
+
+        <div className='pt-2 border-t border-default flex justify-end'>
+          <Button
+            type='button'
+            isPending={guardando}
+            onClick={guardarImagenes}
+            className='h-10 px-5 bg-accent text-white font-semibold text-sm'
+          >
+            {({ isPending }) => (
+              <>
+                {isPending && <Spinner color='current' size='sm' />}
+                {isPending ? 'Guardando...' : 'Guardar imágenes'}
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
