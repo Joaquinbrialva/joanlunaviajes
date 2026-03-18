@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { db, nextDestinationId, uniqueSlug, slugify } from '../store/db.js';
+import { prisma } from '../store/prisma.js';
+import { slugify, uniqueSlug } from '../store/slugify.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = Router();
@@ -12,7 +13,6 @@ function splitComma(value) {
   return String(value || '').split(',').map((s) => s.trim()).filter(Boolean);
 }
 
-// Acepta tanto array como string separado por newlines
 function normalizeList(value) {
   if (Array.isArray(value)) return value.map(String).filter(Boolean);
   return splitLines(value);
@@ -21,7 +21,7 @@ function normalizeList(value) {
 // GET /api/destinos
 router.get('/', async (req, res) => {
   try {
-    const destinations = await db.destinations.read();
+    const destinations = await prisma.destination.findMany({ orderBy: { createdAt: 'desc' } });
     res.json(destinations);
   } catch {
     res.status(500).json({ error: 'No se pudieron obtener los destinos.' });
@@ -31,8 +31,7 @@ router.get('/', async (req, res) => {
 // GET /api/destinos/:slug
 router.get('/:slug', async (req, res) => {
   try {
-    const destinations = await db.destinations.read();
-    const destination = destinations.find((d) => d.slug === req.params.slug);
+    const destination = await prisma.destination.findUnique({ where: { slug: req.params.slug } });
     if (!destination) return res.status(404).json({ error: 'Destino no encontrado.' });
     res.json(destination);
   } catch {
@@ -44,8 +43,6 @@ router.get('/:slug', async (req, res) => {
 router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
     const body = req.body;
-    const destinations = await db.destinations.read();
-
     const name = String(body.name || '').trim();
     const country = String(body.country || '').trim();
 
@@ -53,20 +50,13 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       return res.status(400).json({ error: 'Completá nombre y país del destino.' });
     }
 
-    const existingSlugs = new Set(destinations.map((d) => d.slug));
+    const existingSlugRows = await prisma.destination.findMany({ select: { slug: true } });
+    const existingSlugs = new Set(existingSlugRows.map((d) => d.slug));
     const slug = uniqueSlug(body.slug || `${name}-${country}`, existingSlugs);
-    const id = nextDestinationId(destinations);
-    const now = new Date().toISOString();
     const coverSeed = slugify(`${slug}-${Date.now()}`);
-
     const isRecommended = Boolean(body.isRecommended);
-    let updatedDestinations = destinations;
-    if (isRecommended) {
-      updatedDestinations = destinations.map((d) => ({ ...d, isRecommended: false }));
-    }
 
-    const newDestination = {
-      id,
+    const data = {
       slug,
       name,
       country,
@@ -111,11 +101,16 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       isFeatured: Boolean(body.isFeatured),
       isRecommended,
       status: String(body.status || 'draft'),
-      createdAt: now,
-      updatedAt: now,
     };
 
-    await db.destinations.write([newDestination, ...updatedDestinations]);
+    let newDestination;
+    await prisma.$transaction(async (tx) => {
+      if (isRecommended) {
+        await tx.destination.updateMany({ data: { isRecommended: false } });
+      }
+      newDestination = await tx.destination.create({ data });
+    });
+
     res.status(201).json(newDestination);
   } catch {
     res.status(500).json({ error: 'No se pudo guardar el destino.' });
@@ -125,23 +120,13 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
 // PATCH /api/destinos/:id  (todos los roles autenticados)
 router.patch('/:id', requireAuth, async (req, res) => {
   try {
-    const destinations = await db.destinations.read();
-    const idx = destinations.findIndex((d) => d.id === req.params.id);
-    if (idx === -1) return res.status(404).json({ error: 'Destino no encontrado.' });
+    const existing = await prisma.destination.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'Destino no encontrado.' });
 
-    const existing = destinations[idx];
     const body = req.body;
-    const now = new Date().toISOString();
-
     const isRecommended = Boolean(body.isRecommended);
-    if (isRecommended) {
-      for (let i = 0; i < destinations.length; i++) {
-        if (destinations[i].id !== req.params.id) destinations[i] = { ...destinations[i], isRecommended: false };
-      }
-    }
 
-    const updated = {
-      ...existing,
+    const updateData = {
       name: String(body.name || existing.name).trim(),
       country: String(body.country || existing.country).trim(),
       continent: String(body.continent || existing.continent),
@@ -179,11 +164,16 @@ router.patch('/:id', requireAuth, async (req, res) => {
       isFeatured: Boolean(body.isFeatured),
       isRecommended,
       status: String(body.status || existing.status),
-      updatedAt: now,
     };
 
-    destinations[idx] = updated;
-    await db.destinations.write(destinations);
+    let updated;
+    await prisma.$transaction(async (tx) => {
+      if (isRecommended) {
+        await tx.destination.updateMany({ where: { id: { not: req.params.id } }, data: { isRecommended: false } });
+      }
+      updated = await tx.destination.update({ where: { id: req.params.id }, data: updateData });
+    });
+
     res.json(updated);
   } catch (err) {
     console.error('[PATCH /api/destinos]', err);
@@ -194,14 +184,10 @@ router.patch('/:id', requireAuth, async (req, res) => {
 // DELETE /api/destinos/:id  (admin y agent únicamente)
 router.delete('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
-    const destinations = await db.destinations.read();
-    const filtered = destinations.filter((d) => d.id !== req.params.id);
-    if (filtered.length === destinations.length) {
-      return res.status(404).json({ error: 'Destino no encontrado.' });
-    }
-    await db.destinations.write(filtered);
+    await prisma.destination.delete({ where: { id: req.params.id } });
     res.status(204).send();
-  } catch {
+  } catch (err) {
+    if (err.code === 'P2025') return res.status(404).json({ error: 'Destino no encontrado.' });
     res.status(500).json({ error: 'No se pudo eliminar el destino.' });
   }
 });

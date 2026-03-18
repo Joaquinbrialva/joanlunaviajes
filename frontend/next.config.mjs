@@ -17,6 +17,10 @@ const nextConfig = {
 				hostname: 'content.airhex.com',
 			},
 			{
+				protocol: 'https',
+				hostname: '*.supabase.co',
+			},
+			{
 				protocol: 'http',
 				hostname: 'localhost',
 			},
@@ -27,10 +31,6 @@ const nextConfig = {
 			{
 				source: '/api/:path*',
 				destination: `${BACKEND_URL}/api/:path*`,
-			},
-			{
-				source: '/uploads/:path*',
-				destination: `${BACKEND_URL}/uploads/:path*`,
 			},
 		];
 	},

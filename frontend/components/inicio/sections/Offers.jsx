@@ -29,11 +29,18 @@ export default function Offers() {
           </Button>
         </Link>
       </div>
-      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center'>
-        {offers.map((offer) => (
-          <Card key={offer.id} {...offer} />
-        ))}
-      </div>
+      {offers.length === 0 ? (
+        <div className='flex flex-col items-center gap-3 py-16 text-center rounded-2xl border border-dashed border-default'>
+          <p className='font-semibold text-foreground'>Próximamente nuevas ofertas</p>
+          <p className='text-sm text-muted'>Estamos preparando paquetes exclusivos para vos. Volvé pronto.</p>
+        </div>
+      ) : (
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center'>
+          {offers.map((offer) => (
+            <Card key={offer.id} {...offer} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -27,11 +27,18 @@ export function middleware(request) {
     }
   }
 
-  // Si ya está logueado, no mostrar /login
-  if (pathname === '/login' && token) {
+  // Proteger /cuenta — requiere login
+  if (pathname.startsWith('/cuenta')) {
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
+  // Si ya está logueado, no mostrar /login ni /registro
+  if ((pathname === '/login' || pathname === '/registro') && token) {
     const payload = parseTokenPayload(token);
     if (payload) {
-      const dest = STAFF_ROLES.includes(payload.role) ? '/admin' : '/';
+      const dest = STAFF_ROLES.includes(payload.role) ? '/admin' : '/cuenta';
       return NextResponse.redirect(new URL(dest, request.url));
     }
   }
@@ -40,5 +47,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/login'],
+  matcher: ['/admin/:path*', '/cuenta/:path*', '/login', '/registro'],
 };

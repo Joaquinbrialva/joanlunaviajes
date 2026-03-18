@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import HeroSelect from '@/components/ui/hero-select';
 import { AlertDialog, Button, toast } from '@heroui/react';
-import { Eye, PenLine, Star, Trash2 } from 'lucide-react';
+import { Eye, PenLine, Star, Trash2, ClipboardList } from 'lucide-react';
 import OfferPreviewDrawer from '@/components/admin/offer-preview-drawer';
 import { toastError } from '@/lib/toast';
 
@@ -273,8 +273,16 @@ export default function AdminOffersPage() {
             <tbody className='divide-y divide-default'>
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={role !== 'designer' ? 9 : 8} className='px-4 py-10 text-center text-muted'>
-                    No hay ofertas que coincidan con la búsqueda.
+                  <td colSpan={role !== 'designer' ? 9 : 8} className='px-4 py-12 text-center'>
+                    {offers.length === 0 ? (
+                      <div className='flex flex-col items-center gap-2'>
+                        <ClipboardList className='h-9 w-9 text-muted/40' />
+                        <p className='font-semibold text-foreground'>Sin ofertas todavía</p>
+                        <p className='text-sm text-muted'>Creá la primera oferta para que aparezca aquí.</p>
+                      </div>
+                    ) : (
+                      <p className='text-muted'>No hay ofertas que coincidan con la búsqueda.</p>
+                    )}
                   </td>
                 </tr>
               ) : rows.map((offer) => {

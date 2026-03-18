@@ -9,8 +9,8 @@ const INFO_ITEMS = [
   {
     Icon: LuPhone,
     label: 'Teléfono',
-    value: '+54 11 4567-8901',
-    href: 'tel:+541145678901',
+    value: '011 5813-9420',
+    href: 'tel:+541158139420',
   },
   {
     Icon: LuMail,
@@ -21,8 +21,8 @@ const INFO_ITEMS = [
   {
     Icon: LuMapPin,
     label: 'Dirección',
-    value: 'Av. Corrientes 1234, CABA, Argentina',
-    href: null,
+    value: 'Av. Corrientes 2174 Local 192, CABA',
+    href: 'https://maps.google.com/?q=Av.+Corrientes+2174+Local+192,+Buenos+Aires',
   },
   {
     Icon: LuClock,
@@ -246,21 +246,27 @@ export default function ContactoPage() {
             <p className='text-xs text-muted font-medium uppercase tracking-wide mb-3'>Seguinos</p>
             <div className='flex gap-3'>
               <a
-                href='#'
+                href='https://wa.me/541158139420'
+                target='_blank'
+                rel='noopener noreferrer'
                 className='flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary border border-default text-slate-600 dark:text-gray-300 hover:text-accent hover:border-accent/40 transition-colors'
                 aria-label='WhatsApp'
               >
                 <FaWhatsapp size={18} />
               </a>
               <a
-                href='#'
+                href='https://www.instagram.com/p/DNOOawNOtbG/'
+                target='_blank'
+                rel='noopener noreferrer'
                 className='flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary border border-default text-slate-600 dark:text-gray-300 hover:text-accent hover:border-accent/40 transition-colors'
                 aria-label='Instagram'
               >
                 <FaInstagram size={18} />
               </a>
               <a
-                href='#'
+                href='https://www.facebook.com/JoanLunaViajes/'
+                target='_blank'
+                rel='noopener noreferrer'
                 className='flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary border border-default text-slate-600 dark:text-gray-300 hover:text-accent hover:border-accent/40 transition-colors'
                 aria-label='Facebook'
               >
@@ -269,13 +275,17 @@ export default function ContactoPage() {
             </div>
           </div>
 
-          {/* Mapa placeholder */}
-          <div className='rounded-2xl overflow-hidden border border-default bg-surface-secondary h-48 flex items-center justify-center'>
-            <div className='text-center'>
-              <LuMapPin className='h-8 w-8 text-muted mx-auto mb-2' />
-              <p className='text-sm text-muted'>Av. Corrientes 1234</p>
-              <p className='text-xs text-muted'>CABA, Argentina</p>
-            </div>
+          {/* Mapa */}
+          <div className='rounded-2xl overflow-hidden border border-default'>
+            <iframe
+              src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3283.9685189677566!2d-58.40033972447615!3d-34.60495755756325!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccaeb00b32c33%3A0x7398571e0444cb83!2sJOANLUNA!5e0!3m2!1ses-419!2sar!4v1773798013399!5m2!1ses-419!2sar'
+              width='100%'
+              height='220'
+              style={{ border: 0, display: 'block' }}
+              allowFullScreen
+              loading='lazy'
+              referrerPolicy='no-referrer-when-downgrade'
+            />
           </div>
         </div>
       </section>

@@ -32,6 +32,33 @@ function formatUSD(value) {
   }).format(value);
 }
 
+function calcGrowth(items) {
+  const now = Date.now();
+  const month = 30 * 24 * 60 * 60 * 1000;
+  const current = items.filter((i) => now - new Date(i.createdAt).getTime() < month).length;
+  const prev = items.filter((i) => {
+    const age = now - new Date(i.createdAt).getTime();
+    return age >= month && age < month * 2;
+  }).length;
+  if (prev === 0) return current > 0 ? '+100%' : null;
+  const pct = Math.round(((current - prev) / prev) * 100);
+  return pct >= 0 ? `+${pct}%` : `${pct}%`;
+}
+
+function calcRevenueGrowth(offers) {
+  const now = Date.now();
+  const month = 30 * 24 * 60 * 60 * 1000;
+  const sum = (list) => list.reduce((acc, o) => acc + getOfferPrice(o), 0);
+  const current = sum(offers.filter((o) => now - new Date(o.createdAt).getTime() < month));
+  const prev = sum(offers.filter((o) => {
+    const age = now - new Date(o.createdAt).getTime();
+    return age >= month && age < month * 2;
+  }));
+  if (prev === 0) return current > 0 ? '+100%' : null;
+  const pct = Math.round(((current - prev) / prev) * 100);
+  return pct >= 0 ? `+${pct}%` : `${pct}%`;
+}
+
 function timeAgo(dateStr) {
   if (!dateStr) return '—';
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -129,10 +156,10 @@ function AdminAgentDashboard({ offers, destinations, inquiries }) {
       )}
 
       <section className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4'>
-        <StatCard title='Ofertas activas' value={offers.length} icon={<LuClipboardList />} growth='+5.2%' />
-        <StatCard title='Destinos' value={destinations.length} icon={<LuGlobe />} growth='+3.1%' />
-        <StatCard title='Cotizaciones' value={inquiries.length} icon={<LuMessageSquare />} growth='+12.5%' />
-        <StatCard title='Ingresos estimados' value={formatUSD(monthlyRevenue)} icon={<LuTrendingUp />} growth='+8.4%' />
+        <StatCard title='Ofertas activas' value={offers.length} icon={<LuClipboardList />} growth={calcGrowth(offers)} />
+        <StatCard title='Destinos' value={destinations.length} icon={<LuGlobe />} growth={calcGrowth(destinations)} />
+        <StatCard title='Cotizaciones' value={inquiries.length} icon={<LuMessageSquare />} growth={calcGrowth(inquiries)} />
+        <StatCard title='Ingresos estimados' value={formatUSD(monthlyRevenue)} icon={<LuTrendingUp />} growth={calcRevenueGrowth(offers)} />
       </section>
 
       <section className='rounded-2xl border border-default bg-surface overflow-hidden'>
@@ -145,36 +172,44 @@ function AdminAgentDashboard({ offers, destinations, inquiries }) {
             Ver todas
           </Link>
         </div>
-        <div className='overflow-x-auto'>
-          <table className='w-full text-sm'>
-            <thead className='bg-surface-secondary text-muted'>
-              <tr>
-                <th className='text-left px-4 py-3 font-semibold'>Cliente</th>
-                <th className='text-left px-4 py-3 font-semibold'>Solicitud</th>
-                <th className='text-left px-4 py-3 font-semibold'>Viajeros</th>
-                <th className='text-left px-4 py-3 font-semibold'>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {latestInquiries.map((item) => (
-                <tr key={item.id} className='border-t border-default'>
-                  <td className='px-4 py-3'>
-                    <p className='font-semibold'>{item.name}</p>
-                    <p className='text-muted text-xs'>{item.email}</p>
-                  </td>
-                  <td className='px-4 py-3'>
-                    <p>{item.requestTitle}</p>
-                    <p className='text-muted text-xs'>{item.requestMeta}</p>
-                  </td>
-                  <td className='px-4 py-3'>{item.passengers ?? '—'}</td>
-                  <td className='px-4 py-3'>
-                    <StatusPill status={item.status} />
-                  </td>
+        {latestInquiries.length === 0 ? (
+          <div className='flex flex-col items-center gap-3 py-12 text-center'>
+            <LuMessageSquare className='h-10 w-10 text-muted/40' />
+            <p className='font-semibold text-foreground'>Sin cotizaciones todavía</p>
+            <p className='text-sm text-muted'>Cuando lleguen solicitudes de clientes, aparecerán aquí.</p>
+          </div>
+        ) : (
+          <div className='overflow-x-auto'>
+            <table className='w-full text-sm'>
+              <thead className='bg-surface-secondary text-muted'>
+                <tr>
+                  <th className='text-left px-4 py-3 font-semibold'>Cliente</th>
+                  <th className='text-left px-4 py-3 font-semibold'>Solicitud</th>
+                  <th className='text-left px-4 py-3 font-semibold'>Viajeros</th>
+                  <th className='text-left px-4 py-3 font-semibold'>Estado</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {latestInquiries.map((item) => (
+                  <tr key={item.id} className='border-t border-default'>
+                    <td className='px-4 py-3'>
+                      <p className='font-semibold'>{item.name}</p>
+                      <p className='text-muted text-xs'>{item.email}</p>
+                    </td>
+                    <td className='px-4 py-3'>
+                      <p>{item.requestTitle}</p>
+                      <p className='text-muted text-xs'>{item.requestMeta}</p>
+                    </td>
+                    <td className='px-4 py-3'>{item.passengers ?? '—'}</td>
+                    <td className='px-4 py-3'>
+                      <StatusPill status={item.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </div>
   );
@@ -313,15 +348,22 @@ function DesignerDashboard({ user, offers }) {
 /* ─── Componentes compartidos ────────────────────────────────────────── */
 
 function StatCard({ title, value, icon, growth }) {
+  const isNegative = typeof growth === 'string' && growth.startsWith('-');
   return (
     <article className='rounded-2xl border border-default bg-surface p-4 space-y-3'>
       <div className='flex items-center justify-between'>
         <span className='h-9 w-9 rounded-lg bg-surface-secondary grid place-content-center text-accent'>
           {icon}
         </span>
-        <span className='text-xs font-semibold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-1 rounded-full'>
-          {growth}
-        </span>
+        {growth != null && (
+          <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+            isNegative
+              ? 'text-rose-600 bg-rose-100 dark:bg-rose-900/30'
+              : 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30'
+          }`}>
+            {growth}
+          </span>
+        )}
       </div>
       <p className='text-sm text-muted'>{title}</p>
       <p className='text-4xl font-bold'>{value}</p>

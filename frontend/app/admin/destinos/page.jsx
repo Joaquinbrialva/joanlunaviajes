@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import HeroSelect from '@/components/ui/hero-select';
 import { AlertDialog, Button, toast } from '@heroui/react';
-import { Eye, PenLine, Trash2 } from 'lucide-react';
+import { Eye, PenLine, Trash2, Globe } from 'lucide-react';
 import DestinationPreviewDrawer from '@/components/admin/destination-preview-drawer';
 import { toastError } from '@/lib/toast';
 
@@ -191,8 +191,16 @@ export default function AdminDestinationsPage() {
             <tbody className='divide-y divide-default'>
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={!isDesigner ? 7 : 6} className='px-4 py-10 text-center text-muted'>
-                    No hay destinos que coincidan con la búsqueda.
+                  <td colSpan={!isDesigner ? 7 : 6} className='px-4 py-12 text-center'>
+                    {destinations.length === 0 ? (
+                      <div className='flex flex-col items-center gap-2'>
+                        <Globe className='h-9 w-9 text-muted/40' />
+                        <p className='font-semibold text-foreground'>Sin destinos todavía</p>
+                        <p className='text-sm text-muted'>Creá el primer destino para que aparezca aquí.</p>
+                      </div>
+                    ) : (
+                      <p className='text-muted'>No hay destinos que coincidan con la búsqueda.</p>
+                    )}
                   </td>
                 </tr>
               ) : rows.map((destination) => {

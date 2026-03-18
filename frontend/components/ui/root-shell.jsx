@@ -13,9 +13,9 @@ export default function RootShell({ children }) {
   }
 
   return (
-    <div className='mt-20 space-y-4'>
+    <div>
       <Navbar />
-      <div className='mx-auto max-w-7xl px-4'>{children}</div>
+      <div className='mx-auto max-w-7xl px-4 pt-[68px]'>{children}</div>
       <Footer />
     </div>
   );
