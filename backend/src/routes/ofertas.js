@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { db, nextOfferId, uniqueSlug, slugify } from '../store/db.js';
+import { prisma } from '../store/prisma.js';
+import { slugify, uniqueSlug } from '../store/slugify.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { createNotification } from '../store/notifications.js';
 
@@ -17,7 +18,7 @@ function normalizeList(value) {
 // GET /api/ofertas
 router.get('/', async (req, res) => {
   try {
-    const offers = await db.offers.read();
+    const offers = await prisma.offer.findMany({ orderBy: { createdAt: 'desc' } });
     res.json(offers);
   } catch {
     res.status(500).json({ error: 'No se pudieron obtener las ofertas.' });
@@ -27,8 +28,7 @@ router.get('/', async (req, res) => {
 // GET /api/ofertas/:slug
 router.get('/:slug', async (req, res) => {
   try {
-    const offers = await db.offers.read();
-    const offer = offers.find((o) => o.slug === req.params.slug);
+    const offer = await prisma.offer.findUnique({ where: { slug: req.params.slug } });
     if (!offer) return res.status(404).json({ error: 'Oferta no encontrada.' });
     res.json(offer);
   } catch {
@@ -40,7 +40,6 @@ router.get('/:slug', async (req, res) => {
 router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
     const body = req.body;
-    const offers = await db.offers.read();
 
     const title = String(body.title || '').trim();
     const isMulti = String(body.tripType || '') === 'multi';
@@ -50,28 +49,23 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       return res.status(400).json({ error: 'Completá título y país de destino.' });
     }
 
-    const existingSlugs = new Set(offers.map((o) => o.slug));
+    const existingSlugRows = await prisma.offer.findMany({ select: { slug: true } });
+    const existingSlugs = new Set(existingSlugRows.map((o) => o.slug));
     const slug = uniqueSlug(
       body.slug || `${title} ${body.destinationCity || ''} ${destinationCountry}`,
       existingSlugs
     );
-    const now = new Date().toISOString();
-    const id = nextOfferId(offers);
+
     const coverSeed = slugify(`${slug}-${Date.now()}`);
     const coverImageUrl = String(body.coverImage || '').trim();
+    const imgBase = `img-${Date.now()}`;
 
     const price = Number(body.price || 0);
     const originalPrice = Number(body.originalPrice || 0);
     const hasDiscount = originalPrice > price && price > 0;
-
     const isSpecialOffer = Boolean(body.isSpecialOffer);
-    let updatedOffers = offers;
-    if (isSpecialOffer) {
-      updatedOffers = offers.map((o) => ({ ...o, isSpecialOffer: false }));
-    }
 
-    const newOffer = {
-      id,
+    const data = {
       slug,
       title,
       mediaReady: Boolean(coverImageUrl),
@@ -104,8 +98,8 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
         installments: { available: false },
       },
       availability: {
-        startDate: String(body.startDate || now),
-        endDate: String(body.endDate || now),
+        startDate: String(body.startDate || new Date().toISOString()),
+        endDate: String(body.endDate || new Date().toISOString()),
         limitedSpots: Number(body.seats || 0) <= 5,
         remainingSpots: Math.max(1, Number(body.seats || 1)),
       },
@@ -119,14 +113,14 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       notIncludes: normalizeList(body.notIncludes),
       images: [
         {
-          id: `img-${id}-1`,
+          id: `${imgBase}-1`,
           url: coverImageUrl || `https://picsum.photos/seed/${coverSeed}/1200/800`,
           alt: `Vista de ${destinationCountry}`,
           isCover: true,
           order: 0,
         },
         ...normalizeList(body.galleryImages).map((url, i) => ({
-          id: `img-${id}-${i + 2}`,
+          id: `${imgBase}-${i + 2}`,
           url: String(url),
           alt: `Vista de ${destinationCountry}`,
           isCover: false,
@@ -145,9 +139,7 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
         name: String(body.airline || '').trim(),
         iata: String(body.airlineIata || '').trim(),
       },
-      flight: {
-        type: String(body.flightType || 'direct'),
-      },
+      flight: { type: String(body.flightType || 'direct') },
       luggage: {
         personal: body.luggagePersonal !== false,
         carryOn: body.luggageCarryOn !== false,
@@ -156,13 +148,16 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       status: ['draft', 'published'].includes(body.status) ? body.status : 'draft',
       isFeatured: Boolean(body.featured),
       isPopular: false,
-      createdAt: now,
-      updatedAt: now,
     };
 
-    await db.offers.write([newOffer, ...updatedOffers]);
+    let newOffer;
+    await prisma.$transaction(async (tx) => {
+      if (isSpecialOffer) {
+        await tx.offer.updateMany({ data: { isSpecialOffer: false } });
+      }
+      newOffer = await tx.offer.create({ data });
+    });
 
-    // Si la oferta se creó sin imagen, notificar a los diseñadores
     if (!coverImageUrl) {
       createNotification({
         type: 'pending_media',
@@ -185,11 +180,9 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
 // PATCH /api/ofertas/:id  (todos los roles autenticados)
 router.patch('/:id', requireAuth, async (req, res) => {
   try {
-    const offers = await db.offers.read();
-    const idx = offers.findIndex((o) => o.id === req.params.id);
-    if (idx === -1) return res.status(404).json({ error: 'Oferta no encontrada.' });
+    const existing = await prisma.offer.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'Oferta no encontrada.' });
 
-    const existing = offers[idx];
     const body = req.body;
     const title = String(body.title || '').trim();
     const isMulti = String(body.tripType || '') === 'multi';
@@ -199,20 +192,49 @@ router.patch('/:id', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Completá título y país de destino.' });
     }
 
-    const now = new Date().toISOString();
     const price = Number(body.price || 0);
     const originalPrice = Number(body.originalPrice || 0);
     const hasDiscount = originalPrice > price && price > 0;
-
     const isSpecialOffer = Boolean(body.isSpecialOffer);
-    if (isSpecialOffer) {
-      for (let i = 0; i < offers.length; i++) {
-        if (offers[i].id !== req.params.id) offers[i] = { ...offers[i], isSpecialOffer: false };
-      }
+
+    const isDesignerMediaUpload =
+      req.user?.role === 'designer' &&
+      Boolean(body.coverImage) &&
+      existing.mediaReady === false;
+
+    const hasCoverChange = Boolean(body.coverImage);
+    const hasGalleryChange = Array.isArray(body.galleryImages);
+
+    let images = existing.images;
+    let mediaReady = existing.mediaReady ?? false;
+
+    if (hasCoverChange || hasGalleryChange) {
+      const coverUrl = body.coverImage || existing.images?.[0]?.url || '';
+      const galleryUrls = hasGalleryChange
+        ? body.galleryImages.map(String).filter(Boolean)
+        : (existing.images?.filter((i) => !i.isCover).map((i) => i.url) || []);
+
+      images = [
+        {
+          id: existing.images?.[0]?.id || `img-${existing.id}-1`,
+          url: String(coverUrl),
+          alt: `Vista de ${destinationCountry || existing.location.country}`,
+          isCover: true,
+          order: 0,
+        },
+        ...galleryUrls.map((url, i) => ({
+          id: existing.images?.[i + 1]?.id || `img-${existing.id}-${i + 2}`,
+          url: String(url),
+          alt: `Vista de ${destinationCountry || existing.location.country}`,
+          isCover: false,
+          order: i + 1,
+        })),
+      ];
+
+      if (hasCoverChange) mediaReady = true;
     }
 
-    const updated = {
-      ...existing,
+    const updateData = {
       title,
       isSpecialOffer,
       subtitle: String(body.summary || '').trim() || existing.subtitle,
@@ -240,8 +262,8 @@ router.patch('/:id', requireAuth, async (req, res) => {
         installments: { available: false },
       },
       availability: {
-        startDate: String(body.startDate || existing.availability?.startDate || now),
-        endDate: String(body.endDate || existing.availability?.endDate || now),
+        startDate: String(body.startDate || existing.availability?.startDate),
+        endDate: String(body.endDate || existing.availability?.endDate),
         limitedSpots: Number(body.seats || 0) <= 5,
         remainingSpots: Math.max(1, Number(body.seats || 1)),
       },
@@ -262,73 +284,40 @@ router.patch('/:id', requireAuth, async (req, res) => {
         name: String(body.airline || '').trim(),
         iata: String(body.airlineIata || '').trim(),
       },
-      flight: {
-        type: String(body.flightType || 'direct'),
-      },
+      flight: { type: String(body.flightType || 'direct') },
       luggage: {
         personal: body.luggagePersonal !== false,
         carryOn: body.luggageCarryOn !== false,
         checked: Boolean(body.luggageChecked),
       },
-      status: ['draft', 'published'].includes(body.status) ? body.status : (existing.status || 'draft'),
+      status: isDesignerMediaUpload
+        ? 'published'
+        : (['draft', 'published'].includes(body.status) ? body.status : (existing.status || 'draft')),
       isFeatured: Boolean(body.featured),
-      updatedAt: now,
+      mediaReady,
+      images,
     };
 
-    const isDesignerMediaUpload =
-      req.user?.role === 'designer' &&
-      Boolean(body.coverImage) &&
-      existing.mediaReady === false;
-
-    const hasCoverChange = Boolean(body.coverImage);
-    const hasGalleryChange = Array.isArray(body.galleryImages);
-
-    if (hasCoverChange || hasGalleryChange) {
-      const coverUrl = body.coverImage || existing.images?.[0]?.url || '';
-      const galleryUrls = hasGalleryChange
-        ? body.galleryImages.map(String).filter(Boolean)
-        : (existing.images?.filter((i) => !i.isCover).map((i) => i.url) || []);
-
-      updated.images = [
-        {
-          id: existing.images?.[0]?.id || `img-${existing.id}-1`,
-          url: String(coverUrl),
-          alt: `Vista de ${destinationCountry || existing.location.country}`,
-          isCover: true,
-          order: 0,
-        },
-        ...galleryUrls.map((url, i) => ({
-          id: existing.images?.[i + 1]?.id || `img-${existing.id}-${i + 2}`,
-          url: String(url),
-          alt: `Vista de ${destinationCountry || existing.location.country}`,
-          isCover: false,
-          order: i + 1,
-        })),
-      ];
-
-      if (hasCoverChange) {
-        updated.mediaReady = true;
-        if (isDesignerMediaUpload) {
-          updated.status = 'published';
-          createNotification({
-            type: 'media_uploaded',
-            title: 'Imagen subida por el diseñador',
-            body: `El diseñador subió la imagen para "${updated.title}". La oferta fue publicada automáticamente.`,
-            forRoles: ['admin', 'agent'],
-            offerId: existing.id,
-            offerSlug: existing.slug,
-            offerTitle: updated.title,
-          }).catch(() => {});
-        }
-      } else {
-        updated.mediaReady = existing.mediaReady ?? false;
+    let updated;
+    await prisma.$transaction(async (tx) => {
+      if (isSpecialOffer) {
+        await tx.offer.updateMany({ where: { id: { not: req.params.id } }, data: { isSpecialOffer: false } });
       }
-    } else {
-      updated.mediaReady = existing.mediaReady ?? false;
+      updated = await tx.offer.update({ where: { id: req.params.id }, data: updateData });
+    });
+
+    if (isDesignerMediaUpload) {
+      createNotification({
+        type: 'media_uploaded',
+        title: 'Imagen subida por el diseñador',
+        body: `El diseñador subió la imagen para "${updateData.title}". La oferta fue publicada automáticamente.`,
+        forRoles: ['admin', 'agent'],
+        offerId: existing.id,
+        offerSlug: existing.slug,
+        offerTitle: updateData.title,
+      }).catch(() => {});
     }
 
-    offers[idx] = updated;
-    await db.offers.write(offers);
     res.json(updated);
   } catch (err) {
     console.error('[PATCH /api/ofertas]', err);
@@ -339,14 +328,10 @@ router.patch('/:id', requireAuth, async (req, res) => {
 // DELETE /api/ofertas/:id  (admin y agent únicamente)
 router.delete('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
-    const offers = await db.offers.read();
-    const filtered = offers.filter((o) => o.id !== req.params.id);
-    if (filtered.length === offers.length) {
-      return res.status(404).json({ error: 'Oferta no encontrada.' });
-    }
-    await db.offers.write(filtered);
+    await prisma.offer.delete({ where: { id: req.params.id } });
     res.status(204).send();
-  } catch {
+  } catch (err) {
+    if (err.code === 'P2025') return res.status(404).json({ error: 'Oferta no encontrada.' });
     res.status(500).json({ error: 'No se pudo eliminar la oferta.' });
   }
 });

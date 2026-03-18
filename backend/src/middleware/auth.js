@@ -15,6 +15,17 @@ export function requireAuth(req, res, next) {
   }
 }
 
+export function optionalAuth(req, res, next) {
+  const token = req.cookies?.auth_token;
+  if (!token) return next();
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    // token inválido, seguimos sin usuario
+  }
+  next();
+}
+
 export function requireRole(...roles) {
   return [
     requireAuth,

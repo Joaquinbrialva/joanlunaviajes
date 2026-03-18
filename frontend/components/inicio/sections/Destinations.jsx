@@ -18,9 +18,14 @@ export default function Destinations() {
         <p className='text-lg text-accent font-medium'>INSPIRACIÓN</p>
         <p className='text-4xl font-medium'>Destinos Trending</p>
       </div>
-      <div>
+      {destinations.length === 0 ? (
+        <div className='flex flex-col items-center gap-3 py-16 text-center rounded-2xl border border-dashed border-default'>
+          <p className='font-semibold text-foreground'>Próximamente nuevos destinos</p>
+          <p className='text-sm text-muted'>Estamos sumando los mejores destinos del mundo. Volvé pronto.</p>
+        </div>
+      ) : (
         <CollageGrid destinations={destinations} />
-      </div>
+      )}
     </div>
   );
 }

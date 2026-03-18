@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { AlertDialog, Button, Table, toast } from '@heroui/react';
 import { MessageCircle, Trash2, ChevronRight } from 'lucide-react';
 import HeroSelect from '@/components/ui/hero-select';
@@ -17,13 +18,24 @@ export default function AdminInquiriesPage() {
   const [search, setSearch] = useState('');
   const [pendingDelete, setPendingDelete] = useState(null);
   const [previewInquiry, setPreviewInquiry] = useState(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     let active = true;
     fetch('/api/cotizaciones', { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
-        if (active && Array.isArray(data)) setInquiries(data.map(normalizeInquiry));
+        if (!active || !Array.isArray(data)) return;
+        const normalized = data.map(normalizeInquiry);
+        setInquiries(normalized);
+        // Si viene ?inquiry=ID desde una notificación, abrir el drawer
+        const targetId = searchParams.get('inquiry');
+        if (targetId) {
+          const found = normalized.find((i) => i.id === targetId);
+          if (found) setPreviewInquiry(found);
+          router.replace('/admin/cotizaciones', { scroll: false });
+        }
       })
       .catch(() => {
         if (active) setInquiries([]);
@@ -31,6 +43,7 @@ export default function AdminInquiriesPage() {
     return () => {
       active = false;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const rows = useMemo(() => {

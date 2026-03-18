@@ -2,13 +2,22 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LuBell, LuImage, LuClipboardList } from 'react-icons/lu';
+import {
+  LuBell,
+  LuInbox,
+  LuMessageSquare,
+  LuImage,
+  LuClipboardList,
+  LuTrash2,
+  LuCheckCheck,
+} from 'react-icons/lu';
 
 const POLL_MS = 30_000;
 
-const TYPE_ICON = {
-  pending_media: LuImage,
-  media_uploaded: LuClipboardList,
+const TYPE_META = {
+  new_inquiry:   { icon: LuMessageSquare },
+  pending_media: { icon: LuImage },
+  media_uploaded:{ icon: LuClipboardList },
 };
 
 function timeAgo(dateStr) {
@@ -23,16 +32,20 @@ function timeAgo(dateStr) {
 
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
-  const [open, setOpen] = useState(false);
-  const panelRef = useRef(null);
+  const [open, setOpen]                   = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const panelRef    = useRef(null);
+  const dismissedIds = useRef(new Set());
   const router = useRouter();
 
+  /* ── fetch ─────────────────────────────────────────────────── */
   const fetchNotifs = useCallback(async () => {
     try {
       const res = await fetch('/api/notifications');
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(Array.isArray(data) ? data : []);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setNotifications(data.filter((n) => !dismissedIds.current.has(n.id)));
       }
     } catch {}
   }, []);
@@ -43,38 +56,67 @@ export default function NotificationBell() {
     return () => clearInterval(id);
   }, [fetchNotifs]);
 
-  // Cerrar al hacer click afuera
+  /* ── close on outside click ─────────────────────────────────── */
   useEffect(() => {
-    function onClickOut(e) {
-      if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false);
+    function onOut(e) {
+      if (panelRef.current && !panelRef.current.contains(e.target)) {
+        setOpen(false);
+        setDeleteConfirm(false);
+      }
     }
-    document.addEventListener('mousedown', onClickOut);
-    return () => document.removeEventListener('mousedown', onClickOut);
+    document.addEventListener('mousedown', onOut);
+    return () => document.removeEventListener('mousedown', onOut);
   }, []);
 
-  const unread = notifications.filter((n) => !n.isRead).length;
+  /* ── auto-reset confirm after 3 s ───────────────────────────── */
+  useEffect(() => {
+    if (!deleteConfirm) return;
+    const t = setTimeout(() => setDeleteConfirm(false), 3000);
+    return () => clearTimeout(t);
+  }, [deleteConfirm]);
 
+  const unread  = notifications.filter((n) => !n.isRead).length;
+  const hasRead = notifications.some((n) => n.isRead);
+
+  /* ── open / mark-read ───────────────────────────────────────── */
   async function handleToggle() {
     const wasOpen = open;
     setOpen((v) => !v);
-    if (!wasOpen && unread > 0) {
-      // Marcar todo como leído al abrir
-      try {
-        await fetch('/api/notifications/read-all', { method: 'POST' });
-        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      } catch {}
+    if (wasOpen) { setDeleteConfirm(false); return; }
+
+    // BUG FIX: update UI optimistically — do NOT gate on res.ok
+    if (unread > 0) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      fetch('/api/notifications/read-all', { method: 'POST' }).catch(() => {});
     }
   }
 
+  /* ── delete read ────────────────────────────────────────────── */
+  async function handleDeleteRead() {
+    notifications
+      .filter((n) => n.isRead)
+      .forEach((n) => dismissedIds.current.add(n.id));
+    setNotifications((prev) => prev.filter((n) => !n.isRead));
+    setDeleteConfirm(false);
+    fetch('/api/notifications/read', { method: 'DELETE' }).catch(() => {});
+  }
+
+  /* ── navigate on click ──────────────────────────────────────── */
   function handleClick(notif) {
-    if (notif.offerSlug) {
+    if (notif.inquiryId) {
+      router.push(`/admin/cotizaciones?inquiry=${notif.inquiryId}`);
+      setOpen(false);
+    } else if (notif.offerSlug) {
       router.push(`/admin/ofertas/${notif.offerSlug}/editar`);
       setOpen(false);
     }
   }
 
+  /* ── render ─────────────────────────────────────────────────── */
   return (
     <div className='relative' ref={panelRef}>
+
+      {/* ── Bell button ── */}
       <button
         type='button'
         onClick={handleToggle}
@@ -89,43 +131,103 @@ export default function NotificationBell() {
         )}
       </button>
 
+      {/* ── Panel ── */}
       {open && (
-        <div className='absolute left-0 top-[calc(100%+0.5rem)] z-50 w-80 rounded-2xl border border-default bg-surface shadow-2xl'>
+        <div className='absolute left-0 top-[calc(100%+0.5rem)] z-50 w-[22rem] rounded-2xl border border-default bg-surface shadow-2xl'>
+
           {/* Header */}
           <div className='flex items-center justify-between border-b border-default px-4 py-3'>
-            <span className='text-sm font-semibold'>Notificaciones</span>
-            {notifications.length > 0 && (
-              <span className='text-xs text-muted'>
-                {unread === 0 ? 'Todo leído' : `${unread} sin leer`}
-              </span>
+            <div className='flex items-center gap-2'>
+              <span className='text-sm font-semibold'>Notificaciones</span>
+              {notifications.length > 0 && unread === 0 && (
+                <span className='flex items-center gap-1 rounded-full bg-surface-secondary px-2 py-0.5 text-[11px] text-muted'>
+                  <LuCheckCheck className='h-3 w-3' />
+                  Todo leído
+                </span>
+              )}
+            </div>
+
+            {/* Slide-to-confirm delete */}
+            {hasRead && (
+              <button
+                type='button'
+                onClick={deleteConfirm ? handleDeleteRead : () => setDeleteConfirm(true)}
+                title={deleteConfirm ? 'Confirmar eliminación' : 'Eliminar leídas'}
+                className='flex h-7 items-center gap-1.5 overflow-hidden rounded-lg transition-all duration-300 ease-out'
+                style={{
+                  /* BUG FIX: control width entirely via inline style — no conflicting w-* class */
+                  width:      deleteConfirm ? '108px' : '28px',
+                  paddingLeft:  deleteConfirm ? '10px' : '6px',
+                  paddingRight: deleteConfirm ? '10px' : '6px',
+                  background: deleteConfirm ? 'color-mix(in srgb, #ef4444 12%, transparent)' : 'transparent',
+                  color:      deleteConfirm ? '#ef4444' : 'var(--muted)',
+                }}
+              >
+                <LuTrash2 className='h-3.5 w-3.5 shrink-0' />
+                <span
+                  className='whitespace-nowrap text-xs font-semibold transition-all duration-300 ease-out'
+                  style={{
+                    opacity:  deleteConfirm ? 1 : 0,
+                    maxWidth: deleteConfirm ? '80px' : '0px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  Confirmar
+                </span>
+              </button>
             )}
           </div>
 
-          {/* Lista */}
-          <div className='max-h-[22rem] overflow-y-auto'>
+          {/* Notification list */}
+          <div className='max-h-[22rem] overflow-x-hidden overflow-y-auto rounded-b-2xl'>
             {notifications.length === 0 ? (
-              <p className='px-4 py-8 text-center text-sm text-muted'>Sin notificaciones.</p>
+              <div className='flex flex-col items-center gap-2.5 px-4 py-10 text-center'>
+                <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary text-muted'>
+                  <LuInbox className='h-5 w-5' />
+                </div>
+                <p className='text-sm text-muted'>Sin notificaciones</p>
+              </div>
             ) : (
               notifications.slice(0, 20).map((notif) => {
-                const Icon = TYPE_ICON[notif.type] || LuBell;
+                const Icon = (TYPE_META[notif.type] || {}).icon || LuBell;
+                const isClickable = !!(notif.inquiryId || notif.offerSlug);
                 return (
                   <button
                     key={notif.id}
                     type='button'
                     onClick={() => handleClick(notif)}
-                    className={`w-full border-b border-default px-4 py-3 text-left last:border-b-0 transition-colors hover:bg-surface-secondary ${!notif.isRead ? 'bg-accent/5' : ''}`}
+                    className={[
+                      'relative w-full border-b border-default px-4 py-3 text-left',
+                      'last:border-b-0 transition-colors hover:bg-surface-secondary',
+                      !notif.isRead ? 'bg-accent/5' : '',
+                      isClickable ? 'cursor-pointer' : 'cursor-default',
+                    ].join(' ')}
                   >
+                    {/* Unread accent bar */}
+                    {!notif.isRead && (
+                      <div className='absolute bottom-3 left-0 top-3 w-0.5 rounded-r-full bg-accent' />
+                    )}
+
                     <div className='flex items-start gap-3'>
-                      <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${!notif.isRead ? 'bg-accent/10 text-accent' : 'bg-surface-secondary text-muted'}`}>
+                      <div
+                        className={[
+                          'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg',
+                          !notif.isRead
+                            ? 'bg-accent/10 text-accent'
+                            : 'bg-surface-secondary text-muted',
+                        ].join(' ')}
+                      >
                         <Icon className='h-3.5 w-3.5' />
                       </div>
+
                       <div className='min-w-0 flex-1'>
-                        <p className='truncate text-sm font-medium'>{notif.title}</p>
+                        <p className='truncate text-sm font-medium leading-snug'>{notif.title}</p>
                         <p className='mt-0.5 line-clamp-2 text-xs text-muted'>{notif.body}</p>
-                        <p className='mt-1 text-[11px] text-muted/60'>{timeAgo(notif.createdAt)}</p>
+                        <p className='mt-1 text-[11px] text-muted/50'>{timeAgo(notif.createdAt)}</p>
                       </div>
+
                       {!notif.isRead && (
-                        <div className='mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent' />
+                        <div className='mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent' />
                       )}
                     </div>
                   </button>
@@ -133,6 +235,7 @@ export default function NotificationBell() {
               })
             )}
           </div>
+
         </div>
       )}
     </div>

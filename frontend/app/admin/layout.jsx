@@ -10,9 +10,10 @@ import {
   LuChevronUp,
   LuClipboardList,
   LuGlobe,
+  LuImage,
   LuLayoutDashboard,
   LuLogOut,
-  LuMapPin,
+  LuMessageSquare,
   LuSettings,
   LuUser,
 } from 'react-icons/lu';
@@ -21,7 +22,8 @@ const links = [
   { href: '/admin', label: 'Panel', icon: LuLayoutDashboard },
   { href: '/admin/ofertas', label: 'Ofertas', icon: LuClipboardList },
   { href: '/admin/destinos', label: 'Destinos', icon: LuGlobe },
-  { href: '/admin/cotizaciones', label: 'Cotizaciones', icon: LuMapPin },
+  { href: '/admin/cotizaciones', label: 'Cotizaciones', icon: LuMessageSquare, hideForRoles: ['designer'] },
+  { href: '/admin/apariencia', label: 'Apariencia', icon: LuImage, showForRoles: ['admin', 'designer'] },
 ];
 
 const ROLE_LABELS = {
@@ -79,7 +81,7 @@ export default function AdminLayout({ children }) {
   return (
     <div className='w-screen -mx-[calc((100vw-100%)/2)] bg-background'>
       <div className='grid min-h-dvh grid-cols-1 md:grid-cols-[260px_1fr]'>
-        <aside className='flex flex-col border-r border-default bg-surface p-4 md:sticky md:top-0 md:h-dvh md:overflow-visible md:p-6'>
+        <aside className='flex flex-col border-r border-default bg-surface p-4 md:sticky md:top-0 md:h-dvh md:overflow-visible md:p-6 relative z-10'>
           <div className='mb-6 flex items-start justify-between gap-2'>
             <div>
               <p className='text-sm uppercase tracking-[0.14em] text-muted'>Panel administrador</p>
@@ -90,7 +92,11 @@ export default function AdminLayout({ children }) {
 
           <nav className='flex-1 space-y-1'>
             {links
-              .filter((item) => !(item.href === '/admin/cotizaciones' && user?.role === 'designer'))
+              .filter((item) => {
+                if (item.hideForRoles?.includes(user?.role)) return false;
+                if (item.showForRoles && !item.showForRoles.includes(user?.role)) return false;
+                return true;
+              })
               .map((item) => {
               const Icon = item.icon;
               const active = isActive(pathname, item.href);

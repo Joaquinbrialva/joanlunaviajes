@@ -8,13 +8,6 @@ import { LuPlane, LuEye, LuEyeOff } from 'react-icons/lu';
 
 const STAFF_ROLES = ['admin', 'agent', 'designer'];
 
-const TEST_USERS = [
-  { email: 'admin@joanlunaviajes.com', role: 'Admin' },
-  { email: 'agente@joanlunaviajes.com', role: 'Agente' },
-  { email: 'diseno@joanlunaviajes.com', role: 'Diseñador' },
-  { email: 'cliente@demo.com', role: 'Cliente' },
-];
-
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -45,18 +38,12 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.href = STAFF_ROLES.includes(data.user.role) ? '/admin' : '/';
+      window.location.href = STAFF_ROLES.includes(data.user.role) ? '/admin' : '/cuenta';
     } catch {
       setError('No se pudo conectar con el servidor.');
     } finally {
       setLoading(false);
     }
-  }
-
-  function fillUser(email) {
-    setEmail(email);
-    setPassword('password123');
-    setError('');
   }
 
   return (
@@ -136,40 +123,17 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className='mt-6 pt-5 border-t border-default text-center'>
-            <Link href='/' className='text-sm text-muted hover:text-foreground transition-colors'>
+          <div className='mt-6 pt-5 border-t border-default text-center space-y-2'>
+            <p className='text-sm text-muted'>
+              ¿No tenés cuenta?{' '}
+              <Link href='/registro' className='text-accent font-semibold hover:underline'>
+                Registrate gratis
+              </Link>
+            </p>
+            <Link href='/' className='text-sm text-muted hover:text-foreground transition-colors block'>
               ← Volvé al inicio
             </Link>
           </div>
-        </div>
-
-        {/* Usuarios de prueba */}
-        <div className='bg-surface rounded-2xl border border-default p-5 shadow-sm'>
-          <p className='text-xs font-semibold text-foreground mb-3 uppercase tracking-wide'>
-            Usuarios de prueba
-          </p>
-          <div className='space-y-2'>
-            {TEST_USERS.map((u) => (
-              <button
-                key={u.email}
-                type='button'
-                onClick={() => fillUser(u.email)}
-                className='w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-surface-secondary transition-colors text-left group'
-              >
-                <div>
-                  <span className='text-xs font-semibold text-foreground'>{u.role}</span>
-                  <p className='text-xs text-muted font-mono'>{u.email}</p>
-                </div>
-                <span className='text-xs text-accent opacity-0 group-hover:opacity-100 transition-opacity font-medium'>
-                  Usar →
-                </span>
-              </button>
-            ))}
-          </div>
-          <p className='text-xs text-muted mt-3 pt-3 border-t border-default'>
-            Contraseña para todos:{' '}
-            <span className='font-mono font-semibold text-foreground'>password123</span>
-          </p>
         </div>
 
       </div>

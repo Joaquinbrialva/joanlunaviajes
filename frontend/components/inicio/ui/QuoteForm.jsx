@@ -50,8 +50,12 @@ export default function QuoteForm({ offer }) {
         }),
       });
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data?.error || 'No se pudo enviar la solicitud.');
+        let errMsg = 'No se pudo enviar la solicitud.';
+        try {
+          const data = await res.json();
+          errMsg = data?.error || errMsg;
+        } catch {}
+        throw new Error(errMsg);
       }
       setStatus('success');
     } catch (err) {
