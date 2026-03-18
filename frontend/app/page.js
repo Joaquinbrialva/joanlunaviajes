@@ -7,14 +7,16 @@ import WhyChoose from '@/components/inicio/sections/WhyChoose';
 
 export default function Home() {
 	return (
-		<div className='space-y-15'>
+		<>
 			<Hero />
-			<Offers />
-			<Destinies />
-			<div className='space-y-0'>
-				<WhyChoose />
-				<NewsLetter />
+			<div className="pt-20 sm:pt-28 space-y-24">
+				<Offers />
+				<Destinies />
+				<div>
+					<WhyChoose />
+					<NewsLetter />
+				</div>
 			</div>
-		</div>
+		</>
 	);
 }

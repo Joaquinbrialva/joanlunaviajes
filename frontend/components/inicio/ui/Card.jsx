@@ -98,25 +98,32 @@ function Price({ pricing }) {
     pricing.price ||
     pricing.finalPrice ||
     pricing.originalPrice;
+  const hasPrice = Boolean(finalAmount);
 
   return (
     <div className="mt-4 space-y-1">
       <div className="min-h-5">
-        {hasDiscount && (
+        {hasPrice && hasDiscount && (
           <p className="text-sm text-muted line-through">
             {formatCurrency({ amount: pricing.originalPrice, currency: pricing.currency })}
           </p>
         )}
       </div>
 
-      <p className="text-2xl font-bold text-accent">
-        {formatCurrency({ amount: finalAmount, currency: pricing.currency })}
-      </p>
+      {hasPrice ? (
+        <>
+          <p className="text-2xl font-bold text-accent">
+            {formatCurrency({ amount: finalAmount, currency: pricing.currency })}
+          </p>
 
-      {pricing.pricePer && (
-        <p className="text-sm text-muted">
-          por {pricing.pricePer}
-        </p>
+          {pricing.pricePer && (
+            <p className="text-sm text-muted">
+              por {pricing.pricePer}
+            </p>
+          )}
+        </>
+      ) : (
+        <div className="h-[2.75rem]" />
       )}
 
     </div>

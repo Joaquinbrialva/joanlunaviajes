@@ -25,7 +25,7 @@ router.post('/read-all', requireAuth, async (req, res) => {
   try {
     const { id: userId, role: userRole } = req.user;
     const notifications = await prisma.notification.findMany({
-      where: { forRoles: { has: userRole }, readBy: { not: { has: userId } } },
+      where: { forRoles: { has: userRole }, NOT: { readBy: { has: userId } } },
     });
     await Promise.all(
       notifications.map((n) =>

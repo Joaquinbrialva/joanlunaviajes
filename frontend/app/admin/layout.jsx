@@ -10,62 +10,191 @@ import {
   LuChevronUp,
   LuClipboardList,
   LuGlobe,
+  LuHouse,
   LuImage,
   LuLayoutDashboard,
   LuLogOut,
+  LuMenu,
   LuMessageSquare,
   LuSettings,
   LuUser,
+  LuUsers,
+  LuX,
 } from 'react-icons/lu';
 
-const links = [
-  { href: '/admin', label: 'Panel', icon: LuLayoutDashboard },
-  { href: '/admin/ofertas', label: 'Ofertas', icon: LuClipboardList },
-  { href: '/admin/destinos', label: 'Destinos', icon: LuGlobe },
-  { href: '/admin/cotizaciones', label: 'Cotizaciones', icon: LuMessageSquare, hideForRoles: ['designer'] },
-  { href: '/admin/apariencia', label: 'Apariencia', icon: LuImage, showForRoles: ['admin', 'designer'] },
+/* ─── Nav structure ─────────────────────────────────────────── */
+
+const NAV_GROUPS = [
+  {
+    label: 'Principal',
+    links: [
+      { href: '/admin', label: 'Panel', icon: LuLayoutDashboard },
+      { href: '/', label: 'Ver sitio', icon: LuHouse },
+    ],
+  },
+  {
+    label: 'Contenido',
+    links: [
+      { href: '/admin/ofertas',      label: 'Ofertas',      icon: LuClipboardList },
+      { href: '/admin/destinos',     label: 'Destinos',     icon: LuGlobe },
+      { href: '/admin/cotizaciones', label: 'Cotizaciones', icon: LuMessageSquare, hideForRoles: ['designer'] },
+    ],
+  },
+  {
+    label: 'Administración',
+    links: [
+      { href: '/admin/apariencia', label: 'Apariencia', icon: LuImage,  showForRoles: ['admin', 'designer'] },
+      { href: '/admin/usuarios',   label: 'Usuarios',   icon: LuUsers,  showForRoles: ['admin'] },
+    ],
+  },
 ];
 
 const ROLE_LABELS = {
-  admin: 'Administrador',
-  agent: 'Agente',
+  admin:    'Administrador',
+  agent:    'Agente',
   designer: 'Diseñador',
+  client:   'Cliente',
+};
+
+const ROLE_COLORS = {
+  admin:    { bg: 'rgba(255,126,45,0.18)', text: '#ff9a5c' },
+  agent:    { bg: 'rgba(56,189,248,0.15)', text: '#7dd3fc' },
+  designer: { bg: 'rgba(167,139,250,0.18)', text: '#c4b5fd' },
+  client:   { bg: 'rgba(148,163,184,0.15)', text: '#94a3b8' },
 };
 
 function isActive(pathname, href) {
+  if (href === '/') return pathname === '/';
   if (href === '/admin') return pathname === '/admin';
   return pathname.startsWith(href);
 }
 
+function getInitials(name) {
+  if (!name) return 'A';
+  return name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+}
+
+/* ─── Nav list (shared between desktop sidebar and mobile drawer) ── */
+
+function NavList({ user, pathname, onLinkClick }) {
+  return (
+    <nav className='flex-1 overflow-y-auto px-3 py-4 space-y-6'>
+      {NAV_GROUPS.map((group) => {
+        const visible = group.links.filter((item) => {
+          if (item.hideForRoles?.includes(user?.role)) return false;
+          if (item.showForRoles && !item.showForRoles.includes(user?.role)) return false;
+          return true;
+        });
+        if (!visible.length) return null;
+        return (
+          <div key={group.label}>
+            <p
+              className='px-3 mb-1.5 text-[9px] uppercase font-bold tracking-[0.22em]'
+              style={{ color: 'rgba(255,255,255,0.2)' }}
+            >
+              {group.label}
+            </p>
+            <div className='space-y-0.5'>
+              {visible.map((item) => {
+                const Icon   = item.icon;
+                const active = isActive(pathname, item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onLinkClick}
+                    className='flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150'
+                    style={
+                      active
+                        ? { background: '#ff7e2d', color: '#fff', boxShadow: '0 4px 16px rgba(255,126,45,0.35)' }
+                        : { color: 'rgba(255,255,255,0.45)' }
+                    }
+                    onMouseEnter={(e) => {
+                      if (!active) {
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
+                        e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active) {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = 'rgba(255,255,255,0.45)';
+                      }
+                    }}
+                  >
+                    <Icon className='h-[15px] w-[15px] shrink-0' />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </nav>
+  );
+}
+
+/* ─── SidebarBrand ───────────────────────────────────────────── */
+
+function SidebarBrand() {
+  return (
+    <Link href='/admin' className='flex items-baseline gap-0.5 select-none group'>
+      <span
+        className='text-white text-[13px] font-extrabold tracking-tight uppercase transition-opacity group-hover:opacity-80'
+        style={{ fontFamily: 'var(--font-jakarta)' }}
+      >
+        JOAN LUNA
+      </span>
+      <span
+        className='text-accent ml-0.5'
+        style={{
+          fontFamily: 'var(--font-cormorant)',
+          fontStyle: 'italic',
+          fontSize: '16px',
+          textShadow: '0 0 20px rgba(255,126,45,0.55)',
+        }}
+      >
+        viajes
+      </span>
+    </Link>
+  );
+}
+
+/* ─── Layout ────────────────────────────────────────────────── */
+
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const [user, setUser] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef(null);
+  const router   = useRouter();
+
+  const [user, setUser]               = useState(null);
+  const [menuOpen, setMenuOpen]       = useState(false);
+  const [mobileOpen, setMobileOpen]   = useState(false);
+  const [mounted, setMounted]         = useState(false);
+  const menuRef                       = useRef(null);
+
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     fetch('/api/auth/me')
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data?.user) setUser(data.user);
-      })
+      .then((d) => { if (d?.user) setUser(d.user); })
       .catch(() => {});
   }, []);
 
+  // Close user popup on outside click
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setMenuOpen(false);
-      }
+    function onOut(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', onOut);
+    return () => document.removeEventListener('mousedown', onOut);
   }, []);
+
+  // Close mobile drawer on route change
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -74,115 +203,209 @@ export default function AdminLayout({ children }) {
     router.refresh();
   }
 
-  const initials = user?.name
-    ? user.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
-    : 'A';
+  const initials  = getInitials(user?.name);
+  const roleColor = ROLE_COLORS[user?.role] || ROLE_COLORS.client;
+
+  /* ── Shared user popup ── */
+  const userPopup = menuOpen && (
+    <div
+      className='absolute inset-x-3 bottom-[calc(100%+0.5rem)] rounded-2xl p-1.5 shadow-2xl z-50'
+      style={{
+        background: '#161d27',
+        border: '1px solid rgba(255,255,255,0.1)',
+        backdropFilter: 'blur(12px)',
+      }}
+    >
+      {mounted && (
+        <div
+          className='flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-colors'
+          style={{ color: 'rgba(255,255,255,0.65)' }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+        >
+          <span className='text-sm'>Modo oscuro</span>
+          <Switch
+            isSelected={resolvedTheme === 'dark'}
+            onChange={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+            size='sm'
+          >
+            <Switch.Control><Switch.Thumb /></Switch.Control>
+          </Switch>
+        </div>
+      )}
+      <Link
+        href='/admin/perfil'
+        onClick={() => setMenuOpen(false)}
+        className='flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-colors'
+        style={{ color: 'rgba(255,255,255,0.65)' }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+      >
+        <LuUser className='h-4 w-4 shrink-0' style={{ color: '#ff7e2d' }} />
+        Mi perfil
+      </Link>
+      <Link
+        href='/admin/ajustes'
+        onClick={() => setMenuOpen(false)}
+        className='flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-colors'
+        style={{ color: 'rgba(255,255,255,0.65)' }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+      >
+        <LuSettings className='h-4 w-4 shrink-0' style={{ color: '#ff7e2d' }} />
+        Ajustes
+      </Link>
+      <button
+        type='button'
+        onClick={handleLogout}
+        className='flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-colors'
+        style={{ color: '#f87171' }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(248,113,113,0.1)')}
+        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+      >
+        <LuLogOut className='h-4 w-4 shrink-0' />
+        Cerrar sesión
+      </button>
+    </div>
+  );
+
+  /* ── Shared user button ── */
+  const userButton = user && (
+    <div
+      className='relative px-3 py-3'
+      style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+      ref={menuRef}
+    >
+      {userPopup}
+      <button
+        type='button'
+        onClick={() => setMenuOpen((p) => !p)}
+        className='flex w-full items-center gap-3 px-2.5 py-2.5 rounded-2xl transition-colors text-left'
+        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+      >
+        <div
+          className='h-9 w-9 shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold select-none'
+          style={{ background: roleColor.bg, color: roleColor.text }}
+        >
+          {initials}
+        </div>
+        <div className='min-w-0 flex-1'>
+          <p className='text-[13px] font-semibold text-white truncate leading-tight'>{user.name}</p>
+          <p className='text-[10px] truncate mt-0.5' style={{ color: 'rgba(255,255,255,0.35)' }}>
+            {ROLE_LABELS[user.role] || user.role}
+          </p>
+        </div>
+        <LuChevronUp
+          className='h-4 w-4 shrink-0 transition-transform duration-200'
+          style={{
+            color: 'rgba(255,255,255,0.28)',
+            transform: menuOpen ? 'rotate(0deg)' : 'rotate(180deg)',
+          }}
+        />
+      </button>
+    </div>
+  );
 
   return (
-    <div className='w-screen -mx-[calc((100vw-100%)/2)] bg-background'>
-      <div className='grid min-h-dvh grid-cols-1 md:grid-cols-[260px_1fr]'>
-        <aside className='flex flex-col border-r border-default bg-surface p-4 md:sticky md:top-0 md:h-dvh md:overflow-visible md:p-6 relative z-10'>
-          <div className='mb-6 flex items-start justify-between gap-2'>
-            <div>
-              <p className='text-sm uppercase tracking-[0.14em] text-muted'>Panel administrador</p>
-              <h1 className='text-2xl font-bold'>Joan Luna Viajes</h1>
-            </div>
-            <NotificationBell />
-          </div>
+    <>
+      {/* ══════════════════════════════════════════════════════
+          DESKTOP: Fixed sidebar — completely independent of
+          body scroll. HeroUI scroll-lock cannot affect it.
+      ══════════════════════════════════════════════════════ */}
+      <aside
+        className='hidden md:flex flex-col fixed top-0 left-0 z-40 overflow-visible'
+        style={{ width: 252, height: '100dvh', background: '#0c1018' }}
+      >
+        {/* Header */}
+        <div
+          className='px-5 pt-5 pb-4 flex items-center justify-between shrink-0'
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+        >
+          <SidebarBrand />
+          <NotificationBell />
+        </div>
 
-          <nav className='flex-1 space-y-1'>
-            {links
-              .filter((item) => {
-                if (item.hideForRoles?.includes(user?.role)) return false;
-                if (item.showForRoles && !item.showForRoles.includes(user?.role)) return false;
-                return true;
-              })
-              .map((item) => {
-              const Icon = item.icon;
-              const active = isActive(pathname, item.href);
+        {/* Nav */}
+        <NavList user={user} pathname={pathname} onLinkClick={undefined} />
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                    active
-                      ? 'bg-accent text-white'
-                      : 'text-foreground hover:bg-surface-secondary'
-                  }`}
-                >
-                  <Icon className='h-4 w-4' />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+        {/* User section */}
+        {userButton}
+      </aside>
 
-          {user && (
-            <div className='relative mt-auto border-t border-default pt-4' ref={menuRef}>
-              {menuOpen && (
-                <div className='absolute inset-x-0 bottom-[calc(100%+0.75rem)] rounded-2xl border border-default bg-surface p-1.5 shadow-xl'>
-                  {mounted && (
-                    <Switch
-                      isSelected={resolvedTheme === 'dark'}
-                      onChange={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-                      className='flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 hover:bg-surface-secondary'
-                    >
-                      <Switch.Content className='text-sm text-foreground'>Modo oscuro</Switch.Content>
-                      <Switch.Control>
-                        <Switch.Thumb />
-                      </Switch.Control>
-                    </Switch>
-                  )}
-                  <Link
-                    href='/admin/perfil'
-                    onClick={() => setMenuOpen(false)}
-                    className='flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-surface-secondary'
-                  >
-                    <LuUser className='h-4 w-4 text-accent' />
-                    Mi perfil
-                  </Link>
-                  <Link
-                    href='/admin/ajustes'
-                    onClick={() => setMenuOpen(false)}
-                    className='flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground transition-colors hover:bg-surface-secondary'
-                  >
-                    <LuSettings className='h-4 w-4 text-accent' />
-                    Ajustes
-                  </Link>
-                  <button
-                    type='button'
-                    onClick={handleLogout}
-                    className='flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-danger transition-colors hover:bg-danger/10'
-                  >
-                    <LuLogOut className='h-4 w-4' />
-                    Cerrar sesión
-                  </button>
-                </div>
-              )}
-
-              <button
-                type='button'
-                onClick={() => setMenuOpen((prev) => !prev)}
-                className='flex w-full items-center gap-3 rounded-2xl px-2 py-2 text-left transition-colors hover:bg-surface-secondary'
-              >
-                <div className='grid h-10 w-10 shrink-0 place-content-center rounded-full bg-accent/10 text-sm font-bold text-accent'>
-                  {initials}
-                </div>
-                <div className='min-w-0 flex-1'>
-                  <p className='truncate text-sm font-semibold'>{user.name}</p>
-                  <p className='text-xs text-muted'>{ROLE_LABELS[user.role] || user.role}</p>
-                </div>
-                <LuChevronUp className={`h-4 w-4 text-muted transition-transform ${menuOpen ? 'rotate-0' : 'rotate-180'}`} />
-              </button>
-            </div>
-          )}
-        </aside>
-
-        <div className='min-w-0'>
-          <main className='p-4 md:p-6'>{children}</main>
+      {/* ══════════════════════════════════════════════════════
+          MOBILE: Fixed top bar + slide-in drawer
+      ══════════════════════════════════════════════════════ */}
+      <div
+        className='md:hidden fixed top-0 inset-x-0 z-40 h-14 flex items-center px-4 justify-between shrink-0'
+        style={{ background: '#0c1018', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        <SidebarBrand />
+        <div className='flex items-center gap-3'>
+          <NotificationBell />
+          <button
+            type='button'
+            onClick={() => setMobileOpen(true)}
+            className='h-8 w-8 flex items-center justify-center rounded-lg transition-colors'
+            style={{ color: 'rgba(255,255,255,0.65)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
+          >
+            <LuMenu size={18} />
+          </button>
         </div>
       </div>
-    </div>
+
+      {/* Mobile drawer overlay */}
+      {mobileOpen && (
+        <div
+          className='md:hidden fixed inset-0 z-50 bg-black/60'
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile drawer panel */}
+      <div
+        className='md:hidden fixed top-0 left-0 bottom-0 z-50 flex flex-col overflow-hidden transition-transform duration-300'
+        style={{
+          width: 280,
+          background: '#0c1018',
+          transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
+        }}
+      >
+        <div
+          className='px-5 pt-5 pb-4 flex items-center justify-between shrink-0'
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+        >
+          <SidebarBrand />
+          <button
+            type='button'
+            onClick={() => setMobileOpen(false)}
+            className='h-8 w-8 flex items-center justify-center rounded-lg'
+            style={{ color: 'rgba(255,255,255,0.5)' }}
+          >
+            <LuX size={18} />
+          </button>
+        </div>
+        <NavList user={user} pathname={pathname} onLinkClick={() => setMobileOpen(false)} />
+        {userButton}
+      </div>
+
+      {/* ══════════════════════════════════════════════════════
+          CONTENT: Normal document flow, scrolls naturally.
+          Left padding compensates for fixed sidebar.
+      ══════════════════════════════════════════════════════ */}
+      <div
+        className='bg-background min-h-dvh'
+        style={{ paddingLeft: 0 }}
+      >
+        <main
+          className='p-4 pt-[calc(3.5rem+1rem)] md:p-7 md:pl-[calc(252px+1.75rem)]'
+          style={{ marginLeft: 0 }}
+        >
+          {children}
+        </main>
+      </div>
+    </>
   );
 }

@@ -4,15 +4,20 @@ import { useState, useEffect, useRef } from 'react';
 import { Spinner } from '@heroui/react';
 import {
   LuUpload, LuImage, LuVideo, LuCheck,
-  LuInfo, LuChevronDown, LuSave, LuRotateCcw,
+  LuInfo, LuChevronDown, LuSave, LuRotateCcw, LuCrop, LuX,
 } from 'react-icons/lu';
 import { toastSuccess, toastError } from '@/lib/toast';
 
 export default function AparienciaPage() {
-  const [saved, setSaved] = useState(null);      // estado guardado en servidor
+  const [saved, setSaved] = useState(null);
   const [type, setType] = useState('image');
   const [mediaUrl, setMediaUrl] = useState('');
   const [posterUrl, setPosterUrl] = useState('');
+  const [focalPoint, setFocalPoint] = useState({ x: 50, y: 50 });
+
+  // pendingCrop: { src: string, file: File|null }
+  // file=null means re-cropping an existing uploaded image (no re-upload needed)
+  const [pendingCrop, setPendingCrop] = useState(null);
 
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [uploadingPoster, setUploadingPoster] = useState(false);
@@ -31,11 +36,13 @@ export default function AparienciaPage() {
     ]).then(([auth, hero]) => {
       if (auth?.user) setRole(auth.user.role);
       if (hero?.url) {
-        const s = { type: hero.type || 'image', url: hero.url, poster: hero.poster || '' };
+        const fp = hero.focalPoint ?? { x: 50, y: 50 };
+        const s = { type: hero.type || 'image', url: hero.url, poster: hero.poster || '', focalPoint: fp };
         setSaved(s);
         setType(s.type);
         setMediaUrl(s.url);
         setPosterUrl(s.poster);
+        setFocalPoint(fp);
       }
       setLoaded(true);
     });
@@ -44,9 +51,11 @@ export default function AparienciaPage() {
   const hasChanges = !!saved && (
     type !== saved.type ||
     mediaUrl !== saved.url ||
-    posterUrl !== saved.poster
+    posterUrl !== saved.poster ||
+    focalPoint.x !== (saved.focalPoint?.x ?? 50) ||
+    focalPoint.y !== (saved.focalPoint?.y ?? 50)
   );
-  const canSave = hasChanges && !!mediaUrl && !uploadingMedia && !uploadingPoster && !saving;
+  const canSave = hasChanges && !!mediaUrl && !uploadingMedia && !uploadingPoster && !saving && !pendingCrop;
 
   async function uploadFile(file, setUploading, setUrl) {
     setUploading(true);
@@ -72,10 +81,10 @@ export default function AparienciaPage() {
       const res = await fetch('/api/settings/hero', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, url: mediaUrl, poster: posterUrl || null }),
+        body: JSON.stringify({ type, url: mediaUrl, poster: posterUrl || null, focalPoint }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
-      setSaved({ type, url: mediaUrl, poster: posterUrl });
+      setSaved({ type, url: mediaUrl, poster: posterUrl, focalPoint });
       toastSuccess('Cambios guardados.');
     } catch (err) {
       toastError(err, 'Error al guardar');
@@ -86,15 +95,42 @@ export default function AparienciaPage() {
 
   function handleDiscard() {
     if (!saved) return;
+    setPendingCrop(null);
     setType(saved.type);
     setMediaUrl(saved.url);
     setPosterUrl(saved.poster);
+    setFocalPoint(saved.focalPoint ?? { x: 50, y: 50 });
+  }
+
+  // Called when crop editor confirms a focal point
+  async function handleCropConfirm(fp) {
+    setFocalPoint(fp);
+    if (pendingCrop?.file) {
+      // New file — upload it now
+      await uploadFile(pendingCrop.file, setUploadingMedia, setMediaUrl);
+    }
+    // Revoke local object URL if it was one
+    if (pendingCrop?.src?.startsWith('blob:')) {
+      URL.revokeObjectURL(pendingCrop.src);
+    }
+    setPendingCrop(null);
+  }
+
+  function handleCropCancel() {
+    if (pendingCrop?.src?.startsWith('blob:')) {
+      URL.revokeObjectURL(pendingCrop.src);
+    }
+    setPendingCrop(null);
+  }
+
+  function openCropForExisting() {
+    setPendingCrop({ src: mediaUrl, file: null });
   }
 
   if (loaded && role && !['admin', 'designer'].includes(role)) {
     return (
       <div className="flex items-center justify-center py-20 text-sm text-muted">
-        No tenés permisos para acceder a esta sección.
+        No tienes permisos para acceder a esta sección.
       </div>
     );
   }
@@ -127,23 +163,25 @@ export default function AparienciaPage() {
           <div className="px-5 py-3.5 border-b border-default flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted">Vista previa</p>
             <div className="flex items-center gap-1.5 text-xs text-muted">
-              {type === 'image'
-                ? <LuImage className="w-3.5 h-3.5" />
-                : <LuVideo className="w-3.5 h-3.5" />}
+              {type === 'image' ? <LuImage className="w-3.5 h-3.5" /> : <LuVideo className="w-3.5 h-3.5" />}
               {type === 'image' ? 'Imagen' : 'Video'}
             </div>
           </div>
 
           {/* Viewport simulado */}
           <div className="relative aspect-video bg-black">
-            {/* Media */}
             {uploadingMedia ? (
               <div className="absolute inset-0 flex items-center justify-center bg-black/70">
                 <Spinner color="white" />
               </div>
             ) : mediaUrl && type === 'image' ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={mediaUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
+              <img
+                src={mediaUrl}
+                alt="Preview"
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ objectPosition: `${focalPoint.x}% ${focalPoint.y}%` }}
+              />
             ) : mediaUrl && type === 'video' ? (
               <video
                 key={mediaUrl}
@@ -213,13 +251,9 @@ export default function AparienciaPage() {
           <div className={`rounded-2xl border bg-surface p-4 space-y-3 transition-colors duration-300 ${hasChanges ? 'border-accent/25' : 'border-default'}`}>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Tipo de media</p>
             <div className="relative flex h-9 rounded-xl bg-surface-secondary p-1">
-              {/* Indicador deslizante */}
               <div
                 className="absolute top-1 h-7 rounded-lg bg-surface shadow-sm border border-default transition-all duration-200 ease-out"
-                style={{
-                  left: type === 'image' ? '4px' : 'calc(50%)',
-                  width: 'calc(50% - 4px)',
-                }}
+                style={{ left: type === 'image' ? '4px' : 'calc(50%)', width: 'calc(50% - 4px)' }}
               />
               {[
                 { value: 'image', label: 'Imagen', Icon: LuImage },
@@ -227,7 +261,7 @@ export default function AparienciaPage() {
               ].map(({ value, label, Icon }) => (
                 <button
                   key={value}
-                  onClick={() => setType(value)}
+                  onClick={() => { setPendingCrop(null); setType(value); }}
                   className={`relative flex-1 flex items-center justify-center gap-1.5 text-[13px] font-medium z-10 rounded-lg transition-colors ${
                     type === value ? 'text-foreground' : 'text-muted hover:text-foreground'
                   }`}
@@ -239,45 +273,70 @@ export default function AparienciaPage() {
             </div>
           </div>
 
-          {/* Upload media */}
+          {/* Upload / Crop editor */}
           <div className={`rounded-2xl border bg-surface p-4 space-y-3 transition-colors duration-300 ${hasChanges ? 'border-accent/25' : 'border-default'}`}>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">
               {type === 'image' ? 'Imagen del hero' : 'Video del hero'}
             </p>
 
-            <button
-              type="button"
-              onClick={() => mediaInputRef.current?.click()}
-              disabled={uploadingMedia}
-              className="w-full group rounded-xl border-2 border-dashed border-default hover:border-accent/40 hover:bg-accent/[0.025] transition-all duration-150 p-5 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {uploadingMedia ? (
-                <div className="flex flex-col items-center gap-2">
-                  <Spinner color="primary" size="sm" />
-                  <p className="text-xs text-muted">Subiendo archivo...</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-surface-secondary group-hover:bg-accent/10 flex items-center justify-center transition-colors duration-150">
-                    <LuUpload className="w-4 h-4 text-muted group-hover:text-accent transition-colors duration-150" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[13px] font-medium">
-                      {type === 'image' ? 'Subir imagen' : 'Subir video'}
-                    </p>
-                    <p className="text-xs text-muted mt-0.5">
-                      {type === 'image' ? 'JPG, PNG, WebP — máx. 8 MB' : 'MP4, WebM — máx. 100 MB'}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </button>
+            {/* Crop editor (imagen pendiente de confirmar) */}
+            {pendingCrop ? (
+              <CropEditor
+                src={pendingCrop.src}
+                initialFocalPoint={focalPoint}
+                onConfirm={handleCropConfirm}
+                onCancel={handleCropCancel}
+                uploading={uploadingMedia}
+              />
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => mediaInputRef.current?.click()}
+                  disabled={uploadingMedia}
+                  className="w-full group rounded-xl border-2 border-dashed border-default hover:border-accent/40 hover:bg-accent/[0.025] transition-all duration-150 p-5 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {uploadingMedia ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <Spinner color="primary" size="sm" />
+                      <p className="text-xs text-muted">Subiendo archivo...</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-surface-secondary group-hover:bg-accent/10 flex items-center justify-center transition-colors duration-150">
+                        <LuUpload className="w-4 h-4 text-muted group-hover:text-accent transition-colors duration-150" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[13px] font-medium">
+                          {type === 'image' ? 'Subir imagen' : 'Subir video'}
+                        </p>
+                        <p className="text-xs text-muted mt-0.5">
+                          {type === 'image' ? 'JPG, PNG, WebP — máx. 8 MB' : 'MP4, WebM — máx. 100 MB'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </button>
 
-            {mediaUrl && mediaUrl !== saved?.url && (
-              <div className="flex items-center gap-2 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl px-3 py-2">
-                <LuCheck className="w-3.5 h-3.5 shrink-0" />
-                Nuevo archivo listo — guardá para aplicar
-              </div>
+                {/* Botón editar recorte — visible cuando hay imagen ya subida */}
+                {type === 'image' && mediaUrl && (
+                  <button
+                    type="button"
+                    onClick={openCropForExisting}
+                    className="w-full flex items-center justify-center gap-2 h-9 rounded-xl border border-default bg-surface-secondary hover:bg-surface-tertiary text-[13px] font-medium text-muted hover:text-foreground transition-colors"
+                  >
+                    <LuCrop className="w-3.5 h-3.5" />
+                    Editar recorte
+                  </button>
+                )}
+
+                {mediaUrl && mediaUrl !== saved?.url && (
+                  <div className="flex items-center gap-2 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl px-3 py-2">
+                    <LuCheck className="w-3.5 h-3.5 shrink-0" />
+                    Nuevo archivo listo — guardá para aplicar
+                  </div>
+                )}
+              </>
             )}
 
             <input
@@ -287,7 +346,15 @@ export default function AparienciaPage() {
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) uploadFile(f, setUploadingMedia, setMediaUrl);
+                if (!f) return;
+                if (type === 'image') {
+                  // Show crop editor before uploading
+                  const localUrl = URL.createObjectURL(f);
+                  setPendingCrop({ src: localUrl, file: f });
+                } else {
+                  // Video: upload directly (no crop)
+                  uploadFile(f, setUploadingMedia, setMediaUrl);
+                }
                 e.target.value = '';
               }}
             />
@@ -420,5 +487,232 @@ function Tip({ children }) {
       <span className="text-accent shrink-0 mt-px">→</span>
       <span>{children}</span>
     </p>
+  );
+}
+
+// ─── Crop Editor ──────────────────────────────────────────────────────────────
+// Drag-to-crop estilo Instagram. El usuario arrastra y hace zoom sobre la imagen
+// dentro del frame del hero para elegir qué parte se ve.
+
+function CropEditor({ src, initialFocalPoint, onConfirm, onCancel, uploading }) {
+  const containerRef = useRef(null);
+  const imgRef = useRef(null);
+  const dragRef = useRef(null);   // { startMouseX, startMouseY, startOx, startOy }
+  const offsetRef = useRef({ x: 0, y: 0 });
+  const zoomRef = useRef(1);
+
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [natural, setNatural] = useState(null); // { w, h }
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Tamaño de la imagen mostrada = cover-scale × zoom
+  function getDisplaySize(z) {
+    const c = containerRef.current;
+    if (!c || !natural) return null;
+    const cW = c.offsetWidth;
+    const cH = c.offsetHeight;
+    const scale = Math.max(cW / natural.w, cH / natural.h);
+    return { w: natural.w * scale * z, h: natural.h * scale * z, cW, cH };
+  }
+
+  function clampOffset(ox, oy, cW, cH, dW, dH) {
+    return {
+      x: Math.max(-(dW - cW), Math.min(0, ox)),
+      y: Math.max(-(dH - cH), Math.min(0, oy)),
+    };
+  }
+
+  // Inicializar offset desde focal point una vez conocidas las dimensiones naturales
+  useEffect(() => {
+    if (!natural || !containerRef.current) return;
+    const ds = getDisplaySize(1);
+    if (!ds) return;
+    const fp = initialFocalPoint ?? { x: 50, y: 50 };
+    const ox = -((fp.x / 100) * (ds.w - ds.cW));
+    const oy = -((fp.y / 100) * (ds.h - ds.cH));
+    const clamped = clampOffset(ox, oy, ds.cW, ds.cH, ds.w, ds.h);
+    setOffset(clamped);
+    offsetRef.current = clamped;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [natural]);
+
+  // Re-clampear el offset al cambiar el zoom (para que la imagen siempre cubra)
+  useEffect(() => {
+    if (!natural) return;
+    const ds = getDisplaySize(zoom);
+    if (!ds) return;
+    const clamped = clampOffset(offsetRef.current.x, offsetRef.current.y, ds.cW, ds.cH, ds.w, ds.h);
+    offsetRef.current = clamped;
+    setOffset(clamped);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zoom, natural]);
+
+  function applyZoom(newZoom) {
+    const z = Math.max(1, Math.min(3, parseFloat(newZoom.toFixed(2))));
+    zoomRef.current = z;
+    setZoom(z);
+  }
+
+  function handleImgLoad() {
+    if (imgRef.current) {
+      setNatural({ w: imgRef.current.naturalWidth, h: imgRef.current.naturalHeight });
+    }
+  }
+
+  function handlePointerDown(e) {
+    e.preventDefault();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    dragRef.current = { startMouseX: clientX, startMouseY: clientY, startOx: offsetRef.current.x, startOy: offsetRef.current.y };
+    setIsDragging(true);
+  }
+
+  function handlePointerMove(e) {
+    if (!dragRef.current) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const ds = getDisplaySize(zoomRef.current);
+    if (!ds) return;
+    const newOff = clampOffset(
+      dragRef.current.startOx + (clientX - dragRef.current.startMouseX),
+      dragRef.current.startOy + (clientY - dragRef.current.startMouseY),
+      ds.cW, ds.cH, ds.w, ds.h
+    );
+    offsetRef.current = newOff;
+    setOffset(newOff);
+  }
+
+  function handlePointerUp() {
+    dragRef.current = null;
+    setIsDragging(false);
+  }
+
+  function handleConfirm() {
+    const ds = getDisplaySize(zoomRef.current);
+    if (!ds) { onConfirm({ x: 50, y: 50 }); return; }
+    const { x: ox, y: oy } = offsetRef.current;
+    const fpX = ds.w - ds.cW > 0 ? Math.round((-ox / (ds.w - ds.cW)) * 100) : 50;
+    const fpY = ds.h - ds.cH > 0 ? Math.round((-oy / (ds.h - ds.cH)) * 100) : 50;
+    onConfirm({ x: fpX, y: fpY });
+  }
+
+  const ds = natural ? getDisplaySize(zoom) : null;
+
+  return (
+    <div className="space-y-2.5">
+      {/* Frame de recorte */}
+      <div
+        ref={containerRef}
+        className="relative w-full rounded-xl overflow-hidden select-none"
+        style={{
+          aspectRatio: '16/9',
+          cursor: isDragging ? 'grabbing' : (natural ? 'grab' : 'default'),
+          touchAction: 'none',
+          background: '#0a0a0a',
+          boxShadow: '0 0 0 2px color-mix(in srgb, var(--accent) 50%, transparent)',
+        }}
+        onMouseDown={handlePointerDown}
+        onMouseMove={handlePointerMove}
+        onMouseUp={handlePointerUp}
+        onMouseLeave={handlePointerUp}
+        onTouchStart={handlePointerDown}
+        onTouchMove={handlePointerMove}
+        onTouchEnd={handlePointerUp}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          ref={imgRef}
+          src={src}
+          alt="Recorte"
+          onLoad={handleImgLoad}
+          draggable={false}
+          className="absolute max-w-none pointer-events-none"
+          style={ds
+            ? { width: ds.w, height: ds.h, left: offset.x, top: offset.y }
+            : { width: '100%', height: '100%', objectFit: 'cover' }
+          }
+        />
+
+        {/* Regla de tercios */}
+        {natural && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: [
+                'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px)',
+                'linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+              ].join(', '),
+              backgroundSize: '33.33% 33.33%',
+            }}
+          />
+        )}
+
+        {/* Spinner cargando */}
+        {!natural && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+            <Spinner color="white" size="sm" />
+          </div>
+        )}
+
+        {/* Hint — desaparece al arrastrar */}
+        {natural && !isDragging && (
+          <div className="absolute bottom-3 inset-x-0 flex justify-center pointer-events-none">
+            <span className="text-[10px] font-semibold text-white/75 bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-full tracking-wide">
+              Arrastra para reencuadrar
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Zoom */}
+      {natural && (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => applyZoom(zoom - 0.1)}
+            className="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg border border-default bg-surface-secondary hover:bg-surface-tertiary text-muted hover:text-foreground transition-colors text-base font-bold leading-none"
+          >−</button>
+          <input
+            type="range"
+            min={1} max={3} step={0.02}
+            value={zoom}
+            onChange={(e) => applyZoom(parseFloat(e.target.value))}
+            className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer accent-accent"
+            style={{ background: `linear-gradient(to right, var(--accent) ${((zoom - 1) / 2) * 100}%, var(--surface-secondary) 0%)` }}
+          />
+          <button
+            type="button"
+            onClick={() => applyZoom(zoom + 0.1)}
+            className="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg border border-default bg-surface-secondary hover:bg-surface-tertiary text-muted hover:text-foreground transition-colors text-base font-bold leading-none"
+          >+</button>
+          <span className="text-[11px] text-muted font-mono w-8 text-right shrink-0">{zoom.toFixed(1)}×</span>
+        </div>
+      )}
+
+      {/* Botones de acción */}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={handleConfirm}
+          disabled={uploading || !natural}
+          className="flex-1 h-10 rounded-xl bg-accent text-white text-[13px] font-semibold hover:bg-orange-600 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+        >
+          {uploading
+            ? <><Spinner color="current" size="sm" /> Subiendo...</>
+            : <><LuCrop className="w-3.5 h-3.5" /> Confirmar recorte</>
+          }
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={uploading}
+          className="h-10 w-10 flex items-center justify-center rounded-xl border border-default bg-surface-secondary hover:bg-surface-tertiary text-muted hover:text-foreground transition-colors disabled:opacity-60"
+          aria-label="Cancelar"
+        >
+          <LuX className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Checkbox, NumberField, Spinner } from '@heroui/react';
-import { Minus, Plus } from 'lucide-react';
+import { Check, Minus, Plus } from 'lucide-react';
 import { toastError } from '@/lib/toast';
 import HeroSelect from '@/components/ui/hero-select';
 import AirlineCombobox from '@/components/ui/airline-combobox';
@@ -17,8 +17,8 @@ import GalleryEditor from '@/components/ui/gallery-editor';
 /* ─── Opciones estáticas ─────────────────────────────────────────────── */
 
 const pasos = [
-  { id: 1, label: 'Información general' },
-  { id: 2, label: 'Logística y precios' },
+  { id: 1, label: 'General' },
+  { id: 2, label: 'Logística' },
   { id: 3, label: 'Contenido' },
   { id: 4, label: 'Revisión' },
 ];
@@ -41,7 +41,7 @@ const opcionesTipoViaje = [
 ];
 
 const opcionesTipoVuelo = [
-  { value: 'direct', label: 'Vuelo directo' },
+  { value: 'direct', label: 'Directo' },
   { value: 'stops', label: 'Con escala' },
 ];
 
@@ -70,56 +70,122 @@ const initialForm = {
   title: '',
   tripType: 'round-trip',
   customRoute: '',
-  originCountry: 'Argentina',
+  originCountry: '',
   originCity: '',
   destinationCountry: '',
   destinationCity: '',
   destinationAirport: '',
   startDate: '',
   endDate: '',
-  days: 7,
-  nights: 6,
+  availableMonths: '',
+  days: 1,
+  nights: 0,
   airline: '',
   airlineIata: '',
   flightType: 'direct',
-  luggagePersonal: true,
-  luggageCarryOn: true,
+  luggagePersonal: false,
+  luggageCarryOn: false,
   luggageChecked: false,
   currency: 'ARS',
   price: null,
   originalPrice: null,
-  priceNote: 'por persona',
-  seats: 12,
+  priceNote: '',
+  seats: 1,
   status: 'draft',
   featured: false,
   isSpecialOffer: false,
   summary: '',
-  includes: ['Vuelos', 'Hotel', 'Traslados'],
-  notIncludes: ['Propinas', 'Gastos personales'],
-  highlights: ['Asistencia local', 'Coordinación integral', 'Experiencia curada'],
+  includes: [],
+  notIncludes: [],
+  highlights: [],
   coverImage: '',
   galleryImages: [],
   hotelName: '',
 };
 
-/* ─── Componentes auxiliares ─────────────────────────────────────────── */
+/* ─── Componentes visuales ───────────────────────────────────────────── */
 
-function SectionTitle({ children }) {
-  return <h3 className='text-xl font-bold border-b border-default pb-2 mb-4'>{children}</h3>;
+function StepperBar({ pasos, paso, maxStep, onGoToStep }) {
+  return (
+    <div className='flex items-start gap-0'>
+      {pasos.map((step, i) => {
+        const active = step.id === paso;
+        const done = step.id < paso;
+        const locked = step.id > maxStep;
+        return (
+          <div key={step.id} className='flex items-start flex-1 min-w-0'>
+            <div className='flex flex-col items-center min-w-0 flex-1'>
+              <button
+                type='button'
+                onClick={() => !locked && onGoToStep(step.id)}
+                disabled={locked}
+                className='flex flex-col items-center gap-2 group disabled:cursor-not-allowed'
+              >
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200 ${
+                  active
+                    ? 'bg-accent text-white shadow-lg shadow-accent/25 scale-110'
+                    : done
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-surface-secondary border-2 border-default text-muted/50'
+                }`}>
+                  {done ? <Check size={15} strokeWidth={2.5} /> : step.id}
+                </div>
+                <span className={`text-[10px] uppercase tracking-[0.12em] font-bold whitespace-nowrap transition-colors ${
+                  active ? 'text-accent' : done ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted/60'
+                }`}>
+                  {step.label}
+                </span>
+              </button>
+            </div>
+            {i < pasos.length - 1 && (
+              <div className='flex-1 flex items-start pt-[18px] px-1'>
+                <div className={`h-[2px] w-full rounded-full transition-colors duration-300 ${
+                  paso > step.id ? 'bg-emerald-400 dark:bg-emerald-600' : 'bg-border'
+                }`} />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
-function Field({ label, children, className = '' }) {
+function Panel({ title, children, className = '' }) {
   return (
-    <div className={`space-y-1 ${className}`}>
-      {label && <span className='text-sm font-medium block'>{label}</span>}
+    <div className={`rounded-2xl border border-default/60 bg-surface-secondary/40 p-5 space-y-4 ${className}`}>
+      {title && (
+        <p className='text-[10px] uppercase tracking-[0.2em] font-bold text-muted/70'>{title}</p>
+      )}
       {children}
     </div>
   );
 }
 
+function FL({ children }) {
+  return <span className='text-[10px] uppercase tracking-[0.15em] font-semibold text-muted block mb-1.5'>{children}</span>;
+}
+
+function FInput({ error, className = '', ...props }) {
+  return (
+    <input
+      className={`h-11 px-3.5 rounded-xl border w-full text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/60 transition-all ${
+        error ? 'border-rose-400 ring-2 ring-rose-400/20' : 'border-default hover:border-muted/50'
+      } ${className}`}
+      {...props}
+    />
+  );
+}
+
+function FError({ children }) {
+  if (!children) return null;
+  return <p className='text-xs text-rose-500 mt-1 flex items-center gap-1'>⚠ {children}</p>;
+}
+
 function NumField({ label, value, onChange, min = 0, withButtons = false, formatOptions }) {
   return (
-    <Field label={label}>
+    <div className='space-y-1.5'>
+      <FL>{label}</FL>
       <NumberField
         value={value ?? NaN}
         onChange={(v) => onChange(isNaN(v) ? null : v)}
@@ -127,32 +193,82 @@ function NumField({ label, value, onChange, min = 0, withButtons = false, format
         formatOptions={formatOptions ?? { maximumFractionDigits: 0, useGrouping: false }}
         className='w-full'
       >
-        <NumberField.Group className='h-10 rounded-lg border border-default flex items-center overflow-hidden bg-surface'>
+        <NumberField.Group className='h-11 rounded-xl border border-default flex items-center overflow-hidden bg-surface hover:border-muted/50 transition-colors'>
           {withButtons && (
-            <NumberField.DecrementButton className='h-full px-3 hover:bg-surface-secondary border-r border-default transition-colors flex items-center'>
-              <Minus size={14} />
+            <NumberField.DecrementButton className='h-full px-3 hover:bg-surface-secondary border-r border-default transition-colors flex items-center text-muted'>
+              <Minus size={13} />
             </NumberField.DecrementButton>
           )}
-          <NumberField.Input className='flex-1 h-full px-3 bg-transparent text-sm outline-none min-w-0' />
+          <NumberField.Input className='flex-1 h-full px-3.5 bg-transparent text-sm outline-none min-w-0 text-center' />
           {withButtons && (
-            <NumberField.IncrementButton className='h-full px-3 hover:bg-surface-secondary border-l border-default transition-colors flex items-center'>
-              <Plus size={14} />
+            <NumberField.IncrementButton className='h-full px-3 hover:bg-surface-secondary border-l border-default transition-colors flex items-center text-muted'>
+              <Plus size={13} />
             </NumberField.IncrementButton>
           )}
         </NumberField.Group>
       </NumberField>
-    </Field>
+    </div>
   );
 }
 
-function LuggageCheck({ label, checked, onChange }) {
+function PillToggle({ options, value, onChange }) {
   return (
-    <Checkbox isSelected={checked} onChange={onChange} className='flex items-center gap-2 cursor-pointer'>
-      <Checkbox.Control className='w-5 h-5 rounded-full border border-default flex items-center justify-center bg-surface data-selected:bg-accent data-selected:border-accent transition-colors shrink-0'>
-        <Checkbox.Indicator className='text-white w-full h-full flex items-center justify-center' />
-      </Checkbox.Control>
-      <Checkbox.Content className='text-sm'>{label}</Checkbox.Content>
-    </Checkbox>
+    <div className='flex flex-wrap gap-2'>
+      {options.map((op) => (
+        <button
+          key={op.value}
+          type='button'
+          onClick={() => onChange(op.value)}
+          className={`h-9 px-4 rounded-full text-sm font-semibold border transition-all duration-150 ${
+            value === op.value
+              ? 'bg-accent text-white border-accent shadow-sm shadow-accent/20'
+              : 'bg-surface border-default text-muted hover:border-accent/40 hover:text-foreground'
+          }`}
+        >
+          {op.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function LuggageChip({ label, checked, onChange }) {
+  return (
+    <button
+      type='button'
+      onClick={() => onChange(!checked)}
+      className={`h-8 px-4 rounded-full text-xs font-semibold border transition-all duration-150 flex items-center gap-1.5 ${
+        checked
+          ? 'bg-accent/10 text-accent border-accent/30'
+          : 'bg-surface border-default text-muted hover:border-accent/30'
+      }`}
+    >
+      {checked && <Check size={11} strokeWidth={2.5} />}
+      {label}
+    </button>
+  );
+}
+
+function CheckPill({ label, checked, onChange, note }) {
+  return (
+    <div>
+      <Checkbox isSelected={checked} onChange={onChange} className='flex items-center gap-2.5 cursor-pointer group'>
+        <Checkbox.Control className='w-5 h-5 rounded-md border-2 border-default flex items-center justify-center bg-surface data-selected:bg-accent data-selected:border-accent transition-all shrink-0 group-hover:border-accent/50'>
+          <Checkbox.Indicator className='text-white w-full h-full flex items-center justify-center' />
+        </Checkbox.Control>
+        <Checkbox.Content className='text-sm font-medium'>{label}</Checkbox.Content>
+      </Checkbox>
+      {note && <p className='text-xs text-muted ml-7 mt-0.5'>{note}</p>}
+    </div>
+  );
+}
+
+function ReviewRow({ label, value }) {
+  return (
+    <div className='flex gap-4 py-2.5 px-4 border-b border-default/50 last:border-0'>
+      <span className='text-[11px] uppercase tracking-[0.1em] font-semibold text-muted w-28 shrink-0 pt-0.5'>{label}</span>
+      <span className='flex-1 text-sm font-medium text-foreground'>{value}</span>
+    </div>
   );
 }
 
@@ -176,7 +292,6 @@ export default function AdminNewOfferPage() {
       .catch(() => {});
   }, []);
 
-  // Cargar borrador guardado al montar
   useEffect(() => {
     try {
       const saved = localStorage.getItem(DRAFT_KEY);
@@ -184,7 +299,6 @@ export default function AdminNewOfferPage() {
     } catch { }
   }, []);
 
-  // Guardar borrador en cada cambio del formulario
   useEffect(() => {
     try { localStorage.setItem(DRAFT_KEY, JSON.stringify(form)); } catch { }
   }, [form]);
@@ -208,7 +322,6 @@ export default function AdminNewOfferPage() {
     setPaso(id);
   }
 
-  // Calcular días y noches automáticamente cuando cambian las fechas
   useEffect(() => {
     if (form.startDate && form.endDate) {
       const start = new Date(form.startDate + 'T12:00:00');
@@ -225,7 +338,7 @@ export default function AdminNewOfferPage() {
       if (form.tripType === 'multi') return Boolean(form.title && form.customRoute);
       return Boolean(form.title && form.destinationCountry);
     }
-    if (paso === 2) return Boolean(form.price && form.days > 0);
+    if (paso === 2) return true;
     return true;
   }, [form, paso]);
 
@@ -250,7 +363,6 @@ export default function AdminNewOfferPage() {
     }
   }
 
-  // Designers are not allowed to create offers
   if (role === 'designer') {
     return (
       <div className='flex flex-col items-center justify-center gap-4 py-20 text-center'>
@@ -259,7 +371,7 @@ export default function AdminNewOfferPage() {
         </div>
         <div>
           <h2 className='text-2xl font-bold'>Sin permiso</h2>
-          <p className='text-muted mt-1'>Los diseñadores no pueden crear ofertas. Esa acción corresponde a administradores o agentes.</p>
+          <p className='text-muted mt-1'>Los diseñadores no pueden crear ofertas.</p>
         </div>
         <Link href='/admin/ofertas' className='inline-flex h-10 items-center rounded-xl bg-accent px-5 text-sm font-semibold text-white'>
           Volver a ofertas
@@ -269,246 +381,192 @@ export default function AdminNewOfferPage() {
   }
 
   return (
-    <div className='space-y-6 max-w-4xl'>
+    <div className='space-y-8 max-w-4xl'>
       {/* Encabezado */}
-      <section className='flex flex-col md:flex-row md:items-start md:justify-between gap-3'>
-        <div>
-          <p className='text-sm text-muted mb-1'>
-            <Link href='/admin/ofertas' className='hover:underline'>Ofertas</Link> / Nueva
-          </p>
-          <h2 className='text-4xl font-bold'>Nueva oferta</h2>
-          <p className='text-muted text-sm mt-1'>Completá los datos para publicar una propuesta comercial.</p>
-        </div>
+      <section>
+        <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-muted mb-1'>
+          <Link href='/admin/ofertas' className='hover:text-accent transition-colors'>Ofertas</Link>
+          <span className='mx-1.5 opacity-40'>·</span>Nueva
+        </p>
+        <h2 className='text-3xl font-bold tracking-tight'>Nueva oferta</h2>
+        <p className='text-sm text-muted mt-1'>Completa los datos para publicar una propuesta comercial.</p>
       </section>
 
       {/* Stepper */}
-      <div className='grid grid-cols-2 md:grid-cols-4 gap-2'>
-        {pasos.map((item) => {
-          const active = item.id === paso;
-          const done = item.id < paso;
-          const locked = item.id > maxStep;
-          return (
-            <button
-              key={item.id}
-              type='button'
-              onClick={() => goToStep(item.id)}
-              disabled={locked}
-              className={`h-11 rounded-xl text-sm font-semibold border transition-colors ${active
-                ? 'bg-accent text-white border-accent'
-                : done
-                  ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800'
-                  : locked
-                    ? 'bg-surface-secondary border-default text-muted opacity-40 cursor-not-allowed'
-                    : 'bg-surface-secondary border-default text-muted'
-                }`}
-            >
-              {done ? '✓' : item.id}. {item.label}
-            </button>
-          );
-        })}
-      </div>
+      <StepperBar pasos={pasos} paso={paso} maxStep={maxStep} onGoToStep={goToStep} />
 
       {/* Contenido del paso */}
-      <section className='rounded-2xl border border-default bg-surface p-5 md:p-7 space-y-6'>
+      <section className='rounded-2xl border border-default bg-surface p-6 md:p-8 space-y-6'>
 
         {/* ── PASO 1: Información general ───────────────────────── */}
         {paso === 1 && (
           <div className='space-y-5'>
-            <SectionTitle>Información general</SectionTitle>
+            <div>
+              <h3 className='text-lg font-bold'>Información general</h3>
+              <p className='text-sm text-muted mt-0.5'>Define el destino, la ruta y las imágenes de la oferta.</p>
+            </div>
 
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <Field label='Título de la oferta *' className='md:col-span-2'>
-                <input
-                  className={`h-10 px-3 rounded-lg border w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent ${showErrors && !form.title ? 'border-rose-500 ring-1 ring-rose-500' : 'border-default'}`}
+            <Panel title='Título de la oferta'>
+              <div>
+                <FInput
                   value={form.title}
                   onChange={(e) => update('title', e.target.value)}
                   placeholder='Ej: Vuelos nacionales, conoce Argentina'
+                  error={showErrors && !form.title}
+                  className='text-base h-12 font-medium'
                 />
-                {showErrors && !form.title && <p className='text-xs text-rose-500 mt-1'>El título es obligatorio.</p>}
-              </Field>
+                <FError>{showErrors && !form.title ? 'El título es obligatorio.' : null}</FError>
+              </div>
+            </Panel>
 
-              <Field label='Tipo de viaje' className='md:col-span-2'>
-                <div className='flex flex-wrap gap-2'>
-                  {opcionesTipoViaje.map((op) => (
-                    <button
-                      key={op.value}
-                      type='button'
-                      onClick={() => update('tripType', op.value)}
-                      className={`h-9 px-4 rounded-lg text-sm font-medium border transition-colors ${form.tripType === op.value
-                        ? 'bg-accent text-white border-accent'
-                        : 'bg-surface-secondary border-default hover:bg-surface-tertiary'
-                        }`}
-                    >
-                      {op.label}
-                    </button>
-                  ))}
-                </div>
-              </Field>
-            </div>
+            <Panel title='Tipo de viaje'>
+              <PillToggle options={opcionesTipoViaje} value={form.tripType} onChange={(v) => update('tripType', v)} />
+            </Panel>
 
             {form.tripType === 'multi' ? (
-              <Field label='Ruta completa *'>
-                <input
-                  className={`h-10 px-3 rounded-lg border w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent ${showErrors && !form.customRoute ? 'border-rose-500 ring-1 ring-rose-500' : 'border-default'}`}
-                  value={form.customRoute}
-                  onChange={(e) => update('customRoute', e.target.value)}
-                  placeholder='Buenos Aires → Lima → Bogotá → Buenos Aires'
-                />
-                {showErrors && !form.customRoute && <p className='text-xs text-rose-500 mt-1'>La ruta es obligatoria para viajes multi-destino.</p>}
-              </Field>
+              <Panel title='Ruta completa'>
+                <div>
+                  <FL>Descripción de la ruta *</FL>
+                  <FInput
+                    value={form.customRoute}
+                    onChange={(e) => update('customRoute', e.target.value)}
+                    placeholder='Buenos Aires → Lima → Bogotá → Buenos Aires'
+                    error={showErrors && !form.customRoute}
+                  />
+                  <FError>{showErrors && !form.customRoute ? 'La ruta es obligatoria para viajes multi-destino.' : null}</FError>
+                </div>
+              </Panel>
             ) : (
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <Field label='País de origen'>
-                  <CountryCombobox value={form.originCountry} onChange={(v) => update('originCountry', v)} placeholder='Argentina' />
-                </Field>
-                <Field label='Ciudad de origen'>
-                  <input className='h-10 px-3 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent' value={form.originCity} onChange={(e) => update('originCity', e.target.value)} placeholder='Buenos Aires' />
-                </Field>
-                <Field label='País de destino *'>
-                  <CountryCombobox value={form.destinationCountry} onChange={(v) => update('destinationCountry', v)} placeholder='Seleccionar país destino...' />
-                  {showErrors && !form.destinationCountry && <p className='text-xs text-rose-500 mt-1'>El país de destino es obligatorio.</p>}
-                </Field>
-                <Field label='Ciudad de destino'>
-                  <input className='h-10 px-3 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent' value={form.destinationCity} onChange={(e) => update('destinationCity', e.target.value)} placeholder='Lima' />
-                </Field>
-                <Field label='Código IATA aeropuerto'>
-                  <input className='h-10 px-3 rounded-lg border border-default w-full text-sm font-mono bg-surface focus:outline-none focus:ring-1 focus:ring-accent' value={form.destinationAirport} onChange={(e) => update('destinationAirport', e.target.value)} placeholder='LIM' />
-                </Field>
-              </div>
+              <Panel title='Ruta'>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <div>
+                    <FL>País de origen</FL>
+                    <CountryCombobox value={form.originCountry} onChange={(v) => update('originCountry', v)} placeholder='Argentina' />
+                  </div>
+                  <div>
+                    <FL>Ciudad de origen</FL>
+                    <FInput value={form.originCity} onChange={(e) => update('originCity', e.target.value)} placeholder='Buenos Aires' />
+                  </div>
+                  <div>
+                    <FL>País de destino *</FL>
+                    <CountryCombobox value={form.destinationCountry} onChange={(v) => update('destinationCountry', v)} placeholder='Seleccionar país...' />
+                    <FError>{showErrors && !form.destinationCountry ? 'El país de destino es obligatorio.' : null}</FError>
+                  </div>
+                  <div>
+                    <FL>Ciudad de destino</FL>
+                    <FInput value={form.destinationCity} onChange={(e) => update('destinationCity', e.target.value)} placeholder='Lima' />
+                  </div>
+                  <div>
+                    <FL>Código IATA aeropuerto</FL>
+                    <FInput value={form.destinationAirport} onChange={(e) => update('destinationAirport', e.target.value)} placeholder='LIM' className='font-mono' />
+                  </div>
+                </div>
+              </Panel>
             )}
 
-            <Field label='Imagen de portada'>
-              <CoverImageInput value={form.coverImage} onChange={(url) => update('coverImage', url)} />
-            </Field>
-            <Field label='Galería de imágenes'>
-              <p className='text-xs text-muted mb-2'>Imágenes adicionales que se muestran en la página de la oferta.</p>
-              <GalleryEditor
-                images={form.galleryImages || []}
-                onChange={(imgs) => update('galleryImages', imgs)}
-              />
-            </Field>
+            <Panel title='Imágenes'>
+              <div className='space-y-5'>
+                <div>
+                  <FL>Imagen de portada</FL>
+                  <CoverImageInput value={form.coverImage} onChange={(url) => update('coverImage', url)} />
+                </div>
+                <div>
+                  <FL>Galería adicional</FL>
+                  <p className='text-xs text-muted mb-2'>Imágenes que se muestran en la página de la oferta.</p>
+                  <GalleryEditor
+                    images={form.galleryImages || []}
+                    onChange={(imgs) => update('galleryImages', imgs)}
+                  />
+                </div>
+              </div>
+            </Panel>
           </div>
         )}
 
         {/* ── PASO 2: Logística y precios ───────────────────────── */}
         {paso === 2 && (
-          <div className='space-y-6'>
-            <SectionTitle>Logística y precios</SectionTitle>
-
-            {/* Fechas */}
+          <div className='space-y-5'>
             <div>
-              <p className='text-sm font-semibold text-muted uppercase tracking-wide mb-3'>Fechas del viaje</p>
-              <RangeDatePickerField
-                startDate={form.startDate}
-                endDate={form.endDate}
-                tripType={form.tripType}
-                onChange={({ start, end }) =>
-                  setForm((prev) => ({ ...prev, startDate: start, endDate: end }))
-                }
-              />
+              <h3 className='text-lg font-bold'>Logística y precios</h3>
+              <p className='text-sm text-muted mt-0.5'>Fechas, duración, vuelo y precios.</p>
             </div>
 
-            {/* Duración */}
-            <div>
-              <div className='flex items-center justify-between mb-3'>
-                <p className='text-sm font-semibold text-muted uppercase tracking-wide'>Duración</p>
+            <Panel title='Fechas del viaje'>
+              <div>
+                <FL>Rango de fechas (ida y vuelta)</FL>
+                <RangeDatePickerField
+                  startDate={form.startDate}
+                  endDate={form.endDate}
+                  tripType={form.tripType}
+                  onChange={({ start, end }) => setForm((prev) => ({ ...prev, startDate: start, endDate: end }))}
+                />
+              </div>
+              <div>
+                <FL>Meses disponibles (opcional)</FL>
+                <FInput
+                  value={form.availableMonths}
+                  onChange={(e) => update('availableMonths', e.target.value)}
+                  placeholder='Ej: Enero a Marzo, Junio a Agosto'
+                />
+                <p className='text-xs text-muted mt-1'>Se muestra si no hay fechas exactas.</p>
+              </div>
+            </Panel>
+
+            {(form.startDate || form.endDate) && (
+              <Panel title='Duración'>
                 {form.startDate && form.endDate && (
-                  <span className='text-xs text-accent'>Calculado automáticamente · podés ajustar</span>
+                  <p className='text-xs text-accent font-medium -mb-1'>Calculado automáticamente · puedes ajustar</p>
                 )}
-              </div>
-              <div className='grid grid-cols-2 gap-4'>
-                <NumField
-                  label='Días'
-                  value={form.days}
-                  onChange={(v) => update('days', v ?? 1)}
-                  min={1}
-                  withButtons
-                />
-                <NumField
-                  label='Noches'
-                  value={form.nights}
-                  onChange={(v) => update('nights', v ?? 0)}
-                  min={0}
-                  withButtons
-                />
-              </div>
-            </div>
+                <div className='grid grid-cols-2 gap-4'>
+                  <NumField label='Días' value={form.days} onChange={(v) => update('days', v ?? 1)} min={1} withButtons />
+                  <NumField label='Noches' value={form.nights} onChange={(v) => update('nights', v ?? 0)} min={0} withButtons />
+                </div>
+              </Panel>
+            )}
 
-            {/* Vuelo */}
-            <div>
-              <p className='text-sm font-semibold text-muted uppercase tracking-wide mb-3'>Vuelo</p>
+            <Panel title='Vuelo'>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <Field label='Aerolínea'>
+                <div>
+                  <FL>Aerolínea</FL>
                   <AirlineCombobox
                     value={form.airline}
                     iata={form.airlineIata}
                     onChange={({ name, iata }) => setForm((prev) => ({ ...prev, airline: name, airlineIata: iata }))}
                   />
-                </Field>
-                <Field label='Tipo de vuelo'>
-                  <div className='flex gap-2'>
-                    {opcionesTipoVuelo.map((op) => (
-                      <button
-                        key={op.value}
-                        type='button'
-                        onClick={() => update('flightType', op.value)}
-                        className={`h-10 flex-1 rounded-lg text-sm font-medium border transition-colors ${form.flightType === op.value
-                          ? 'bg-accent text-white border-accent'
-                          : 'bg-surface-secondary border-default hover:bg-surface-tertiary'
-                          }`}
-                      >
-                        {op.label}
-                      </button>
-                    ))}
-                  </div>
-                </Field>
-              </div>
-
-              {/* Equipaje */}
-              <div className='mt-4'>
-                <span className='text-sm font-medium block mb-2'>Equipaje incluido</span>
-                <div className='flex flex-wrap gap-4'>
-                  <LuggageCheck
-                    label='Artículo personal'
-                    checked={form.luggagePersonal}
-                    onChange={(v) => update('luggagePersonal', v)}
-                  />
-                  <LuggageCheck
-                    label='Carry on (equipaje de mano)'
-                    checked={form.luggageCarryOn}
-                    onChange={(v) => update('luggageCarryOn', v)}
-                  />
-                  <LuggageCheck
-                    label='Equipaje despachado'
-                    checked={form.luggageChecked}
-                    onChange={(v) => update('luggageChecked', v)}
-                  />
+                </div>
+                <div>
+                  <FL>Tipo de vuelo</FL>
+                  <PillToggle options={opcionesTipoVuelo} value={form.flightType} onChange={(v) => update('flightType', v)} />
                 </div>
               </div>
-            </div>
+              <div>
+                <FL>Equipaje incluido</FL>
+                <div className='flex flex-wrap gap-2'>
+                  <LuggageChip label='Artículo personal' checked={form.luggagePersonal} onChange={(v) => update('luggagePersonal', v)} />
+                  <LuggageChip label='Carry on' checked={form.luggageCarryOn} onChange={(v) => update('luggageCarryOn', v)} />
+                  <LuggageChip label='Equipaje despachado' checked={form.luggageChecked} onChange={(v) => update('luggageChecked', v)} />
+                </div>
+              </div>
+            </Panel>
 
-            {/* Precios */}
-            <div>
-              <p className='text-sm font-semibold text-muted uppercase tracking-wide mb-3'>Precio</p>
+            <Panel title='Precio'>
               <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                <Field label='Moneda'>
+                <div>
+                  <FL>Moneda</FL>
                   <HeroSelect
                     value={form.currency}
                     onValueChange={(v) => update('currency', v)}
                     options={opcionesMoneda}
-                    triggerClassName='h-10 rounded-lg border border-default bg-surface-secondary'
+                    triggerClassName='h-11 rounded-xl border border-default bg-surface hover:border-muted/50 transition-colors'
                   />
-                </Field>
-                <div>
-                  <NumField
-                    label='Precio base *'
-                    value={form.price}
-                    onChange={(v) => update('price', v)}
-                    min={0}
-                    formatOptions={{ useGrouping: true, maximumFractionDigits: 0 }}
-                  />
-                  {showErrors && !form.price && <p className='text-xs text-rose-500 mt-1'>El precio base es obligatorio.</p>}
                 </div>
+                <NumField
+                  label='Precio base'
+                  value={form.price}
+                  onChange={(v) => update('price', v)}
+                  min={0}
+                  formatOptions={{ useGrouping: true, maximumFractionDigits: 0 }}
+                />
                 <NumField
                   label='Precio original (tachado)'
                   value={form.originalPrice}
@@ -516,192 +574,160 @@ export default function AdminNewOfferPage() {
                   min={0}
                   formatOptions={{ useGrouping: true, maximumFractionDigits: 0 }}
                 />
-                <Field label='Aclaración de precio'>
-                  <input
-                    className='h-10 px-3 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent'
-                    value={form.priceNote}
-                    onChange={(e) => update('priceNote', e.target.value)}
-                    placeholder='por persona'
-                  />
-                </Field>
-                <NumField
-                  label='Cupos disponibles'
-                  value={form.seats}
-                  onChange={(v) => update('seats', v ?? 1)}
-                  min={1}
-                  withButtons
-                />
-                <Field label='Hotel'>
-                  <input
-                    className='h-10 px-3 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent'
-                    value={form.hotelName}
-                    onChange={(e) => update('hotelName', e.target.value)}
-                    placeholder='Nombre del hotel (opcional)'
-                  />
-                </Field>
+                <div>
+                  <FL>Aclaración de precio</FL>
+                  <FInput value={form.priceNote} onChange={(e) => update('priceNote', e.target.value)} placeholder='por persona' />
+                </div>
+                <NumField label='Cupos disponibles' value={form.seats} onChange={(v) => update('seats', v ?? 1)} min={1} withButtons />
+                <div>
+                  <FL>Hotel</FL>
+                  <FInput value={form.hotelName} onChange={(e) => update('hotelName', e.target.value)} placeholder='Nombre del hotel (opcional)' />
+                </div>
               </div>
-            </div>
+            </Panel>
           </div>
         )}
 
         {/* ── PASO 3: Contenido ─────────────────────────────────── */}
         {paso === 3 && (
-          <div className='space-y-6'>
-            <SectionTitle>Contenido</SectionTitle>
-
-            <Field label='Resumen comercial'>
-              <textarea
-                className='min-h-24 px-3 py-2 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent resize-y'
-                value={form.summary}
-                onChange={(e) => update('summary', e.target.value)}
-                placeholder='Descripción breve que aparece en la tarjeta de oferta...'
-              />
-            </Field>
-
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              <ItemListInput
-                label='¿Qué incluye?'
-                items={form.includes}
-                onChange={(v) => update('includes', v)}
-                placeholder='Ej: Vuelos, Hotel, Traslados...'
-              />
-              <ItemListInput
-                label='¿Qué no incluye?'
-                items={form.notIncludes}
-                onChange={(v) => update('notIncludes', v)}
-                placeholder='Ej: Propinas, Gastos personales...'
-              />
+          <div className='space-y-5'>
+            <div>
+              <h3 className='text-lg font-bold'>Contenido</h3>
+              <p className='text-sm text-muted mt-0.5'>Descripción, inclusions y puntos destacados.</p>
             </div>
 
-            <ItemListInput
-              label='Highlights (puntos clave)'
-              items={form.highlights}
-              onChange={(v) => update('highlights', v)}
-              placeholder='Ej: Asistencia local, Coordinación integral...'
-            />
+            <Panel title='Descripción'>
+              <div>
+                <FL>Resumen comercial</FL>
+                <textarea
+                  className='min-h-28 px-3.5 py-3 rounded-xl border border-default w-full text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/60 resize-y hover:border-muted/50 transition-all'
+                  value={form.summary}
+                  onChange={(e) => update('summary', e.target.value)}
+                  placeholder='Descripción breve que aparece en la tarjeta de oferta...'
+                />
+              </div>
+            </Panel>
+
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <Panel title='Incluye'>
+                <ItemListInput
+                  label=''
+                  items={form.includes}
+                  onChange={(v) => update('includes', v)}
+                  placeholder='Ej: Vuelos, Hotel, Traslados...'
+                />
+              </Panel>
+              <Panel title='No incluye'>
+                <ItemListInput
+                  label=''
+                  items={form.notIncludes}
+                  onChange={(v) => update('notIncludes', v)}
+                  placeholder='Ej: Propinas, Gastos personales...'
+                />
+              </Panel>
+            </div>
+
+            <Panel title='Highlights'>
+              <ItemListInput
+                label=''
+                items={form.highlights}
+                onChange={(v) => update('highlights', v)}
+                placeholder='Ej: Asistencia local, Coordinación integral...'
+              />
+            </Panel>
           </div>
         )}
 
         {/* ── PASO 4: Revisión ──────────────────────────────────── */}
         {paso === 4 && (
           <div className='space-y-5'>
-            <SectionTitle>Revisión y publicación</SectionTitle>
+            <div>
+              <h3 className='text-lg font-bold'>Revisión y publicación</h3>
+              <p className='text-sm text-muted mt-0.5'>Revisa los datos antes de publicar.</p>
+            </div>
 
-            <div className='rounded-xl border border-default bg-surface-secondary divide-y divide-default overflow-hidden text-sm'>
+            <div className='rounded-2xl border border-default bg-surface-secondary/50 overflow-hidden'>
               <ReviewRow label='Título' value={form.title || '—'} />
               <ReviewRow label='Ruta' value={buildRouteLabel(form)} />
-              <div className='px-4 py-3 flex gap-6'>
-                <span className='text-muted w-32 shrink-0'>Aerolínea</span>
-                <span className='flex items-center gap-2 flex-1'>
-                  {form.airlineIata && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={`https://content.airhex.com/content/logos/airlines_${form.airlineIata}_50_50_s.png`}
-                      alt={form.airline}
-                      className='h-5 w-8 object-contain'
-                    />
-                  )}
-                  {form.airline || '—'} · {form.flightType === 'direct' ? 'Vuelo directo' : 'Con escala'}
-                </span>
-              </div>
-              <ReviewRow
-                label='Equipaje'
-                value={
-                  [
-                    form.luggagePersonal && 'Artículo personal',
-                    form.luggageCarryOn && 'Carry on',
-                    form.luggageChecked && 'Despachado',
-                  ]
-                    .filter(Boolean)
-                    .join(', ') || 'Sin especificar'
-                }
-              />
+              <ReviewRow label='Aerolínea' value={form.airline ? `${form.airline} · ${form.flightType === 'direct' ? 'Directo' : 'Con escala'}` : '—'} />
               <ReviewRow label='Salida' value={form.startDate || '—'} />
               <ReviewRow label='Regreso' value={form.endDate || '—'} />
-              <ReviewRow label='Duración' value={`${form.days} días / ${form.nights} noches`} />
-              <ReviewRow
-                label='Precio'
-                value={`${formatPrice(form.price, form.currency)}${form.priceNote ? ` ${form.priceNote}` : ''}`}
-              />
-              {form.originalPrice ? (
-                <ReviewRow label='Precio original' value={formatPrice(form.originalPrice, form.currency)} />
-              ) : null}
+              {form.availableMonths && <ReviewRow label='Meses' value={form.availableMonths} />}
+              {(form.startDate || form.endDate) && <ReviewRow label='Duración' value={`${form.days} días / ${form.nights} noches`} />}
+              <ReviewRow label='Precio' value={`${formatPrice(form.price, form.currency)}${form.priceNote ? ` ${form.priceNote}` : ''}`} />
+              {form.originalPrice ? <ReviewRow label='Precio original' value={formatPrice(form.originalPrice, form.currency)} /> : null}
               {form.hotelName ? <ReviewRow label='Hotel' value={form.hotelName} /> : null}
               {form.includes.length > 0 && (
-                <div className='px-4 py-3 flex gap-6'>
-                  <span className='text-muted w-32 shrink-0'>Incluye</span>
-                  <ul className='flex flex-wrap gap-1.5 flex-1'>
+                <div className='flex gap-4 py-2.5 px-4 border-b border-default/50 flex-wrap'>
+                  <span className='text-[11px] uppercase tracking-[0.1em] font-semibold text-muted w-28 shrink-0 pt-0.5'>Incluye</span>
+                  <div className='flex flex-wrap gap-1.5 flex-1'>
                     {form.includes.map((item, i) => (
-                      <li key={i} className='px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs dark:bg-emerald-900/30 dark:text-emerald-400'>
-                        {item}
-                      </li>
+                      <span key={i} className='px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium dark:bg-emerald-900/30 dark:text-emerald-400'>{item}</span>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               )}
               {form.notIncludes.length > 0 && (
-                <div className='px-4 py-3 flex gap-6'>
-                  <span className='text-muted w-32 shrink-0'>No incluye</span>
-                  <ul className='flex flex-wrap gap-1.5 flex-1'>
+                <div className='flex gap-4 py-2.5 px-4 flex-wrap'>
+                  <span className='text-[11px] uppercase tracking-[0.1em] font-semibold text-muted w-28 shrink-0 pt-0.5'>No incluye</span>
+                  <div className='flex flex-wrap gap-1.5 flex-1'>
                     {form.notIncludes.map((item, i) => (
-                      <li key={i} className='px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs dark:bg-rose-900/30 dark:text-rose-400'>
-                        {item}
-                      </li>
+                      <span key={i} className='px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-medium dark:bg-rose-900/30 dark:text-rose-400'>{item}</span>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               )}
             </div>
 
             {form.isSpecialOffer && (
-              <div className='rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-2 text-sm text-amber-700 dark:text-amber-300'>
-                Esta oferta será marcada como oferta especial (la anterior será desactivada automáticamente).
+              <div className='rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-3 text-sm text-amber-700 dark:text-amber-300 flex items-start gap-2'>
+                <span className='text-base leading-none mt-0.5'>⚠</span>
+                <span>Esta oferta será marcada como oferta especial. La anterior será desactivada automáticamente.</span>
               </div>
             )}
 
-            <div className='grid grid-cols-1 md:grid-cols-[220px_1fr] gap-4 items-center pt-1'>
-              <Field label='Estado de publicación'>
-                <HeroSelect
-                  value={form.status}
-                  onValueChange={(v) => update('status', v)}
-                  options={opcionesEstado}
-                  triggerClassName={`h-10 rounded-lg border bg-surface-secondary ${showErrors && !form.status ? 'border-rose-500' : 'border-default'}`}
-                />
-                {showErrors && !form.status && <p className='text-xs text-rose-500 mt-1'>Seleccioná un estado.</p>}
-              </Field>
-              <LuggageCheck
-                label='Marcar como oferta destacada'
-                checked={form.featured}
-                onChange={(v) => update('featured', v)}
-              />
-              <div className='space-y-0.5'>
-                <LuggageCheck
-                  label='Marcar como oferta especial'
-                  checked={form.isSpecialOffer}
-                  onChange={(v) => update('isSpecialOffer', v)}
-                />
-                <p className='text-xs text-muted ml-7'>Solo puede haber una a la vez. Marcar aquí desactivará la anterior.</p>
+            <Panel title='Publicación'>
+              <div className='grid grid-cols-1 md:grid-cols-[200px_1fr] gap-5 items-start'>
+                <div>
+                  <FL>Estado</FL>
+                  <HeroSelect
+                    value={form.status}
+                    onValueChange={(v) => update('status', v)}
+                    options={opcionesEstado}
+                    triggerClassName={`h-11 rounded-xl border bg-surface transition-colors ${showErrors && !form.status ? 'border-rose-400' : 'border-default hover:border-muted/50'}`}
+                  />
+                  <FError>{showErrors && !form.status ? 'Selecciona un estado.' : null}</FError>
+                </div>
+                <div className='space-y-3 md:pt-6'>
+                  <CheckPill label='Marcar como oferta destacada' checked={form.featured} onChange={(v) => update('featured', v)} />
+                  <CheckPill
+                    label='Marcar como oferta especial'
+                    checked={form.isSpecialOffer}
+                    onChange={(v) => update('isSpecialOffer', v)}
+                    note='Solo puede haber una a la vez. Marcar aquí desactivará la anterior.'
+                  />
+                </div>
               </div>
-            </div>
+            </Panel>
           </div>
         )}
 
         {/* Navegación */}
-        <div className='pt-4 border-t border-default flex items-center justify-between'>
-          <Button
+        <div className='pt-5 border-t border-default flex items-center justify-between gap-4'>
+          <button
             type='button'
             onClick={goBack}
             disabled={paso === 1 || guardando}
-            className='h-10 px-5 rounded-lg border border-default bg-surface hover:bg-surface-secondary disabled:opacity-40 text-sm font-medium text-foreground transition-colors'
+            className='h-11 px-6 rounded-xl border border-default bg-surface hover:bg-surface-secondary disabled:opacity-30 text-sm font-semibold text-foreground transition-all disabled:cursor-not-allowed'
           >
-            Atrás
-          </Button>
-          <span className='text-xs text-muted'>Paso {paso} de {pasos.length}</span>
+            ← Atrás
+          </button>
+          <span className='text-xs text-muted font-medium hidden sm:block'>Paso {paso} de {pasos.length}</span>
           {paso < 4 ? (
             <Button
               type='button'
               onClick={tryGoNext}
-              className='h-10 px-5 rounded-lg bg-accent text-white font-semibold text-sm transition-opacity'
+              className='h-11 px-6 rounded-xl bg-accent text-white font-semibold text-sm shadow-sm shadow-accent/20 hover:bg-orange-500 transition-all'
             >
               Siguiente →
             </Button>
@@ -710,28 +736,18 @@ export default function AdminNewOfferPage() {
               type='button'
               isPending={guardando}
               onClick={guardarOferta}
-              className='h-10 px-5 bg-accent text-white font-semibold text-sm'
+              className='h-11 px-6 rounded-xl bg-accent text-white font-semibold text-sm shadow-sm shadow-accent/20 hover:bg-orange-500 transition-all'
             >
               {({ isPending }) => (
                 <>
                   {isPending && <Spinner color='current' size='sm' />}
-                  {isPending ? 'Publicando' : 'Publicar oferta'}
+                  {isPending ? 'Publicando...' : 'Publicar oferta'}
                 </>
               )}
             </Button>
           )}
         </div>
       </section>
-
-    </div>
-  );
-}
-
-function ReviewRow({ label, value }) {
-  return (
-    <div className='px-4 py-3 flex gap-6'>
-      <span className='text-muted w-32  shrink-0'>{label}</span>
-      <span className='flex-1'>{value}</span>
     </div>
   );
 }

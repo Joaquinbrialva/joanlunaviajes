@@ -60,9 +60,9 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
     const coverImageUrl = String(body.coverImage || '').trim();
     const imgBase = `img-${Date.now()}`;
 
-    const price = Number(body.price || 0);
+    const price = body.price != null && body.price !== '' ? Number(body.price) : null;
     const originalPrice = Number(body.originalPrice || 0);
-    const hasDiscount = originalPrice > price && price > 0;
+    const hasDiscount = price != null && originalPrice > price && price > 0;
     const isSpecialOffer = Boolean(body.isSpecialOffer);
 
     const data = {
@@ -98,8 +98,9 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
         installments: { available: false },
       },
       availability: {
-        startDate: String(body.startDate || new Date().toISOString()),
-        endDate: String(body.endDate || new Date().toISOString()),
+        ...(body.startDate ? { startDate: String(body.startDate) } : {}),
+        ...(body.endDate ? { endDate: String(body.endDate) } : {}),
+        availableMonths: String(body.availableMonths || '').trim() || null,
         limitedSpots: Number(body.seats || 0) <= 5,
         remainingSpots: Math.max(1, Number(body.seats || 1)),
       },
@@ -192,9 +193,9 @@ router.patch('/:id', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Completá título y país de destino.' });
     }
 
-    const price = Number(body.price || 0);
+    const price = body.price != null && body.price !== '' ? Number(body.price) : null;
     const originalPrice = Number(body.originalPrice || 0);
-    const hasDiscount = originalPrice > price && price > 0;
+    const hasDiscount = price != null && originalPrice > price && price > 0;
     const isSpecialOffer = Boolean(body.isSpecialOffer);
 
     const isDesignerMediaUpload =
@@ -262,8 +263,9 @@ router.patch('/:id', requireAuth, async (req, res) => {
         installments: { available: false },
       },
       availability: {
-        startDate: String(body.startDate || existing.availability?.startDate),
-        endDate: String(body.endDate || existing.availability?.endDate),
+        ...(body.startDate ? { startDate: String(body.startDate) } : existing.availability?.startDate ? { startDate: existing.availability.startDate } : {}),
+        ...(body.endDate ? { endDate: String(body.endDate) } : existing.availability?.endDate ? { endDate: existing.availability.endDate } : {}),
+        availableMonths: body.availableMonths != null ? (String(body.availableMonths).trim() || null) : (existing.availability?.availableMonths ?? null),
         limitedSpots: Number(body.seats || 0) <= 5,
         remainingSpots: Math.max(1, Number(body.seats || 1)),
       },

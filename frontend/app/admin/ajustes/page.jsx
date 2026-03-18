@@ -32,14 +32,14 @@ export default function AjustesPage() {
           <Link href='/admin' className='hover:underline'>Panel</Link> / Ajustes
         </p>
         <h2 className='text-4xl font-bold'>Ajustes</h2>
-        <p className='text-muted'>Personalizá la experiencia del panel.</p>
+        <p className='text-muted'>Personaliza la experiencia del panel.</p>
       </section>
 
       {/* Appearance */}
       <div className='rounded-2xl border border-default bg-surface p-5 space-y-4'>
         <div>
           <h3 className='text-lg font-semibold'>Apariencia</h3>
-          <p className='text-sm text-muted'>Seleccioná el tema visual del panel de administración.</p>
+          <p className='text-sm text-muted'>Selecciona el tema visual del panel de administración.</p>
         </div>
 
         {mounted && (
@@ -70,7 +70,7 @@ export default function AjustesPage() {
       <div className='rounded-2xl border border-default bg-surface p-5 space-y-3'>
         <div>
           <h3 className='text-lg font-semibold'>Accesos rápidos</h3>
-          <p className='text-sm text-muted'>Navegá rápidamente a las secciones del panel.</p>
+          <p className='text-sm text-muted'>Navega rápidamente a las secciones del panel.</p>
         </div>
         <div className='grid grid-cols-2 gap-3'>
           {[

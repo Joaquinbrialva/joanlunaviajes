@@ -71,7 +71,7 @@ export default function CuentaPage() {
       <div className='flex items-start justify-between'>
         <div>
           <h1 className='text-4xl font-bold'>Mi cuenta</h1>
-          <p className='text-muted mt-1'>Seguí el estado de tus consultas y viajes.</p>
+          <p className='text-muted mt-1'>Sigue el estado de tus consultas y viajes.</p>
         </div>
         <button
           onClick={handleLogout}
@@ -126,8 +126,8 @@ export default function CuentaPage() {
         {inquiries.length === 0 ? (
           <div className='flex flex-col items-center gap-3 py-14 text-center px-6'>
             <LuMessageSquare className='h-10 w-10 text-muted/40' />
-            <p className='font-semibold'>Todavía no hiciste ninguna consulta</p>
-            <p className='text-sm text-muted'>Cuando consultes sobre una oferta o destino, las vas a ver acá.</p>
+            <p className='font-semibold'>Todavía no has hecho ninguna consulta</p>
+            <p className='text-sm text-muted'>Cuando consultes sobre una oferta o destino, las verás aquí.</p>
             <Link
               href='/consulta'
               className='mt-1 inline-flex h-9 items-center px-4 rounded-xl bg-accent text-white text-sm font-semibold'

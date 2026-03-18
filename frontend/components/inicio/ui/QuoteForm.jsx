@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button, NumberField, Spinner } from '@heroui/react';
-import { LuCalendarDays, LuMapPin, LuShieldCheck, LuUsers } from 'react-icons/lu';
+import { LuCalendarDays, LuCalendar, LuMapPin, LuShieldCheck, LuUsers } from 'react-icons/lu';
 import { FaRegClock } from 'react-icons/fa';
 import { toastError } from '@/lib/toast';
 import { formatCurrency } from '@/util/utils';
@@ -25,13 +25,21 @@ export default function QuoteForm({ offer }) {
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState('idle'); // idle | loading | success
 
-  const price = offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || 0;
-  const total = price * passengers;
+  const price = offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || null;
+  const hasPrice = price != null && price > 0;
+  const total = hasPrice ? price * passengers : null;
+  const currency = offer.pricing?.currency || 'USD';
+
+  const avail = offer.availability || {};
+  const hasStartDate = Boolean(avail.startDate);
+  const hasEndDate = Boolean(avail.endDate);
+  const hasAvailableMonths = Boolean(avail.availableMonths);
+  const remainingSpots = avail.remainingSpots;
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) {
-      toastError('Completá nombre y teléfono.');
+      toastError('Completa nombre y teléfono.');
       return;
     }
     setStatus('loading');
@@ -88,31 +96,55 @@ export default function QuoteForm({ offer }) {
       <div className='rounded-2xl border border-default bg-surface p-5 space-y-5'>
         {/* Precio */}
         <div>
-          <p className='text-xs uppercase tracking-wider text-muted mb-1'>Desde</p>
-          <p className='text-4xl font-bold text-foreground'>
-            {formatCurrency({ amount: price, currency: offer.pricing.currency })}
-            <span className='text-base font-normal text-muted'> / {offer.pricing.pricePer || 'persona'}</span>
-          </p>
+          {hasPrice ? (
+            <>
+              <p className='text-xs uppercase tracking-wider text-muted mb-1'>Desde</p>
+              <p className='text-4xl font-bold text-foreground'>
+                {formatCurrency({ amount: price, currency })}
+                <span className='text-base font-normal text-muted'> / {offer.pricing.pricePer || 'persona'}</span>
+              </p>
+            </>
+          ) : (
+            <>
+              <p className='text-xs uppercase tracking-wider text-muted mb-1'>Precio</p>
+              <p className='text-2xl font-bold text-accent'>Consultar precio</p>
+              <p className='text-xs text-muted mt-1'>Completá el formulario y te cotizamos.</p>
+            </>
+          )}
         </div>
 
         {/* Resumen */}
         <div className='grid grid-cols-2 gap-3 text-sm'>
-          <div className='border border-default rounded-xl p-3'>
-            <p className='text-xs text-muted uppercase flex items-center gap-1'><FaRegClock /> Duración</p>
-            <p className='font-medium mt-0.5'>{offer.duration.days} días / {offer.duration.nights} noches</p>
-          </div>
-          <div className='border border-default rounded-xl p-3'>
-            <p className='text-xs text-muted uppercase flex items-center gap-1'><LuUsers /> Cupos</p>
-            <p className='font-medium mt-0.5'>Máx {offer.availability.remainingSpots}</p>
-          </div>
-          <div className='border border-default rounded-xl p-3'>
-            <p className='text-xs text-muted uppercase flex items-center gap-1'><LuCalendarDays /> Salida</p>
-            <p className='font-medium mt-0.5'>{formatDate(offer.availability.startDate)}</p>
-          </div>
-          <div className='border border-default rounded-xl p-3'>
-            <p className='text-xs text-muted uppercase flex items-center gap-1'><LuMapPin /> Regreso</p>
-            <p className='font-medium mt-0.5'>{formatDate(offer.availability.endDate)}</p>
-          </div>
+          {offer.duration?.days > 0 && (
+            <div className='border border-default rounded-xl p-3'>
+              <p className='text-xs text-muted uppercase flex items-center gap-1'><FaRegClock /> Duración</p>
+              <p className='font-medium mt-0.5'>{offer.duration.days} días / {offer.duration.nights} noches</p>
+            </div>
+          )}
+          {remainingSpots > 0 && (
+            <div className='border border-default rounded-xl p-3'>
+              <p className='text-xs text-muted uppercase flex items-center gap-1'><LuUsers /> Cupos</p>
+              <p className='font-medium mt-0.5'>Máx {remainingSpots}</p>
+            </div>
+          )}
+          {hasStartDate && (
+            <div className='border border-default rounded-xl p-3'>
+              <p className='text-xs text-muted uppercase flex items-center gap-1'><LuCalendarDays /> Salida</p>
+              <p className='font-medium mt-0.5'>{formatDate(avail.startDate)}</p>
+            </div>
+          )}
+          {hasEndDate && (
+            <div className='border border-default rounded-xl p-3'>
+              <p className='text-xs text-muted uppercase flex items-center gap-1'><LuMapPin /> Regreso</p>
+              <p className='font-medium mt-0.5'>{formatDate(avail.endDate)}</p>
+            </div>
+          )}
+          {!hasStartDate && hasAvailableMonths && (
+            <div className='border border-default rounded-xl p-3 col-span-2'>
+              <p className='text-xs text-muted uppercase flex items-center gap-1'><LuCalendar /> Disponibilidad</p>
+              <p className='font-medium mt-0.5'>{avail.availableMonths}</p>
+            </div>
+          )}
         </div>
 
         {/* Formulario */}
@@ -176,17 +208,19 @@ export default function QuoteForm({ offer }) {
               className='min-h-20 px-3 py-2 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent resize-none'
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder='Contanos qué necesitás...'
+              placeholder='Cuéntanos qué necesitas...'
             />
           </div>
 
-          {/* Total estimado */}
-          <div className='flex items-end justify-between border-t border-default pt-3'>
-            <span className='text-muted text-sm'>Total estimado</span>
-            <strong className='text-xl text-accent'>
-              {formatCurrency({ amount: total, currency: offer.pricing.currency })}
-            </strong>
-          </div>
+          {/* Total estimado — solo si tiene precio */}
+          {hasPrice && total && (
+            <div className='flex items-end justify-between border-t border-default pt-3'>
+              <span className='text-muted text-sm'>Total estimado</span>
+              <strong className='text-xl text-accent'>
+                {formatCurrency({ amount: total, currency })}
+              </strong>
+            </div>
+          )}
 
           <Button
             type='submit'

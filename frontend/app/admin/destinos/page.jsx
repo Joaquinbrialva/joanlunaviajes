@@ -11,6 +11,7 @@ import { toastError } from '@/lib/toast';
 
 export default function AdminDestinationsPage() {
   const [destinations, setDestinations] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [continent, setContinent] = useState('all');
   const [selected, setSelected] = useState(new Set());
@@ -31,7 +32,10 @@ export default function AdminDestinationsPage() {
     fetch('/api/destinos', { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => { if (active && Array.isArray(data)) setDestinations(data); })
-      .catch(() => { if (active) setDestinations([]); });
+      .catch(() => { if (active) setDestinations([]); })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
     return () => { active = false; };
   }, []);
 
@@ -85,6 +89,7 @@ export default function AdminDestinationsPage() {
   const deleteLabel = pendingDelete?.type === 'batch'
     ? `${selected.size} destino(s) seleccionado(s)`
     : 'este destino';
+  const tableLoading = loading || role === null;
 
   return (
     <div className='space-y-5'>
@@ -106,7 +111,7 @@ export default function AdminDestinationsPage() {
                 </AlertDialog.Header>
                 <AlertDialog.Body>
                   <p className='text-sm text-muted'>
-                    Estás por eliminar <strong>{deleteLabel}</strong>. Esta acción no se puede deshacer.
+                    Estás a punto de eliminar <strong>{deleteLabel}</strong>. Esta acción no se puede deshacer.
                   </p>
                 </AlertDialog.Body>
                 <AlertDialog.Footer className='flex justify-end gap-2'>
@@ -124,7 +129,7 @@ export default function AdminDestinationsPage() {
           <h2 className='text-4xl font-bold'>Gestión de destinos</h2>
           <p className='text-muted'>
             {isDesigner
-              ? 'Podés ver los destinos y editar sus imágenes.'
+              ? 'Puedes ver los destinos y editar sus imágenes.'
               : 'Controla contenido, metadata SEO y visibilidad comercial.'}
           </p>
         </div>
@@ -169,7 +174,12 @@ export default function AdminDestinationsPage() {
         </div>
 
         <div className='overflow-x-auto rounded-xl border border-default'>
-          <table className='w-full min-w-[600px] text-sm'>
+          {tableLoading ? (
+            <div className='flex min-h-[320px] items-center justify-center'>
+              <div className='h-7 w-7 animate-spin rounded-full border-2 border-accent border-t-transparent' />
+            </div>
+          ) : (
+            <table className='w-full min-w-[600px] text-sm'>
             <thead>
               <tr className='border-b border-default bg-surface-secondary text-left text-xs font-medium text-muted'>
                 {!isDesigner && (
@@ -196,7 +206,7 @@ export default function AdminDestinationsPage() {
                       <div className='flex flex-col items-center gap-2'>
                         <Globe className='h-9 w-9 text-muted/40' />
                         <p className='font-semibold text-foreground'>Sin destinos todavía</p>
-                        <p className='text-sm text-muted'>Creá el primer destino para que aparezca aquí.</p>
+                        <p className='text-sm text-muted'>Crea el primer destino para que aparezca aquí.</p>
                       </div>
                     ) : (
                       <p className='text-muted'>No hay destinos que coincidan con la búsqueda.</p>
@@ -266,7 +276,8 @@ export default function AdminDestinationsPage() {
                 );
               })}
             </tbody>
-          </table>
+            </table>
+          )}
         </div>
       </section>
     </div>

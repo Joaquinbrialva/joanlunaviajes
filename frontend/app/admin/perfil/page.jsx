@@ -66,8 +66,8 @@ export default function PerfilPage() {
 
   async function handleSavePassword(e) {
     e.preventDefault();
-    if (!currentPassword) return toastError('Ingresá tu contraseña actual.');
-    if (!newPassword) return toastError('Ingresá la nueva contraseña.');
+    if (!currentPassword) return toastError('Ingresa tu contraseña actual.');
+    if (!newPassword) return toastError('Ingresa la nueva contraseña.');
     if (newPassword.length < 6) return toastError('La nueva contraseña debe tener al menos 6 caracteres.');
     if (newPassword !== confirmPassword) return toastError('Las contraseñas no coinciden.');
     setSavingPassword(true);
@@ -105,7 +105,7 @@ export default function PerfilPage() {
           <Link href='/admin' className='hover:underline'>Panel</Link> / Mi perfil
         </p>
         <h2 className='text-4xl font-bold'>Mi perfil</h2>
-        <p className='text-muted'>Gestioná tu información personal y contraseña.</p>
+        <p className='text-muted'>Gestiona tu información personal y contraseña.</p>
       </section>
 
       {/* Avatar + role */}
@@ -217,7 +217,7 @@ export default function PerfilPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className='w-full rounded-xl border border-default bg-surface-secondary pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40'
-              placeholder='Repetí la nueva contraseña'
+              placeholder='Repite la nueva contraseña'
             />
           </div>
         </div>

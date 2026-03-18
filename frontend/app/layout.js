@@ -1,12 +1,14 @@
-import { Inter, Fira_Code, Cormorant_Garamond, Syne } from 'next/font/google';
+import { Fira_Code, Cormorant_Garamond, Syne, Nunito } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import HeroUIToastProvider from '@/components/ui/heroui-toast-provider';
 import RootShell from '@/components/ui/root-shell';
 
-const inter = Inter({
-	variable: '--font-sans',
+const jakarta = Nunito({
+	variable: '--font-jakarta',
 	subsets: ['latin'],
+	weight: ['400', '500', '600', '700', '800'],
+	display: 'swap',
 });
 
 const fira = Fira_Code({
@@ -30,15 +32,16 @@ const syne = Syne({
 });
 
 export const metadata = {
-	title: 'Joan Luna Viajes',
-	description: 'Agencia de viajes especializada en paquetes y destinos turísticos.',
+	title: 'Joanluna Viajes - Viajes y Turismo',
+	description:
+		'Agencia de viajes especializada en paquetes y destinos turísticos.',
 };
 
 export default function RootLayout({ children }) {
 	return (
 		<html lang='es' suppressHydrationWarning>
 			<body
-				className={`${inter.variable} ${fira.variable} ${cormorant.variable} ${syne.variable} font-sans antialiased`}
+				className={`${jakarta.variable} ${fira.variable} ${cormorant.variable} ${syne.variable} font-sans antialiased`}
 			>
 				<ThemeProvider attribute='class' defaultTheme='light' enableSystem>
 					<RootShell>{children}</RootShell>

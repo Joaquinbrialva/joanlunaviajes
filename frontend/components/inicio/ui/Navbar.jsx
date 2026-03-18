@@ -1,7 +1,7 @@
 'use client'
 import ThemeToggle from "@/app/ThemeToggle";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { LuLayoutDashboard, LuLogOut, LuMenu, LuUser, LuX } from "react-icons/lu";
 
@@ -23,8 +23,18 @@ export default function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [scrolled, setScrolled] = useState(false);
   const userMenuRef = useRef(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const isHome = pathname === '/';
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -57,41 +67,73 @@ export default function Navbar() {
     ? user.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
     : '';
 
+  // isIsland: forma island (padding + bordes redondeados + max-width) — solo al scrollear
+  const isIsland = scrolled;
+  // showBg: fondo visible — en non-home siempre, en home solo al scrollear o con menú abierto
+  const showBg = scrolled || !isHome || (mobileOpen && !scrolled);
+  // darkColors: texto oscuro — en non-home siempre, en home solo al scrollear
+  const active = scrolled || !isHome;
+
+  const ease = 'cubic-bezier(0.4, 0, 0.2, 1)';
+  const dur = '420ms';
+  const transition = `padding ${dur} ${ease}, max-width ${dur} ${ease}, border-radius ${dur} ${ease}, background-color ${dur} ${ease}, box-shadow ${dur} ${ease}, border-color ${dur} ${ease}`;
+
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3">
-      {/* Floating island */}
-      <div className="max-w-7xl mx-auto rounded-2xl bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border border-slate-200/70 dark:border-white/[0.07] shadow-xl shadow-black/[0.07] dark:shadow-black/40 transition-all">
+    <header
+      className="fixed inset-x-0 top-0 z-50"
+      style={{
+        paddingTop: isIsland ? '12px' : '0px',
+        paddingLeft: isIsland ? '12px' : '0px',
+        paddingRight: isIsland ? '12px' : '0px',
+        transition,
+      }}
+    >
+      {/* Island / full-width container */}
+      <div
+        className={`mx-auto backdrop-blur-2xl border ${
+          showBg
+            ? 'bg-white/90 dark:bg-slate-950/90 border-slate-200/70 dark:border-white/[0.07] shadow-xl shadow-black/[0.07] dark:shadow-black/40'
+            : 'bg-transparent border-transparent shadow-none'
+        }`}
+        style={{
+          maxWidth: isIsland ? '80rem' : '100vw',
+          borderRadius: isIsland ? '1rem' : '0rem',
+          transition,
+        }}
+      >
 
-        {/* Main bar */}
-        <div className="px-4 sm:px-5 flex items-center justify-between h-14">
+        {/* Main bar — 3 columnas para centrar los links */}
+        <div className="px-5 sm:px-8 flex items-center h-[68px] gap-4">
 
-          {/* Wordmark */}
-          <Link href="/" className="shrink-0 flex items-baseline select-none">
-            <span
-              className="text-[16px] font-extrabold tracking-tight uppercase text-slate-900 dark:text-white leading-none"
-              style={syneStyle}
-            >
-              JOANLUNA
-            </span>
-            <span
-              className="text-accent leading-none ml-0.5"
-              style={{
-                ...cormorantStyle,
-                fontSize: '19px',
-                textShadow: '0 0 18px rgba(255,126,45,0.4)',
-              }}
-            >
-              viajes
-            </span>
-          </Link>
+          {/* Columna izquierda — Wordmark */}
+          <div className="flex-1 flex items-center">
+            <Link href="/" className="shrink-0 flex items-baseline select-none">
+              <span
+                className={`text-[16px] font-extrabold tracking-tight uppercase leading-none transition-colors duration-300 ${
+                  active ? 'text-slate-900 dark:text-white' : 'text-white'
+                }`}
+                style={syneStyle}
+              >
+                JOANLUNA
+              </span>
+              <span
+                className="text-accent leading-none ml-0.5"
+                style={{ ...cormorantStyle, fontSize: '19px', textShadow: '0 0 18px rgba(255,126,45,0.4)' }}
+              >
+                viajes
+              </span>
+            </Link>
+          </div>
 
-          {/* Nav links — desktop */}
+          {/* Columna central — Nav links */}
           <nav className="hidden md:flex items-center gap-0.5">
             {NAV_LINKS.map((item) => (
               <Link
                 key={item.name}
                 href={item.url}
-                className="relative px-3.5 py-2 text-[13px] font-medium tracking-wide text-slate-600 dark:text-slate-300 rounded-xl hover:text-accent dark:hover:text-accent transition-colors group"
+                className={`relative px-3.5 py-2 text-[13px] font-medium tracking-wide rounded-xl hover:text-accent transition-colors duration-300 group ${
+                  active ? 'text-slate-600 dark:text-slate-300' : 'text-white/85 hover:text-white'
+                }`}
                 style={syneStyle}
               >
                 {item.name}
@@ -100,8 +142,8 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Actions — desktop */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* Columna derecha — Actions + ThemeToggle al final */}
+          <div className="flex-1 hidden md:flex items-center justify-end gap-2">
             {!authLoading && !isStaff && (
               <Link
                 href="/consulta"
@@ -112,19 +154,21 @@ export default function Navbar() {
               </Link>
             )}
 
-            <ThemeToggle />
-
             {!authLoading && (
               user ? (
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen((v) => !v)}
-                    className="flex items-center gap-2 h-8 pl-1 pr-3 rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 transition-all shadow-sm cursor-pointer"
+                    className={`flex items-center gap-2 h-8 pl-1 pr-3 rounded-full border transition-all shadow-sm cursor-pointer ${
+                      active
+                        ? 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10'
+                        : 'border-white/25 bg-white/10 hover:bg-white/20'
+                    }`}
                   >
                     <span className="h-6 w-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center text-[10px] font-bold">
                       {initials}
                     </span>
-                    <span className="text-[13px] font-medium text-slate-700 dark:text-slate-200">
+                    <span className={`text-[13px] font-medium transition-colors duration-300 ${active ? 'text-slate-700 dark:text-slate-200' : 'text-white'}`}>
                       {user.name.split(' ')[0]}
                     </span>
                   </button>
@@ -158,21 +202,31 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  className="flex items-center gap-1.5 h-8 px-3 rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-[13px] font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/10 transition-all shadow-sm"
+                  className={`flex items-center gap-1.5 h-8 px-3 rounded-full border text-[13px] font-medium transition-all shadow-sm ${
+                    active
+                      ? 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/10'
+                      : 'border-white/25 bg-white/10 text-white hover:bg-white/20'
+                  }`}
                 >
                   <LuUser className="w-3.5 h-3.5" />
                   Iniciar sesión
                 </Link>
               )
             )}
+
+            <ThemeToggle />
           </div>
 
           {/* Mobile right */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex md:hidden items-center gap-2 ml-auto">
             <ThemeToggle />
             <button
               onClick={() => setMobileOpen((v) => !v)}
-              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+              className={`p-2 rounded-xl transition-colors ${
+                active
+                  ? 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
+                  : 'text-white hover:bg-white/10'
+              }`}
               aria-label="Menú"
             >
               {mobileOpen ? <LuX className="w-5 h-5" /> : <LuMenu className="w-5 h-5" />}
@@ -181,7 +235,7 @@ export default function Navbar() {
 
         </div>
 
-        {/* Mobile menu — inside island */}
+        {/* Mobile menu */}
         {mobileOpen && (
           <div className="md:hidden border-t border-slate-100 dark:border-white/5 px-4 pb-4 pt-3 space-y-1">
             {NAV_LINKS.map((item) => (
