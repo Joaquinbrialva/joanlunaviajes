@@ -26,6 +26,7 @@ function getStatus(offer) {
 
 export default function AdminOffersPage() {
   const [offers, setOffers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [selected, setSelected] = useState(new Set());
@@ -50,6 +51,9 @@ export default function AdminOffersPage() {
       })
       .catch(() => {
         if (active) setOffers([]);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
       });
     return () => {
       active = false;
@@ -129,6 +133,7 @@ export default function AdminOffersPage() {
   const deleteLabel = pendingDelete?.type === 'batch'
     ? `${selected.size} oferta(s) seleccionada(s)`
     : 'esta oferta';
+  const tableLoading = loading || role === null;
 
   return (
     <div className='space-y-5'>
@@ -166,7 +171,7 @@ export default function AdminOffersPage() {
           <h2 className='text-4xl font-bold'>Gestion de ofertas</h2>
           <p className='text-muted'>
             {role === 'designer'
-              ? 'Subí la imagen de portada de las ofertas pendientes.'
+              ? 'Sube la imagen de portada de las ofertas pendientes.'
               : 'Administra disponibilidad, precios y estado comercial.'}
           </p>
         </div>
@@ -249,7 +254,12 @@ export default function AdminOffersPage() {
         </div>
 
         <div className='overflow-x-auto rounded-xl border border-default'>
-          <table className='w-full min-w-[640px] text-sm'>
+          {tableLoading ? (
+            <div className='flex min-h-[320px] items-center justify-center'>
+              <div className='h-7 w-7 animate-spin rounded-full border-2 border-accent border-t-transparent' />
+            </div>
+          ) : (
+            <table className='w-full min-w-[640px] text-sm'>
             <thead>
               <tr className='border-b border-default bg-surface-secondary text-left text-xs font-medium text-muted'>
                 {role !== 'designer' && (
@@ -278,7 +288,7 @@ export default function AdminOffersPage() {
                       <div className='flex flex-col items-center gap-2'>
                         <ClipboardList className='h-9 w-9 text-muted/40' />
                         <p className='font-semibold text-foreground'>Sin ofertas todavía</p>
-                        <p className='text-sm text-muted'>Creá la primera oferta para que aparezca aquí.</p>
+                        <p className='text-sm text-muted'>Crea la primera oferta para que aparezca aquí.</p>
                       </div>
                     ) : (
                       <p className='text-muted'>No hay ofertas que coincidan con la búsqueda.</p>
@@ -356,7 +366,8 @@ export default function AdminOffersPage() {
                 );
               })}
             </tbody>
-          </table>
+            </table>
+          )}
         </div>
       </section>
     </div>

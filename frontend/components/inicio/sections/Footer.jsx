@@ -1,70 +1,127 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
+
+const syne = { fontFamily: 'var(--font-syne)' };
+const cormorant = { fontFamily: 'var(--font-cormorant)', fontStyle: 'italic' };
+
+const EXPLORE = [
+  { label: 'Destinos', href: '/destinos' },
+  { label: 'Ofertas', href: '/ofertas' },
+  { label: 'Guías de viaje', href: '#' },
+];
+
+const AGENCY = [
+  { label: 'Nosotros', href: '/nosotros' },
+  { label: 'Contacto', href: '/contacto' },
+  { label: 'Blog', href: '#' },
+];
 
 export default function Footer() {
   return (
-    <footer className='w-screen -mx-[calc((100vw-100%)/2)] bg-slate-950 text-slate-100 mt-12'>
-      <div className='max-w-7xl mx-auto px-4 py-10 md:px-8 md:py-12'>
-        <div className='grid grid-cols-1 md:grid-cols-4 gap-8'>
-          <section className='space-y-3'>
-            <p className='text-lg font-bold'>Joan Luna Viajes</p>
-            <p className='text-sm text-slate-300'>
-              Creamos experiencias memorables con itinerarios curados, soporte local y foco en viajes premium.
-            </p>
-          </section>
+    <footer className="w-screen -mx-[calc((100vw-100%)/2)] bg-[#080f16] text-slate-100">
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 pt-16 pb-10">
 
-          <section className='space-y-2 text-sm'>
-            <p className='font-semibold text-white'>Explore</p>
-            <Link href='/destinos' className='block text-slate-300 hover:text-white transition-colors'>
-              Destinos
+        {/* Grid principal */}
+        <div className="grid grid-cols-1 md:grid-cols-[1.8fr_1fr_1fr_1.6fr] gap-10 md:gap-8 pb-12 border-b border-white/[0.07]">
+
+          {/* Marca */}
+          <div className="space-y-4">
+            <Link href="/" className="inline-flex items-baseline gap-0.5 select-none">
+              <span
+                className="text-[15px] font-extrabold tracking-tight uppercase text-white leading-none"
+                style={syne}
+              >
+                JOANLUNA
+              </span>
+              <span
+                className="text-accent leading-none ml-0.5"
+                style={{ ...cormorant, fontSize: '18px', textShadow: '0 0 16px rgba(255,126,45,0.35)' }}
+              >
+                viajes
+              </span>
             </Link>
-            <Link href='/ofertas' className='block text-slate-300 hover:text-white transition-colors'>
-              Experiencias
-            </Link>
-            <a href='#' className='block text-slate-300 hover:text-white transition-colors'>
-              Guias de viaje
-            </a>
-          </section>
-
-          <section className='space-y-2 text-sm'>
-            <p className='font-semibold text-white'>Company</p>
-            <a href='#' className='block text-slate-300 hover:text-white transition-colors'>
-              About us
-            </a>
-            <a href='#' className='block text-slate-300 hover:text-white transition-colors'>
-              Contacto
-            </a>
-            <a href='#' className='block text-slate-300 hover:text-white transition-colors'>
-              Blog
-            </a>
-          </section>
-
-          <section className='space-y-3'>
-            <p className='font-semibold text-white'>Stay inspired</p>
-            <p className='text-sm text-slate-300'>
-              Recibi ofertas y novedades de destinos.
+            <p className="text-sm text-slate-500 leading-relaxed max-w-[260px]">
+              Experiencias de viaje memorables con itinerarios curados y atención 100% personalizada.
             </p>
-            <form className='flex flex-col sm:flex-row gap-2 w-full'>
+          </div>
+
+          {/* Explorar */}
+          <div className="space-y-4">
+            <p
+              className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600"
+              style={syne}
+            >
+              Explorar
+            </p>
+            <nav className="space-y-2.5">
+              {EXPLORE.map(({ label, href }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  className="block text-sm text-slate-500 hover:text-white transition-colors duration-200"
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* Agencia */}
+          <div className="space-y-4">
+            <p
+              className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600"
+              style={syne}
+            >
+              Agencia
+            </p>
+            <nav className="space-y-2.5">
+              {AGENCY.map(({ label, href }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  className="block text-sm text-slate-500 hover:text-white transition-colors duration-200"
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* Newsletter */}
+          <div className="space-y-4">
+            <p
+              className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600"
+              style={syne}
+            >
+              Novedades
+            </p>
+            <p className="text-sm text-slate-500 leading-relaxed">
+              Recibe ofertas y destinos curados directo en tu mail.
+            </p>
+            <form className="flex gap-2">
               <input
-                className='min-w-0 flex-1 rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-400'
-                placeholder='tu@email.com'
-                type='email'
+                type="email"
+                placeholder="tu@email.com"
+                className="flex-1 min-w-0 h-9 bg-white/[0.05] border border-white/[0.08] rounded-lg px-3 text-sm text-slate-300 placeholder:text-slate-700 focus:outline-none focus:border-accent/40 transition-colors"
+                style={syne}
               />
               <button
-                type='button'
-                className='h-10 px-4 rounded-lg bg-accent text-white text-sm font-semibold whitespace-nowrap sm:w-auto w-full'
+                type="button"
+                className="shrink-0 h-9 px-4 rounded-lg bg-accent/90 text-white text-xs font-semibold hover:bg-accent transition-colors"
+                style={syne}
               >
-                Suscribirme
+                Ir
               </button>
             </form>
-          </section>
+          </div>
         </div>
 
-        <div className='mt-8 pt-6 border-t border-slate-800 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-slate-400'>
-          <p>© 2026 Joan Luna Viajes. Todos los derechos reservados.</p>
-          <div className='flex items-center gap-5'>
-            <a href='#' className='hover:text-white transition-colors'>Privacidad</a>
-            <a href='#' className='hover:text-white transition-colors'>Terminos</a>
-            <a href='#' className='hover:text-white transition-colors'>Soporte</a>
+        {/* Footer bottom */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-8 text-xs text-slate-700">
+          <p style={syne}>© 2026 Joanluna Viajes. Todos los derechos reservados.</p>
+          <div className="flex items-center gap-5" style={syne}>
+            <a href="#" className="hover:text-slate-400 transition-colors">Privacidad</a>
+            <a href="#" className="hover:text-slate-400 transition-colors">Términos</a>
+            <a href="#" className="hover:text-slate-400 transition-colors">Soporte</a>
           </div>
         </div>
       </div>

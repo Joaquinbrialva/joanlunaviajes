@@ -9,6 +9,7 @@ import cotizacionesRouter from './routes/cotizaciones.js';
 import uploadRouter from './routes/upload.js';
 import notificationsRouter from './routes/notifications.js';
 import settingsRouter from './routes/settings.js';
+import usersRouter from './routes/users.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -25,6 +26,7 @@ app.use('/api/cotizaciones', cotizacionesRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/users', usersRouter);
 
 app.get('/health', (_, res) => res.json({ status: 'ok' }));
 

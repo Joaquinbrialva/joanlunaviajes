@@ -34,9 +34,8 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen]                   = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const panelRef    = useRef(null);
-  const dismissedIds = useRef(new Set());
-  const router = useRouter();
+  const panelRef = useRef(null);
+  const router   = useRouter();
 
   /* ── fetch ─────────────────────────────────────────────────── */
   const fetchNotifs = useCallback(async () => {
@@ -44,9 +43,7 @@ export default function NotificationBell() {
       const res = await fetch('/api/notifications');
       if (!res.ok) return;
       const data = await res.json();
-      if (Array.isArray(data)) {
-        setNotifications(data.filter((n) => !dismissedIds.current.has(n.id)));
-      }
+      if (Array.isArray(data)) setNotifications(data);
     } catch {}
   }, []);
 
@@ -84,21 +81,33 @@ export default function NotificationBell() {
     setOpen((v) => !v);
     if (wasOpen) { setDeleteConfirm(false); return; }
 
-    // BUG FIX: update UI optimistically — do NOT gate on res.ok
     if (unread > 0) {
+      // Optimistic update
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      fetch('/api/notifications/read-all', { method: 'POST' }).catch(() => {});
+      try {
+        const res = await fetch('/api/notifications/read-all', { method: 'POST' });
+        if (!res.ok) throw new Error();
+      } catch {
+        // Si falló, re-sincronizar con el servidor
+        fetchNotifs();
+      }
     }
   }
 
   /* ── delete read ────────────────────────────────────────────── */
   async function handleDeleteRead() {
-    notifications
-      .filter((n) => n.isRead)
-      .forEach((n) => dismissedIds.current.add(n.id));
+    // Optimistic update
     setNotifications((prev) => prev.filter((n) => !n.isRead));
     setDeleteConfirm(false);
-    fetch('/api/notifications/read', { method: 'DELETE' }).catch(() => {});
+    try {
+      const res = await fetch('/api/notifications/read', { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      // Confirmar estado real del servidor
+      await fetchNotifs();
+    } catch {
+      // Si falló, restaurar desde el servidor
+      fetchNotifs();
+    }
   }
 
   /* ── navigate on click ──────────────────────────────────────── */

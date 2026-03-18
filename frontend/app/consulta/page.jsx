@@ -99,7 +99,7 @@ export default function ConsultaPage() {
     e.preventDefault();
     const phone = `${phonePrefix} ${phoneNumber}`.trim();
     if (!name.trim() || !phoneNumber.trim()) {
-      toastError('Completá nombre y teléfono.');
+      toastError('Completa nombre y teléfono.');
       return;
     }
     setStatus('loading');
@@ -198,7 +198,7 @@ export default function ConsultaPage() {
                 {[
                   { icon: LuShieldCheck, text: 'Registro 100% gratuito, sin tarjeta' },
                   { icon: LuZap,         text: 'Tu consulta llega directamente a un agente con todo el contexto' },
-                  { icon: LuHistory,     text: 'Seguí el estado de todas tus consultas en tiempo real' },
+                  { icon: LuHistory,     text: 'Sigue el estado de todas tus consultas en tiempo real' },
                   { icon: LuBellRing,    text: 'Te avisamos ante novedades y ofertas exclusivas' },
                 ].map(({ icon: Icon, text }) => (
                   <div key={text} className='flex items-center gap-3'>
@@ -246,9 +246,9 @@ export default function ConsultaPage() {
 
         {/* Header */}
         <div className='space-y-2'>
-          <h1 className='text-4xl font-bold'>Consultanos sobre tu viaje</h1>
+          <h1 className='text-4xl font-bold'>Consulta sobre tu viaje</h1>
           <p className='text-muted text-lg'>
-            Contanos qué estás buscando y te armamos una propuesta a medida.
+            Cuéntanos qué estás buscando y te preparamos una propuesta a medida.
           </p>
         </div>
 
@@ -257,7 +257,7 @@ export default function ConsultaPage() {
           {/* Selector de oferta/destino */}
           <div>
             <label className='text-sm font-medium text-foreground block mb-1.5'>
-              ¿Sobre qué querés consultar?
+              ¿Sobre qué quieres consultar?
             </label>
             <HeroSelect
               value={selection}
@@ -318,12 +318,12 @@ export default function ConsultaPage() {
 
             <div>
               <label className='text-sm font-medium text-foreground block mb-1.5'>
-                ¿Qué necesitás?
+                ¿Qué necesitas?
               </label>
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder='Contanos fechas tentativas, cantidad de personas, preferencias...'
+                placeholder='Cuéntanos fechas tentativas, cantidad de personas, preferencias...'
                 rows={4}
                 className='w-full px-3 py-2.5 rounded-xl border border-default bg-field-background text-foreground placeholder:text-field-placeholder focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors text-sm resize-none'
               />
