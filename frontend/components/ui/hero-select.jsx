@@ -15,8 +15,8 @@ export default function HeroSelect({
       selectedKey={value != null && value !== '' ? String(value) : null}
       onSelectionChange={(key) => onValueChange(key != null ? String(key) : '')}
     >
-      <Select.Trigger className={triggerClassName}>
-        <Select.Value />
+      <Select.Trigger className={`flex items-center gap-2 ${triggerClassName}`}>
+        <Select.Value className='flex-1' />
         <Select.Indicator />
       </Select.Trigger>
       <Select.Popover>

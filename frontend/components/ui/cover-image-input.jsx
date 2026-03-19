@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { ProgressCircle } from '@heroui/react';
 import { LuUpload, LuX, LuImage } from 'react-icons/lu';
 
 /**
@@ -13,10 +14,11 @@ import { LuUpload, LuX, LuImage } from 'react-icons/lu';
 export default function CoverImageInput({ value, onChange, disabled = false }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
 
-  async function handleFile(file) {
+  function handleFile(file) {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       setError('Solo se permiten imágenes.');
@@ -27,19 +29,30 @@ export default function CoverImageInput({ value, onChange, disabled = false }) {
       return;
     }
     setError('');
+    setProgress(0);
     setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/upload', { method: 'POST', body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error al subir la imagen.');
-      onChange(data.url);
-    } catch (err) {
-      setError(err.message || 'No se pudo subir la imagen.');
-    } finally {
+    const fd = new FormData();
+    fd.append('file', file);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload');
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          onChange(data.url);
+        } else {
+          setError(data.error || 'Error al subir la imagen.');
+        }
+      } catch {
+        setError('No se pudo subir la imagen.');
+      }
       setUploading(false);
-    }
+    };
+    xhr.onerror = () => { setError('Error de red.'); setUploading(false); };
+    xhr.send(fd);
   }
 
   function handleInputChange(e) {
@@ -100,8 +113,13 @@ export default function CoverImageInput({ value, onChange, disabled = false }) {
         >
           {uploading ? (
             <>
-              <span className='h-5 w-5 animate-spin rounded-full border-2 border-accent border-t-transparent' />
-              <span>Subiendo imagen…</span>
+              <ProgressCircle value={progress} minValue={0} maxValue={100} size='sm' color='accent'>
+                <ProgressCircle.Track>
+                  <ProgressCircle.TrackCircle />
+                  <ProgressCircle.FillCircle />
+                </ProgressCircle.Track>
+              </ProgressCircle>
+              <span>Subiendo… {progress}%</span>
             </>
           ) : (
             <>

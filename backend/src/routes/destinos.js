@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../store/prisma.js';
 import { slugify, uniqueSlug } from '../store/slugify.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
+import { createNotification } from '../store/notifications.js';
 
 const router = Router();
 
@@ -56,6 +57,8 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
     const coverSeed = slugify(`${slug}-${Date.now()}`);
     const isRecommended = Boolean(body.isRecommended);
 
+    const coverImageUrl = String(body.featuredImage || '').trim();
+
     const data = {
       slug,
       name,
@@ -82,9 +85,7 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       },
       highlights: splitLines(body.highlights),
       travelStyles: splitLines(body.travelStyles),
-      featuredImage:
-        String(body.featuredImage || '').trim() ||
-        `https://picsum.photos/seed/${coverSeed}/1200/800`,
+      featuredImage: coverImageUrl || `https://picsum.photos/seed/${coverSeed}/1200/800`,
       gallery: normalizeList(body.gallery),
       stats: {
         annualVisitorsMillions: Number(body.annualVisitorsMillions || 0),
@@ -100,6 +101,7 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       isPopular: Boolean(body.isPopular),
       isFeatured: Boolean(body.isFeatured),
       isRecommended,
+      mediaReady: Boolean(coverImageUrl),
       status: String(body.status || 'draft'),
     };
 
@@ -110,6 +112,18 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       }
       newDestination = await tx.destination.create({ data });
     });
+
+    if (!coverImageUrl) {
+      createNotification({
+        type: 'pending_media',
+        title: 'Nuevo destino pendiente de imagen',
+        body: `El destino "${newDestination.name}" fue creado y está esperando su imagen de portada.`,
+        forRoles: ['designer'],
+        destinationId: newDestination.id,
+        destinationSlug: newDestination.slug,
+        destinationName: newDestination.name,
+      }).catch(() => {});
+    }
 
     res.status(201).json(newDestination);
   } catch {
@@ -125,6 +139,14 @@ router.patch('/:id', requireAuth, async (req, res) => {
 
     const body = req.body;
     const isRecommended = Boolean(body.isRecommended);
+
+    const isDesignerMediaUpload =
+      req.user?.role === 'designer' &&
+      Boolean(body.featuredImage) &&
+      existing.mediaReady === false;
+
+    const newFeaturedImage = String(body.featuredImage || existing.featuredImage).trim();
+    const mediaReady = Boolean(body.featuredImage) ? true : (existing.mediaReady ?? false);
 
     const updateData = {
       name: String(body.name || existing.name).trim(),
@@ -149,7 +171,7 @@ router.patch('/:id', requireAuth, async (req, res) => {
       },
       highlights: splitLines(body.highlights).length > 0 ? splitLines(body.highlights) : existing.highlights,
       travelStyles: splitLines(body.travelStyles).length > 0 ? splitLines(body.travelStyles) : existing.travelStyles,
-      featuredImage: String(body.featuredImage || existing.featuredImage).trim(),
+      featuredImage: newFeaturedImage,
       gallery: normalizeList(body.gallery).length > 0 ? normalizeList(body.gallery) : existing.gallery,
       stats: {
         annualVisitorsMillions: Number(body.annualVisitorsMillions ?? existing.stats.annualVisitorsMillions),
@@ -163,7 +185,10 @@ router.patch('/:id', requireAuth, async (req, res) => {
       isPopular: Boolean(body.isPopular),
       isFeatured: Boolean(body.isFeatured),
       isRecommended,
-      status: String(body.status || existing.status),
+      mediaReady,
+      status: isDesignerMediaUpload
+        ? 'published'
+        : String(body.status || existing.status),
     };
 
     let updated;
@@ -173,6 +198,18 @@ router.patch('/:id', requireAuth, async (req, res) => {
       }
       updated = await tx.destination.update({ where: { id: req.params.id }, data: updateData });
     });
+
+    if (isDesignerMediaUpload) {
+      createNotification({
+        type: 'media_uploaded',
+        title: 'Imagen subida por el diseñador',
+        body: `El diseñador subió la imagen para el destino "${updateData.name}". El destino fue publicado automáticamente.`,
+        forRoles: ['admin', 'agent'],
+        destinationId: existing.id,
+        destinationSlug: existing.slug,
+        destinationName: updateData.name,
+      }).catch(() => {});
+    }
 
     res.json(updated);
   } catch (err) {

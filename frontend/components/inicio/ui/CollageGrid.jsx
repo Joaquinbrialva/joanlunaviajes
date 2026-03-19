@@ -34,7 +34,7 @@ function DestinationCard({ destination: dest }) {
     <Link href={`/destinos/${dest.slug}`} className='group block'>
       <article
         className='relative overflow-hidden rounded-2xl transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-2xl group-hover:shadow-black/25'
-        style={{ height: '250px' }}
+        style={{ aspectRatio: '3 / 2' }}
       >
         {/* Image */}
         {dest.featuredImage ? (

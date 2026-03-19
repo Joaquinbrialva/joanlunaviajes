@@ -1,5 +1,5 @@
 // Lista curada de aerolíneas relevantes para rutas desde Argentina / Latinoamérica
-// Código IATA de 2 letras usado para logos: https://content.airhex.com/content/logos/airlines_{IATA}_50_50_s.png
+// Logos servidos por Aviasales CDN (pics.avs.io) — gratuito, sin API key, por código IATA
 
 const airlines = [
   // Latinoamérica
@@ -65,6 +65,12 @@ const airlines = [
 
 export default airlines;
 
-export function getLogoUrl(iata) {
-  return `https://content.airhex.com/content/logos/airlines_${iata}_50_50_s.png`;
+/**
+ * Devuelve la URL del logo de la aerolínea según su código IATA.
+ * Usa el CDN de Aviasales (pics.avs.io) — gratuito, sin API key.
+ * size: ancho x alto en px (el CDN acepta cualquier valor)
+ */
+export function getLogoUrl(iata, size = 100) {
+  if (!iata) return null;
+  return `https://pics.avs.io/${size}/${size}/${iata.toUpperCase()}.png`;
 }

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button, Checkbox, NumberField, Spinner } from '@heroui/react';
+import { Button, Checkbox, Description, NumberField, Spinner } from '@heroui/react';
 import { Check, Minus, Plus } from 'lucide-react';
 import { toastError } from '@/lib/toast';
 import HeroSelect from '@/components/ui/hero-select';
@@ -78,8 +78,8 @@ const initialForm = {
   startDate: '',
   endDate: '',
   availableMonths: '',
-  days: 1,
-  nights: 0,
+  days: null,
+  nights: null,
   airline: '',
   airlineIata: '',
   flightType: 'direct',
@@ -121,27 +121,24 @@ function StepperBar({ pasos, paso, maxStep, onGoToStep }) {
                 disabled={locked}
                 className='flex flex-col items-center gap-2 group disabled:cursor-not-allowed'
               >
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200 ${
-                  active
-                    ? 'bg-accent text-white shadow-lg shadow-accent/25 scale-110'
-                    : done
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-surface-secondary border-2 border-default text-muted/50'
-                }`}>
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200 ${active
+                  ? 'bg-accent text-white shadow-lg shadow-accent/25 scale-110'
+                  : done
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-surface-secondary border-2 border-default text-muted/50'
+                  }`}>
                   {done ? <Check size={15} strokeWidth={2.5} /> : step.id}
                 </div>
-                <span className={`text-[10px] uppercase tracking-[0.12em] font-bold whitespace-nowrap transition-colors ${
-                  active ? 'text-accent' : done ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted/60'
-                }`}>
+                <span className={`text-[10px] uppercase tracking-[0.12em] font-bold whitespace-nowrap transition-colors ${active ? 'text-accent' : done ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted/60'
+                  }`}>
                   {step.label}
                 </span>
               </button>
             </div>
             {i < pasos.length - 1 && (
               <div className='flex-1 flex items-start pt-[18px] px-1'>
-                <div className={`h-[2px] w-full rounded-full transition-colors duration-300 ${
-                  paso > step.id ? 'bg-emerald-400 dark:bg-emerald-600' : 'bg-border'
-                }`} />
+                <div className={`h-[2px] w-full rounded-full transition-colors duration-300 ${paso > step.id ? 'bg-emerald-400 dark:bg-emerald-600' : 'bg-border'
+                  }`} />
               </div>
             )}
           </div>
@@ -169,9 +166,8 @@ function FL({ children }) {
 function FInput({ error, className = '', ...props }) {
   return (
     <input
-      className={`h-11 px-3.5 rounded-xl border w-full text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/60 transition-all ${
-        error ? 'border-rose-400 ring-2 ring-rose-400/20' : 'border-default hover:border-muted/50'
-      } ${className}`}
+      className={`h-11 px-3.5 rounded-xl border w-full text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/60 transition-all ${error ? 'border-rose-400 ring-2 ring-rose-400/20' : 'border-default hover:border-muted/50'
+        } ${className}`}
       {...props}
     />
   );
@@ -219,11 +215,10 @@ function PillToggle({ options, value, onChange }) {
           key={op.value}
           type='button'
           onClick={() => onChange(op.value)}
-          className={`h-9 px-4 rounded-full text-sm font-semibold border transition-all duration-150 ${
-            value === op.value
-              ? 'bg-accent text-white border-accent shadow-sm shadow-accent/20'
-              : 'bg-surface border-default text-muted hover:border-accent/40 hover:text-foreground'
-          }`}
+          className={`h-9 px-4 rounded-full text-sm font-semibold border transition-all duration-150 ${value === op.value
+            ? 'bg-accent text-white border-accent shadow-sm shadow-accent/20'
+            : 'bg-surface border-default text-muted hover:border-accent/40 hover:text-foreground'
+            }`}
         >
           {op.label}
         </button>
@@ -237,11 +232,10 @@ function LuggageChip({ label, checked, onChange }) {
     <button
       type='button'
       onClick={() => onChange(!checked)}
-      className={`h-8 px-4 rounded-full text-xs font-semibold border transition-all duration-150 flex items-center gap-1.5 ${
-        checked
-          ? 'bg-accent/10 text-accent border-accent/30'
-          : 'bg-surface border-default text-muted hover:border-accent/30'
-      }`}
+      className={`h-8 px-4 rounded-full text-xs font-semibold border transition-all duration-150 flex items-center gap-1.5 ${checked
+        ? 'bg-accent/10 text-accent border-accent/30'
+        : 'bg-surface border-default text-muted hover:border-accent/30'
+        }`}
     >
       {checked && <Check size={11} strokeWidth={2.5} />}
       {label}
@@ -252,13 +246,15 @@ function LuggageChip({ label, checked, onChange }) {
 function CheckPill({ label, checked, onChange, note }) {
   return (
     <div>
-      <Checkbox isSelected={checked} onChange={onChange} className='flex items-center gap-2.5 cursor-pointer group'>
-        <Checkbox.Control className='w-5 h-5 rounded-md border-2 border-default flex items-center justify-center bg-surface data-selected:bg-accent data-selected:border-accent transition-all shrink-0 group-hover:border-accent/50'>
-          <Checkbox.Indicator className='text-white w-full h-full flex items-center justify-center' />
+      <Checkbox isSelected={checked} onChange={onChange}>
+        <Checkbox.Control>
+          <Checkbox.Indicator />
         </Checkbox.Control>
-        <Checkbox.Content className='text-sm font-medium'>{label}</Checkbox.Content>
+        <Checkbox.Content>
+          <span className='text-sm font-medium'>{label}</span>
+        </Checkbox.Content>
       </Checkbox>
-      {note && <p className='text-xs text-muted ml-7 mt-0.5'>{note}</p>}
+      {note && <Description>{note}</Description>}
     </div>
   );
 }
@@ -289,7 +285,7 @@ export default function AdminNewOfferPage() {
     fetch('/api/auth/me')
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => { if (data?.user) setRole(data.user.role); })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -367,7 +363,7 @@ export default function AdminNewOfferPage() {
     return (
       <div className='flex flex-col items-center justify-center gap-4 py-20 text-center'>
         <div className='grid h-14 w-14 place-content-center rounded-2xl bg-rose-100 text-rose-500 dark:bg-rose-900/30'>
-          <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10'/><line x1='12' y1='8' x2='12' y2='12'/><line x1='12' y1='16' x2='12.01' y2='16'/></svg>
+          <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' /><line x1='12' y1='8' x2='12' y2='12' /><line x1='12' y1='16' x2='12.01' y2='16' /></svg>
         </div>
         <div>
           <h2 className='text-2xl font-bold'>Sin permiso</h2>

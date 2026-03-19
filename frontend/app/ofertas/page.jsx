@@ -5,10 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button, Chip, Spinner } from '@heroui/react';
-import { FaStar } from 'react-icons/fa';
-import { LuArrowRight, LuClock3, LuMapPin, LuSearch, LuSlidersHorizontal, LuX } from 'react-icons/lu';
+import { LuArrowRight, LuClock3, LuMapPin, LuSearch, LuSlidersHorizontal, LuX, LuStar, LuPlane, LuBedDouble, LuTag } from 'react-icons/lu';
 import HeroSelect from '@/components/ui/hero-select';
 import DatePickerField from '@/components/ui/date-picker-field';
+import { getLogoUrl } from '@/lib/airlines';
 
 const syne = { fontFamily: 'var(--font-syne)' };
 const cormorant = { fontFamily: 'var(--font-cormorant)' };
@@ -374,82 +374,146 @@ function OfferCard({ offer }) {
   const hasPrice = price > 0;
   const originalPrice = offer.pricing?.originalPrice;
   const discount = offer.pricing?.discountPercentage;
+  const hasDiscount = discount > 0 && originalPrice && originalPrice > price;
   const cover = offer.images?.find((img) => img.isCover) || offer.images?.[0];
-  const fullStars = Math.round(offer.rating?.value || 0);
+  const currency = offer.pricing?.currency || 'USD';
+  const keyIncludes = (offer.includes || []).filter(Boolean).slice(0, 3);
 
   return (
     <Link
       href={`/ofertas/${offer.slug}`}
-      className="group block rounded-2xl overflow-hidden border border-default bg-surface hover:shadow-xl hover:shadow-black/8 hover:-translate-y-0.5 transition-all duration-300"
+      className="group block h-full"
     >
-      {/* Imagen */}
-      <div className="relative h-52 overflow-hidden">
-        {cover?.url ? (
-          <Image
-            src={cover.url}
-            alt={cover.alt || offer.title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-        ) : (
-          <div className="h-full w-full bg-surface-tertiary" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent" />
+      <article className="h-full bg-surface rounded-2xl overflow-hidden flex flex-col border border-default transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/10 hover:border-accent/25">
 
-        {discount > 0 ? (
-          <span className="absolute top-3 left-3 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full" style={syne}>-{discount}% OFF</span>
-        ) : offer.isFeatured ? (
-          <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-slate-900 text-[10px] font-bold px-2.5 py-1 rounded-full" style={syne}>Más vendida</span>
-        ) : null}
+        {/* Imagen */}
+        <div className="relative h-52 overflow-hidden shrink-0">
+          {cover?.url ? (
+            <Image
+              src={cover.url}
+              alt={cover.alt || offer.title}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-[1.06]"
+            />
+          ) : (
+            <div className="h-full w-full bg-surface-tertiary" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
 
-        <div className="absolute bottom-3 left-3 flex items-center gap-1 text-white/75 text-xs" style={syne}>
-          <LuMapPin size={10} className="shrink-0" />
-          <span className="truncate max-w-[150px]">{offer.location.city}, {offer.location.country}</span>
-        </div>
-      </div>
-
-      {/* Contenido */}
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-0.5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <FaStar key={i} size={10} className={i < fullStars ? 'text-amber-400' : 'text-slate-200 dark:text-slate-700'} />
-            ))}
-            {offer.rating?.value > 0 && <span className="ml-1 text-xs text-muted" style={syne}>{offer.rating.value}</span>}
+          {/* Location */}
+          <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/45 backdrop-blur-sm rounded-full px-2.5 py-1">
+            <LuMapPin size={9} className="text-white/80 shrink-0" />
+            <span className="text-white text-[10px] font-semibold truncate max-w-[150px]">
+              {offer.location.city}, {offer.location.country}
+            </span>
           </div>
-          <span className="flex items-center gap-1 text-xs text-muted" style={syne}>
-            <LuClock3 size={10} /> {offer.duration.days} días
-          </span>
+
+          {/* Badge */}
+          {hasDiscount ? (
+            <span className="absolute top-3 right-3 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-orange-500/30" style={syne}>
+              -{discount}% OFF
+            </span>
+          ) : offer.isFeatured ? (
+            <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-slate-900 text-[10px] font-bold px-2.5 py-1 rounded-full" style={syne}>
+              Más vendida
+            </span>
+          ) : null}
         </div>
 
-        <h3 className="font-semibold text-[15px] text-foreground mb-3 group-hover:text-accent transition-colors line-clamp-2 leading-snug">
-          {offer.title}
-        </h3>
+        {/* Stats strip */}
+        <div className="flex items-center gap-3 px-4 py-2 bg-surface-secondary border-b border-default">
+          {offer.rating?.value > 0 && (
+            <span className="flex items-center gap-1 text-[11px] font-bold text-foreground shrink-0">
+              <LuStar size={10} fill="currentColor" className="text-amber-400" />
+              {offer.rating.value}
+            </span>
+          )}
+          {offer.duration?.days > 0 && (
+            <span className="flex items-center gap-1 text-[11px] text-muted shrink-0" style={syne}>
+              <LuClock3 size={10} />
+              {offer.duration.days} días
+            </span>
+          )}
+          {offer.airline?.name && (
+            <span className="flex items-center gap-1.5 text-[11px] text-muted truncate" style={syne}>
+              {offer.airline.iata ? (
+                <img
+                  src={getLogoUrl(offer.airline.iata)}
+                  alt=''
+                  className='h-4 w-6 object-contain shrink-0'
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              ) : (
+                <LuPlane size={10} className="shrink-0" />
+              )}
+              {offer.airline.name}
+            </span>
+          )}
+          {offer.hotel?.stars > 0 && !offer.airline?.name && (
+            <span className="flex items-center gap-1 text-[11px] text-muted shrink-0" style={syne}>
+              <LuBedDouble size={10} />
+              {'★'.repeat(offer.hotel.stars)}
+            </span>
+          )}
+        </div>
 
-        <div className="flex items-end justify-between pt-3 border-t border-default">
-          <div>
-            {hasPrice && originalPrice && originalPrice > price ? (
-              <p className="text-xs text-muted line-through leading-none mb-0.5">
-                {formatCardPrice(originalPrice, offer.pricing.currency)}
-              </p>
-            ) : <div className="h-3.5" />}
-            {hasPrice ? (
-              <>
-                <p className="text-lg font-bold text-accent leading-none">
-                  {formatCardPrice(price, offer.pricing.currency)}
+        {/* Contenido */}
+        <div className="p-4 flex flex-col grow">
+          <h3
+            className="leading-snug line-clamp-2 font-bold group-hover:text-accent transition-colors duration-300 mb-2"
+            style={{ fontSize: '1rem' }}
+          >
+            {offer.title}
+          </h3>
+
+          {/* Includes tags */}
+          {keyIncludes.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-auto mt-1">
+              {keyIncludes.map((item, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1 text-[10px] font-medium text-muted bg-surface-tertiary rounded-full px-2 py-0.5 leading-none"
+                  style={syne}
+                >
+                  <LuTag size={8} className="text-accent/70 shrink-0" />
+                  {item}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Price row */}
+          <div className="flex items-end justify-between gap-2 mt-4 pt-3 border-t border-default">
+            <div>
+              {hasPrice && hasDiscount && originalPrice && (
+                <p className="text-xs text-muted line-through leading-none mb-0.5">
+                  {formatCardPrice(originalPrice, currency)}
                 </p>
-                <p className="text-[11px] text-muted mt-0.5">/persona</p>
-              </>
-            ) : (
-              <div className="h-[2.25rem]" />
-            )}
+              )}
+              {hasPrice ? (
+                <>
+                  <p className="text-xl font-bold text-accent leading-none">
+                    {formatCardPrice(price, currency)}
+                  </p>
+                  <p className="text-[11px] text-muted mt-0.5" style={syne}>
+                    /{offer.pricing?.pricePer || 'persona'}
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm font-medium text-muted italic">Consultar precio</p>
+              )}
+            </div>
+            <span
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-accent px-4 text-[11px] font-semibold text-white shadow-md shadow-orange-500/20 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-orange-500/30 group-hover:bg-orange-500 shrink-0"
+              style={syne}
+            >
+              {hasPrice ? 'Ver oferta' : 'Consultar'} <LuArrowRight size={12} />
+            </span>
           </div>
-          <span className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-accent px-4 text-[11px] font-semibold text-white shadow-md shadow-orange-500/20 transition-all duration-300 group-hover:bg-orange-500 group-hover:shadow-lg group-hover:shadow-orange-500/30 ${hasPrice ? '' : 'w-full'}`}>
-            {hasPrice ? 'Ver oferta →' : 'Consultar precio →'}
-          </span>
         </div>
-      </div>
+
+      </article>
     </Link>
   );
 }

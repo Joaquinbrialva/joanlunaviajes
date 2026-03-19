@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Spinner } from '@heroui/react';
+import { Spinner, ProgressCircle } from '@heroui/react';
 import {
   LuUpload, LuImage, LuVideo, LuCheck,
   LuInfo, LuChevronDown, LuSave, LuRotateCcw, LuCrop, LuX,
@@ -20,7 +20,9 @@ export default function AparienciaPage() {
   const [pendingCrop, setPendingCrop] = useState(null);
 
   const [uploadingMedia, setUploadingMedia] = useState(false);
+  const [uploadMediaProgress, setUploadMediaProgress] = useState(0);
   const [uploadingPoster, setUploadingPoster] = useState(false);
+  const [uploadPosterProgress, setUploadPosterProgress] = useState(0);
   const [saving, setSaving] = useState(false);
   const [role, setRole] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -57,21 +59,44 @@ export default function AparienciaPage() {
   );
   const canSave = hasChanges && !!mediaUrl && !uploadingMedia && !uploadingPoster && !saving && !pendingCrop;
 
-  async function uploadFile(file, setUploading, setUrl) {
+  function uploadFile(file, setUploading, setUrl, setProgress = () => {}) {
+    const MAX_MB = 10;
+    if (file.size > MAX_MB * 1024 * 1024) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      toastError(
+        `El archivo pesa ${sizeMB} MB. El límite es ${MAX_MB} MB.\nUsá un video más corto o comprímelo antes de subir.`,
+        'Archivo demasiado grande'
+      );
+      return Promise.resolve();
+    }
+    setProgress(0);
     setUploading(true);
     const fd = new FormData();
     fd.append('file', file);
     fd.append('folder', 'hero');
-    try {
-      const res = await fetch('/api/upload/media', { method: 'POST', body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || 'Error al subir.');
-      setUrl(data.url);
-    } catch (err) {
-      toastError(err, 'Error al subir');
-    } finally {
-      setUploading(false);
-    }
+    return new Promise((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/upload/media');
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));
+      };
+      xhr.onload = () => {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          if (xhr.status >= 200 && xhr.status < 300) {
+            setUrl(data.url);
+          } else {
+            toastError(data?.error || 'Error al subir.', 'Error al subir');
+          }
+        } catch {
+          toastError('Error al subir.', 'Error al subir');
+        }
+        setUploading(false);
+        resolve();
+      };
+      xhr.onerror = () => { toastError('Error de red.', 'Error al subir'); setUploading(false); resolve(); };
+      xhr.send(fd);
+    });
   }
 
   async function handleSave() {
@@ -107,7 +132,7 @@ export default function AparienciaPage() {
     setFocalPoint(fp);
     if (pendingCrop?.file) {
       // New file — upload it now
-      await uploadFile(pendingCrop.file, setUploadingMedia, setMediaUrl);
+      await uploadFile(pendingCrop.file, setUploadingMedia, setMediaUrl, setUploadMediaProgress);
     }
     // Revoke local object URL if it was one
     if (pendingCrop?.src?.startsWith('blob:')) {
@@ -171,8 +196,14 @@ export default function AparienciaPage() {
           {/* Viewport simulado */}
           <div className="relative aspect-video bg-black">
             {uploadingMedia ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-                <Spinner color="white" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/70">
+                <ProgressCircle value={uploadMediaProgress} minValue={0} maxValue={100} size="md" color="default">
+                  <ProgressCircle.Track>
+                    <ProgressCircle.TrackCircle />
+                    <ProgressCircle.FillCircle />
+                  </ProgressCircle.Track>
+                </ProgressCircle>
+                <span className="text-[11px] font-semibold text-white/70">{uploadMediaProgress}%</span>
               </div>
             ) : mediaUrl && type === 'image' ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -287,6 +318,7 @@ export default function AparienciaPage() {
                 onConfirm={handleCropConfirm}
                 onCancel={handleCropCancel}
                 uploading={uploadingMedia}
+                uploadProgress={uploadMediaProgress}
               />
             ) : (
               <>
@@ -298,8 +330,13 @@ export default function AparienciaPage() {
                 >
                   {uploadingMedia ? (
                     <div className="flex flex-col items-center gap-2">
-                      <Spinner color="primary" size="sm" />
-                      <p className="text-xs text-muted">Subiendo archivo...</p>
+                      <ProgressCircle value={uploadMediaProgress} minValue={0} maxValue={100} size="sm" color="accent">
+                        <ProgressCircle.Track>
+                          <ProgressCircle.TrackCircle />
+                          <ProgressCircle.FillCircle />
+                        </ProgressCircle.Track>
+                      </ProgressCircle>
+                      <p className="text-xs text-muted">Subiendo… {uploadMediaProgress}%</p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-2.5">
@@ -311,7 +348,7 @@ export default function AparienciaPage() {
                           {type === 'image' ? 'Subir imagen' : 'Subir video'}
                         </p>
                         <p className="text-xs text-muted mt-0.5">
-                          {type === 'image' ? 'JPG, PNG, WebP — máx. 8 MB' : 'MP4, WebM — máx. 100 MB'}
+                          {type === 'image' ? 'JPG, PNG, WebP — máx. 8 MB' : 'MP4, WebM — máx. 10 MB'}
                         </p>
                       </div>
                     </div>
@@ -353,7 +390,7 @@ export default function AparienciaPage() {
                   setPendingCrop({ src: localUrl, file: f });
                 } else {
                   // Video: upload directly (no crop)
-                  uploadFile(f, setUploadingMedia, setMediaUrl);
+                  uploadFile(f, setUploadingMedia, setMediaUrl, setUploadMediaProgress);
                 }
                 e.target.value = '';
               }}
@@ -376,8 +413,13 @@ export default function AparienciaPage() {
               >
                 {uploadingPoster ? (
                   <div className="flex items-center justify-center gap-2">
-                    <Spinner color="primary" size="sm" />
-                    <span className="text-xs text-muted">Subiendo...</span>
+                    <ProgressCircle value={uploadPosterProgress} minValue={0} maxValue={100} size="sm" color="accent">
+                      <ProgressCircle.Track>
+                        <ProgressCircle.TrackCircle />
+                        <ProgressCircle.FillCircle />
+                      </ProgressCircle.Track>
+                    </ProgressCircle>
+                    <span className="text-xs text-muted">Subiendo… {uploadPosterProgress}%</span>
                   </div>
                 ) : posterUrl ? (
                   <div className="flex items-center gap-3">
@@ -405,7 +447,7 @@ export default function AparienciaPage() {
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  if (f) uploadFile(f, setUploadingPoster, setPosterUrl);
+                  if (f) uploadFile(f, setUploadingPoster, setPosterUrl, setUploadPosterProgress);
                   e.target.value = '';
                 }}
               />
@@ -494,7 +536,7 @@ function Tip({ children }) {
 // Drag-to-crop estilo Instagram. El usuario arrastra y hace zoom sobre la imagen
 // dentro del frame del hero para elegir qué parte se ve.
 
-function CropEditor({ src, initialFocalPoint, onConfirm, onCancel, uploading }) {
+function CropEditor({ src, initialFocalPoint, onConfirm, onCancel, uploading, uploadProgress = 0 }) {
   const containerRef = useRef(null);
   const imgRef = useRef(null);
   const dragRef = useRef(null);   // { startMouseX, startMouseY, startOx, startOy }
@@ -648,10 +690,15 @@ function CropEditor({ src, initialFocalPoint, onConfirm, onCancel, uploading }) 
           />
         )}
 
-        {/* Spinner cargando */}
+        {/* Cargando imagen */}
         {!natural && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-            <Spinner color="white" size="sm" />
+            <ProgressCircle isIndeterminate size="sm" color="default">
+              <ProgressCircle.Track>
+                <ProgressCircle.TrackCircle />
+                <ProgressCircle.FillCircle />
+              </ProgressCircle.Track>
+            </ProgressCircle>
           </div>
         )}
 
@@ -698,10 +745,19 @@ function CropEditor({ src, initialFocalPoint, onConfirm, onCancel, uploading }) 
           disabled={uploading || !natural}
           className="flex-1 h-10 rounded-xl bg-accent text-white text-[13px] font-semibold hover:bg-orange-600 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
-          {uploading
-            ? <><Spinner color="current" size="sm" /> Subiendo...</>
-            : <><LuCrop className="w-3.5 h-3.5" /> Confirmar recorte</>
-          }
+          {uploading ? (
+            <>
+              <ProgressCircle value={uploadProgress} minValue={0} maxValue={100} size="sm" color="default">
+                <ProgressCircle.Track>
+                  <ProgressCircle.TrackCircle />
+                  <ProgressCircle.FillCircle />
+                </ProgressCircle.Track>
+              </ProgressCircle>
+              Subiendo… {uploadProgress}%
+            </>
+          ) : (
+            <><LuCrop className="w-3.5 h-3.5" /> Confirmar recorte</>
+          )}
         </button>
         <button
           type="button"

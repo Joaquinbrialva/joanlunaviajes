@@ -6,7 +6,11 @@ import { formatCurrency } from '@/util/utils';
 import { fetchDestination, fetchDestinations, fetchOffers } from '@/lib/api';
 
 function getOfferPrice(offer) {
-  return offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || 0;
+  return offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || null;
+}
+
+function normalize(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').trim();
 }
 
 export async function generateMetadata({ params }) {
@@ -40,10 +44,12 @@ export default async function DestinationDetailPage({ params }) {
     .filter((item) => item.slug !== destination.slug && item.continent === destination.continent)
     .slice(0, 4);
 
-  const byCountry = allOffers.filter((o) => o.location.country === destination.country);
+  const byCountry = allOffers.filter(
+    (o) => normalize(o.location.country) === normalize(destination.country)
+  );
   const relatedOffers = byCountry.length > 0
     ? byCountry.slice(0, 3)
-    : allOffers.filter((o) => o.isFeatured).slice(0, 3);
+    : allOffers.slice(0, 3);
 
   return (
     <div className='space-y-14 pb-12'>
@@ -160,14 +166,20 @@ export default async function DestinationDetailPage({ params }) {
 
                   <div className='mt-auto pt-3 border-t border-default flex items-end justify-between gap-3'>
                     <div>
-                      <p className='text-sm text-muted'>Desde</p>
-                      <p className='text-3xl font-bold text-accent'>
-                        {formatCurrency({ amount: price, currency: offer.pricing.currency })}
-                      </p>
+                      {price ? (
+                        <>
+                          <p className='text-sm text-muted'>Desde</p>
+                          <p className='text-3xl font-bold text-accent'>
+                            {formatCurrency({ amount: price, currency: offer.pricing.currency })}
+                          </p>
+                        </>
+                      ) : (
+                        <p className='text-lg font-semibold text-muted italic'>Consultar precio</p>
+                      )}
                     </div>
                     <Link
                       href={`/ofertas/${offer.slug}`}
-                      className='inline-flex items-center justify-center h-10 px-4 rounded-md bg-slate-900 text-white cursor-pointer'
+                      className='inline-flex items-center justify-center h-10 px-4 rounded-md bg-accent text-white font-semibold text-sm transition-colors hover:bg-orange-600 cursor-pointer'
                     >
                       Ver oferta
                     </Link>
