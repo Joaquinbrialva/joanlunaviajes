@@ -183,13 +183,15 @@ function NumField({ label, value, onChange, min = 0, max, withButtons = false, f
 function CheckPill({ label, checked, onChange, note }) {
   return (
     <div>
-      <Checkbox isSelected={checked} onChange={onChange} className='flex items-center gap-2.5 cursor-pointer group'>
-        <Checkbox.Control className='w-5 h-5 rounded-md border-2 border-default flex items-center justify-center bg-surface data-selected:bg-accent data-selected:border-accent transition-all shrink-0 group-hover:border-accent/50'>
-          <Checkbox.Indicator className='text-white w-full h-full flex items-center justify-center' />
+      <Checkbox isSelected={checked} onChange={onChange}>
+        <Checkbox.Control>
+          <Checkbox.Indicator />
         </Checkbox.Control>
-        <Checkbox.Content className='text-sm font-medium'>{label}</Checkbox.Content>
+        <Checkbox.Content>
+          <span className='text-sm font-medium'>{label}</span>
+        </Checkbox.Content>
       </Checkbox>
-      {note && <p className='text-xs text-muted ml-7 mt-0.5'>{note}</p>}
+      {note && <p className='text-xs text-muted mt-0.5 ml-6'>{note}</p>}
     </div>
   );
 }

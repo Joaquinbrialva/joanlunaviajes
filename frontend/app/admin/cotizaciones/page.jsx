@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { AlertDialog, Button, Table, toast } from '@heroui/react';
 import { MessageCircle, Trash2, ChevronRight } from 'lucide-react';
@@ -13,6 +13,10 @@ import {
 import { toastError } from '@/lib/toast';
 
 export default function AdminInquiriesPage() {
+  return <Suspense><AdminInquiriesContent /></Suspense>;
+}
+
+function AdminInquiriesContent() {
   const [inquiries, setInquiries]         = useState([]);
   const [loading, setLoading]             = useState(true);
   const [statusFilter, setStatusFilter]   = useState('all');

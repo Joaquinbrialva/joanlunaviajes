@@ -51,7 +51,7 @@ export default function WhyChoose() {
             >
               {/* Número decorativo */}
               <span
-                className="block text-[64px] leading-none font-light text-foreground/[0.07] dark:text-white/[0.06] select-none mb-6"
+                className="block text-[64px] leading-none font-light text-foreground/20 dark:text-white/10 select-none mb-6"
                 style={cormorant}
               >
                 {num}

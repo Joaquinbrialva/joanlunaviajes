@@ -22,6 +22,10 @@ const nextConfig = {
 			},
 			{
 				protocol: 'https',
+				hostname: 'pics.avs.io',
+			},
+			{
+				protocol: 'https',
 				hostname: '*.supabase.co',
 			},
 			{

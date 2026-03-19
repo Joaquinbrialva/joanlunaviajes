@@ -82,8 +82,8 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       tags: ['Experiencia', 'Turismo', 'Premium'],
       rating: { value: 4.7, reviewsCount: 0 },
       duration: {
-        nights: Math.max(1, Number(body.nights || 1)),
-        days: Math.max(1, Number(body.days || 1)),
+        nights: body.nights != null && body.nights !== '' ? Math.max(0, Number(body.nights)) : null,
+        days: body.days != null && body.days !== '' ? Math.max(1, Number(body.days)) : null,
       },
       pricing: {
         currency: String(body.currency || 'USD'),
@@ -247,8 +247,8 @@ router.patch('/:id', requireAuth, async (req, res) => {
         airport: String(body.destinationAirport || '').trim() || 'N/A',
       },
       duration: {
-        nights: Math.max(1, Number(body.nights || 1)),
-        days: Math.max(1, Number(body.days || 1)),
+        nights: body.nights != null && body.nights !== '' ? Math.max(0, Number(body.nights)) : null,
+        days: body.days != null && body.days !== '' ? Math.max(1, Number(body.days)) : null,
       },
       pricing: {
         currency: String(body.currency || 'USD'),

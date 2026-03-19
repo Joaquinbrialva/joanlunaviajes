@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
-import { Switch } from '@heroui/react';
+import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
+import { Popover } from '@heroui/react';
 import NotificationBell from '@/components/admin/notification-bell';
 import {
   LuChevronUp,
@@ -78,7 +78,7 @@ function getInitials(name) {
 
 function NavList({ user, pathname, onLinkClick }) {
   return (
-    <nav className='flex-1 overflow-y-auto px-3 py-4 space-y-6'>
+    <nav className='flex-1 overflow-y-scroll px-3 py-4 space-y-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
       {NAV_GROUPS.map((group) => {
         const visible = group.links.filter((item) => {
           if (item.hideForRoles?.includes(user?.role)) return false;
@@ -171,7 +171,6 @@ export default function AdminLayout({ children }) {
   const [menuOpen, setMenuOpen]       = useState(false);
   const [mobileOpen, setMobileOpen]   = useState(false);
   const [mounted, setMounted]         = useState(false);
-  const menuRef                       = useRef(null);
 
   const { resolvedTheme, setTheme } = useTheme();
 
@@ -184,21 +183,11 @@ export default function AdminLayout({ children }) {
       .catch(() => {});
   }, []);
 
-  // Close user popup on outside click
-  useEffect(() => {
-    function onOut(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
-    }
-    document.addEventListener('mousedown', onOut);
-    return () => document.removeEventListener('mousedown', onOut);
-  }, []);
-
   // Close mobile drawer on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
-    setMenuOpen(false);
     router.push('/login');
     router.refresh();
   }
@@ -206,104 +195,107 @@ export default function AdminLayout({ children }) {
   const initials  = getInitials(user?.name);
   const roleColor = ROLE_COLORS[user?.role] || ROLE_COLORS.client;
 
-  /* ── Shared user popup ── */
-  const userPopup = menuOpen && (
-    <div
-      className='absolute inset-x-3 bottom-[calc(100%+0.5rem)] rounded-2xl p-1.5 shadow-2xl z-50'
-      style={{
-        background: '#161d27',
-        border: '1px solid rgba(255,255,255,0.1)',
-        backdropFilter: 'blur(12px)',
-      }}
-    >
-      {mounted && (
-        <div
-          className='flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-colors'
-          style={{ color: 'rgba(255,255,255,0.65)' }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-        >
-          <span className='text-sm'>Modo oscuro</span>
-          <Switch
-            isSelected={resolvedTheme === 'dark'}
-            onChange={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-            size='sm'
-          >
-            <Switch.Control><Switch.Thumb /></Switch.Control>
-          </Switch>
-        </div>
-      )}
-      <Link
-        href='/admin/perfil'
-        onClick={() => setMenuOpen(false)}
-        className='flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-colors'
-        style={{ color: 'rgba(255,255,255,0.65)' }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-      >
-        <LuUser className='h-4 w-4 shrink-0' style={{ color: '#ff7e2d' }} />
-        Mi perfil
-      </Link>
-      <Link
-        href='/admin/ajustes'
-        onClick={() => setMenuOpen(false)}
-        className='flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-colors'
-        style={{ color: 'rgba(255,255,255,0.65)' }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-      >
-        <LuSettings className='h-4 w-4 shrink-0' style={{ color: '#ff7e2d' }} />
-        Ajustes
-      </Link>
-      <button
-        type='button'
-        onClick={handleLogout}
-        className='flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-colors'
-        style={{ color: '#f87171' }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(248,113,113,0.1)')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-      >
-        <LuLogOut className='h-4 w-4 shrink-0' />
-        Cerrar sesión
-      </button>
-    </div>
-  );
-
   /* ── Shared user button ── */
   const userButton = user && (
     <div
-      className='relative px-3 py-3'
+      className='px-3 py-3'
       style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
-      ref={menuRef}
     >
-      {userPopup}
-      <button
-        type='button'
-        onClick={() => setMenuOpen((p) => !p)}
-        className='flex w-full items-center gap-3 px-2.5 py-2.5 rounded-2xl transition-colors text-left'
-        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-      >
-        <div
-          className='h-9 w-9 shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold select-none'
-          style={{ background: roleColor.bg, color: roleColor.text }}
-        >
-          {initials}
-        </div>
-        <div className='min-w-0 flex-1'>
-          <p className='text-[13px] font-semibold text-white truncate leading-tight'>{user.name}</p>
-          <p className='text-[10px] truncate mt-0.5' style={{ color: 'rgba(255,255,255,0.35)' }}>
-            {ROLE_LABELS[user.role] || user.role}
-          </p>
-        </div>
-        <LuChevronUp
-          className='h-4 w-4 shrink-0 transition-transform duration-200'
+      <Popover placement='top' isOpen={menuOpen} onOpenChange={setMenuOpen}>
+        <Popover.Trigger>
+          <button
+            type='button'
+            className='flex w-full items-center gap-3 px-2.5 py-2.5 rounded-2xl transition-colors text-left'
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          >
+            <div
+              className='h-9 w-9 shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold select-none'
+              style={{ background: roleColor.bg, color: roleColor.text }}
+            >
+              {initials}
+            </div>
+            <div className='min-w-0 flex-1'>
+              <p className='text-[13px] font-semibold text-white truncate leading-tight'>{user.name}</p>
+              <p className='text-[10px] truncate mt-0.5' style={{ color: 'rgba(255,255,255,0.35)' }}>
+                {ROLE_LABELS[user.role] || user.role}
+              </p>
+            </div>
+            <LuChevronUp
+              className='h-4 w-4 shrink-0 transition-transform duration-200'
+              style={{
+                color: 'rgba(255,255,255,0.28)',
+                transform: menuOpen ? 'rotate(0deg)' : 'rotate(180deg)',
+              }}
+            />
+          </button>
+        </Popover.Trigger>
+        <Popover.Content
+          className='rounded-2xl p-1.5 shadow-2xl min-w-[220px]'
           style={{
-            color: 'rgba(255,255,255,0.28)',
-            transform: menuOpen ? 'rotate(0deg)' : 'rotate(180deg)',
+            background: '#161d27',
+            border: '1px solid rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(12px)',
           }}
-        />
-      </button>
+        >
+          <Popover.Dialog>
+            {mounted && (
+              <button
+                type='button'
+                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                className='flex items-center justify-between w-full px-3 py-2 rounded-xl transition-colors hover:bg-white/[0.07]'
+                style={{ color: 'rgba(255,255,255,0.65)' }}
+              >
+                <span className='text-sm'>Modo oscuro</span>
+                <span
+                  className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors duration-200 ${
+                    resolvedTheme === 'dark' ? 'bg-accent' : 'bg-white/20'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 my-0.5 ${
+                      resolvedTheme === 'dark' ? 'translate-x-4' : 'translate-x-0.5'
+                    }`}
+                  />
+                </span>
+              </button>
+            )}
+            <Link
+              href='/admin/perfil'
+              onClick={() => setMenuOpen(false)}
+              className='flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-colors'
+              style={{ color: 'rgba(255,255,255,0.65)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            >
+              <LuUser className='h-4 w-4 shrink-0' style={{ color: '#ff7e2d' }} />
+              Mi perfil
+            </Link>
+            <Link
+              href='/admin/ajustes'
+              onClick={() => setMenuOpen(false)}
+              className='flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-colors'
+              style={{ color: 'rgba(255,255,255,0.65)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            >
+              <LuSettings className='h-4 w-4 shrink-0' style={{ color: '#ff7e2d' }} />
+              Ajustes
+            </Link>
+            <button
+              type='button'
+              onClick={handleLogout}
+              className='flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-colors'
+              style={{ color: '#f87171' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(248,113,113,0.1)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            >
+              <LuLogOut className='h-4 w-4 shrink-0' />
+              Cerrar sesión
+            </button>
+          </Popover.Dialog>
+        </Popover.Content>
+      </Popover>
     </div>
   );
 

@@ -2,7 +2,6 @@ import * as React from "react"
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button";
 
 const Pagination = ({
   className,
@@ -29,6 +28,16 @@ const PaginationItem = React.forwardRef(({ className, ...props }, ref) => (
 ))
 PaginationItem.displayName = "PaginationItem"
 
+const paginationLinkBase = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
+const paginationLinkVariants = {
+  outline: "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+  ghost: "hover:bg-accent hover:text-accent-foreground",
+};
+const paginationLinkSizes = {
+  default: "h-9 px-4 py-2",
+  icon: "h-9 w-9",
+};
+
 const PaginationLink = ({
   className,
   isActive,
@@ -37,10 +46,12 @@ const PaginationLink = ({
 }) => (
   <a
     aria-current={isActive ? "page" : undefined}
-    className={cn(buttonVariants({
-      variant: isActive ? "outline" : "ghost",
-      size,
-    }), className)}
+    className={cn(
+      paginationLinkBase,
+      paginationLinkVariants[isActive ? "outline" : "ghost"],
+      paginationLinkSizes[size] ?? paginationLinkSizes.icon,
+      className
+    )}
     {...props} />
 )
 PaginationLink.displayName = "PaginationLink"

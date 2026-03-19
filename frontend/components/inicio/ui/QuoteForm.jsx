@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, NumberField, Spinner } from '@heroui/react';
-import { LuCalendarDays, LuCalendar, LuMapPin, LuShieldCheck, LuUsers } from 'react-icons/lu';
+import { NumberField, Spinner } from '@heroui/react';
+import { LuCalendarDays, LuCalendar, LuMapPin, LuShieldCheck, LuUsers, LuSend, LuCheck } from 'react-icons/lu';
 import { FaRegClock } from 'react-icons/fa';
+import { Minus, Plus } from 'lucide-react';
 import { toastError } from '@/lib/toast';
 import { formatCurrency } from '@/util/utils';
-import { Minus, Plus } from 'lucide-react';
 
 function formatDate(dateLike) {
   return new Intl.DateTimeFormat('es-AR', {
@@ -15,6 +15,65 @@ function formatDate(dateLike) {
     year: 'numeric',
     timeZone: 'UTC',
   }).format(new Date(dateLike));
+}
+
+function FloatInput({ label, value, onChange, type = 'text', required, placeholder, autoComplete }) {
+  const [focused, setFocused] = useState(false);
+  const floated = focused || Boolean(value);
+
+  return (
+    <div className="relative">
+      <label
+        className={`absolute left-3.5 pointer-events-none transition-all duration-150 ${
+          floated
+            ? 'top-1.5 text-[10px] font-semibold text-accent'
+            : 'top-1/2 -translate-y-1/2 text-sm text-muted'
+        }`}
+      >
+        {label}
+        {required && <span className="text-accent ml-0.5">*</span>}
+      </label>
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        required={required}
+        autoComplete={autoComplete}
+        placeholder={floated ? placeholder : ''}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        className="w-full h-12 pt-5 pb-1 px-3.5 rounded-xl border border-border bg-surface text-sm text-foreground outline-none transition-colors focus:border-accent placeholder:text-muted/50"
+      />
+    </div>
+  );
+}
+
+function FloatTextarea({ label, value, onChange }) {
+  const [focused, setFocused] = useState(false);
+  const floated = focused || Boolean(value);
+
+  return (
+    <div className="relative">
+      <label
+        className={`absolute left-3.5 pointer-events-none transition-all duration-150 ${
+          floated
+            ? 'top-2 text-[10px] font-semibold text-accent'
+            : 'top-3.5 text-sm text-muted'
+        }`}
+      >
+        Mensaje (opcional)
+      </label>
+      <textarea
+        value={value}
+        onChange={onChange}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder={floated ? 'Contanos qué necesitás...' : ''}
+        rows={3}
+        className="w-full pt-7 pb-2 px-3.5 rounded-xl border border-border bg-surface text-sm text-foreground outline-none transition-colors focus:border-accent resize-none placeholder:text-muted/50"
+      />
+    </div>
+  );
 }
 
 export default function QuoteForm({ offer }) {
@@ -29,6 +88,8 @@ export default function QuoteForm({ offer }) {
   const hasPrice = price != null && price > 0;
   const total = hasPrice ? price * passengers : null;
   const currency = offer.pricing?.currency || 'USD';
+  const originalPrice = offer.pricing?.originalPrice;
+  const hasDiscount = offer.pricing?.discountPercentage > 0 && originalPrice && originalPrice > (price || 0);
 
   const avail = offer.availability || {};
   const hasStartDate = Boolean(avail.startDate);
@@ -39,7 +100,7 @@ export default function QuoteForm({ offer }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) {
-      toastError('Completa nombre y teléfono.');
+      toastError('Completá nombre y teléfono.');
       return;
     }
     setStatus('loading');
@@ -74,173 +135,226 @@ export default function QuoteForm({ offer }) {
 
   if (status === 'success') {
     return (
-      <aside className='xl:sticky xl:top-24 space-y-4'>
-        <div className='rounded-2xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-800 p-6 text-center space-y-3'>
-          <div className='text-4xl'>✓</div>
-          <h3 className='text-xl font-bold text-emerald-700 dark:text-emerald-400'>¡Solicitud enviada!</h3>
-          <p className='text-sm text-muted'>Te contactaremos pronto a través de WhatsApp o email para coordinar tu viaje.</p>
-          <Button
-            type='button'
-            className='mt-2 bg-accent text-white w-full'
+      <aside className="xl:sticky xl:top-24">
+        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-900/20 p-8 text-center space-y-4">
+          <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-800/40 flex items-center justify-center mx-auto">
+            <LuCheck size={26} className="text-emerald-600 dark:text-emerald-400" strokeWidth={2.5} />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-foreground">¡Solicitud enviada!</h3>
+            <p className="text-sm text-muted mt-1.5 leading-relaxed">
+              Te contactamos pronto por WhatsApp o email para coordinar tu viaje.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="w-full h-11 rounded-xl bg-surface border border-border text-sm font-semibold text-foreground hover:bg-surface-secondary transition-colors"
             onClick={() => setStatus('idle')}
           >
             Enviar otra consulta
-          </Button>
+          </button>
         </div>
       </aside>
     );
   }
 
   return (
-    <aside className='xl:sticky xl:top-24 space-y-4'>
-      <div className='rounded-2xl border border-default bg-surface p-5 space-y-5'>
-        {/* Precio */}
-        <div>
+    <aside className="xl:sticky xl:top-24">
+      <div className="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden">
+
+        {/* Price header */}
+        <div className="px-5 py-5 border-b border-border">
           {hasPrice ? (
-            <>
-              <p className='text-xs uppercase tracking-wider text-muted mb-1'>Desde</p>
-              <p className='text-4xl font-bold text-foreground'>
-                {formatCurrency({ amount: price, currency })}
-                <span className='text-base font-normal text-muted'> / {offer.pricing.pricePer || 'persona'}</span>
-              </p>
-            </>
+            <div className="flex items-end justify-between gap-3 flex-wrap">
+              <div>
+                <p className="text-[11px] uppercase tracking-widest text-muted font-medium mb-1">
+                  Desde
+                </p>
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  {hasDiscount && (
+                    <span className="text-sm text-muted line-through">
+                      {formatCurrency({ amount: originalPrice, currency })}
+                    </span>
+                  )}
+                  <span className="text-3xl font-bold text-foreground leading-none">
+                    {formatCurrency({ amount: price, currency })}
+                  </span>
+                  <span className="text-sm text-muted">
+                    / {offer.pricing?.pricePer || 'persona'}
+                  </span>
+                </div>
+                {hasDiscount && (
+                  <span className="inline-block mt-1.5 text-[10px] font-bold bg-accent/10 text-accent px-2 py-0.5 rounded-full">
+                    -{offer.pricing.discountPercentage}% OFF
+                  </span>
+                )}
+              </div>
+              {offer.availability?.limitedSpots && remainingSpots > 0 && (
+                <span className="text-xs text-rose-600 dark:text-rose-400 font-semibold bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/40 px-2.5 py-1 rounded-full">
+                  ⚡ Solo quedan {remainingSpots}
+                </span>
+              )}
+            </div>
           ) : (
-            <>
-              <p className='text-xs uppercase tracking-wider text-muted mb-1'>Precio</p>
-              <p className='text-2xl font-bold text-accent'>Consultar precio</p>
-              <p className='text-xs text-muted mt-1'>Completá el formulario y te cotizamos.</p>
-            </>
-          )}
-        </div>
-
-        {/* Resumen */}
-        <div className='grid grid-cols-2 gap-3 text-sm'>
-          {offer.duration?.days > 0 && (
-            <div className='border border-default rounded-xl p-3'>
-              <p className='text-xs text-muted uppercase flex items-center gap-1'><FaRegClock /> Duración</p>
-              <p className='font-medium mt-0.5'>{offer.duration.days} días / {offer.duration.nights} noches</p>
-            </div>
-          )}
-          {remainingSpots > 0 && (
-            <div className='border border-default rounded-xl p-3'>
-              <p className='text-xs text-muted uppercase flex items-center gap-1'><LuUsers /> Cupos</p>
-              <p className='font-medium mt-0.5'>Máx {remainingSpots}</p>
-            </div>
-          )}
-          {hasStartDate && (
-            <div className='border border-default rounded-xl p-3'>
-              <p className='text-xs text-muted uppercase flex items-center gap-1'><LuCalendarDays /> Salida</p>
-              <p className='font-medium mt-0.5'>{formatDate(avail.startDate)}</p>
-            </div>
-          )}
-          {hasEndDate && (
-            <div className='border border-default rounded-xl p-3'>
-              <p className='text-xs text-muted uppercase flex items-center gap-1'><LuMapPin /> Regreso</p>
-              <p className='font-medium mt-0.5'>{formatDate(avail.endDate)}</p>
-            </div>
-          )}
-          {!hasStartDate && hasAvailableMonths && (
-            <div className='border border-default rounded-xl p-3 col-span-2'>
-              <p className='text-xs text-muted uppercase flex items-center gap-1'><LuCalendar /> Disponibilidad</p>
-              <p className='font-medium mt-0.5'>{avail.availableMonths}</p>
+            <div>
+              <p className="text-[11px] uppercase tracking-widest text-muted font-medium mb-1">Precio</p>
+              <p className="text-2xl font-bold text-accent">A consultar</p>
+              <p className="text-xs text-muted mt-1">Completá el formulario y te cotizamos.</p>
             </div>
           )}
         </div>
 
-        {/* Formulario */}
-        <form onSubmit={handleSubmit} className='space-y-3'>
-          <div>
-            <label className='text-xs font-medium text-muted block mb-1'>Nombre completo *</label>
-            <input
-              className='h-10 px-3 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder='Tu nombre completo'
-              required
-            />
+        {/* Info pills */}
+        {(offer.duration?.days > 0 || hasStartDate || hasEndDate || hasAvailableMonths || remainingSpots > 0) && (
+          <div className="grid grid-cols-2 gap-2 px-5 py-4 border-b border-border">
+            {offer.duration?.days > 0 && (
+              <div className="rounded-xl bg-surface-secondary px-3 py-2.5">
+                <p className="text-[10px] text-muted uppercase tracking-wide flex items-center gap-1 mb-0.5">
+                  <FaRegClock size={9} /> Duración
+                </p>
+                <p className="text-xs font-semibold">
+                  {offer.duration.days}d / {offer.duration.nights}n
+                </p>
+              </div>
+            )}
+            {remainingSpots > 0 && (
+              <div className="rounded-xl bg-surface-secondary px-3 py-2.5">
+                <p className="text-[10px] text-muted uppercase tracking-wide flex items-center gap-1 mb-0.5">
+                  <LuUsers size={9} /> Cupos
+                </p>
+                <p className="text-xs font-semibold">Máx {remainingSpots}</p>
+              </div>
+            )}
+            {hasStartDate && (
+              <div className="rounded-xl bg-surface-secondary px-3 py-2.5">
+                <p className="text-[10px] text-muted uppercase tracking-wide flex items-center gap-1 mb-0.5">
+                  <LuCalendarDays size={9} /> Salida
+                </p>
+                <p className="text-xs font-semibold">{formatDate(avail.startDate)}</p>
+              </div>
+            )}
+            {hasEndDate && (
+              <div className="rounded-xl bg-surface-secondary px-3 py-2.5">
+                <p className="text-[10px] text-muted uppercase tracking-wide flex items-center gap-1 mb-0.5">
+                  <LuMapPin size={9} /> Regreso
+                </p>
+                <p className="text-xs font-semibold">{formatDate(avail.endDate)}</p>
+              </div>
+            )}
+            {!hasStartDate && hasAvailableMonths && (
+              <div className="rounded-xl bg-surface-secondary px-3 py-2.5 col-span-2">
+                <p className="text-[10px] text-muted uppercase tracking-wide flex items-center gap-1 mb-0.5">
+                  <LuCalendar size={9} /> Disponibilidad
+                </p>
+                <p className="text-xs font-semibold">{avail.availableMonths}</p>
+              </div>
+            )}
           </div>
-          <div>
-            <label className='text-xs font-medium text-muted block mb-1'>Teléfono / WhatsApp *</label>
-            <input
-              className='h-10 px-3 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent'
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder='+54 9 11 1234-5678'
-              type='tel'
-              required
-            />
-          </div>
-          <div>
-            <label className='text-xs font-medium text-muted block mb-1'>Email</label>
-            <input
-              className='h-10 px-3 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder='tu@email.com'
-              type='email'
-            />
-          </div>
+        )}
 
-          {/* Pasajeros */}
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="px-5 py-5 space-y-3">
+          <FloatInput
+            label="Nombre completo"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            placeholder="Tu nombre"
+            autoComplete="name"
+          />
+          <FloatInput
+            label="Teléfono / WhatsApp"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            type="tel"
+            required
+            placeholder="+54 9 11 1234-5678"
+            autoComplete="tel"
+          />
+          <FloatInput
+            label="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            placeholder="tu@email.com"
+            autoComplete="email"
+          />
+
+          {/* Passengers */}
           <div>
-            <label className='text-xs font-medium text-muted block mb-1'>Cantidad de pasajeros</label>
+            <label className="text-[10px] uppercase tracking-widest text-muted font-semibold block mb-1.5 ml-0.5">
+              Pasajeros
+            </label>
             <NumberField
               value={passengers}
               onChange={(v) => setPassengers(isNaN(v) ? 1 : Math.max(1, v))}
               minValue={1}
               formatOptions={{ maximumFractionDigits: 0, useGrouping: false }}
             >
-              <NumberField.Group className='h-10 rounded-lg border border-default flex items-center overflow-hidden bg-surface w-full'>
-                <NumberField.DecrementButton className='h-full px-3 hover:bg-surface-secondary border-r border-default flex items-center'>
-                  <Minus size={14} />
+              <NumberField.Group className="h-11 rounded-xl border border-border flex items-center overflow-hidden bg-surface w-full">
+                <NumberField.DecrementButton className="h-full px-3.5 hover:bg-surface-secondary border-r border-border flex items-center text-muted hover:text-foreground transition-colors">
+                  <Minus size={13} />
                 </NumberField.DecrementButton>
-                <NumberField.Input className='flex-1 h-full px-3 bg-transparent text-sm outline-none text-center' />
-                <NumberField.IncrementButton className='h-full px-3 hover:bg-surface-secondary border-l border-default flex items-center'>
-                  <Plus size={14} />
+                <NumberField.Input className="flex-1 h-full px-3 bg-transparent text-sm outline-none text-center font-semibold" />
+                <NumberField.IncrementButton className="h-full px-3.5 hover:bg-surface-secondary border-l border-border flex items-center text-muted hover:text-foreground transition-colors">
+                  <Plus size={13} />
                 </NumberField.IncrementButton>
               </NumberField.Group>
             </NumberField>
           </div>
 
-          <div>
-            <label className='text-xs font-medium text-muted block mb-1'>Mensaje (opcional)</label>
-            <textarea
-              className='min-h-20 px-3 py-2 rounded-lg border border-default w-full text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-accent resize-none'
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder='Cuéntanos qué necesitas...'
-            />
-          </div>
+          <FloatTextarea value={message} onChange={(e) => setMessage(e.target.value)} />
 
-          {/* Total estimado — solo si tiene precio */}
+          {/* Total estimado */}
           {hasPrice && total && (
-            <div className='flex items-end justify-between border-t border-default pt-3'>
-              <span className='text-muted text-sm'>Total estimado</span>
-              <strong className='text-xl text-accent'>
+            <div className="flex items-center justify-between rounded-xl bg-accent/5 border border-accent/20 px-4 py-3">
+              <span className="text-sm text-muted">Total estimado</span>
+              <strong className="text-lg font-bold text-accent">
                 {formatCurrency({ amount: total, currency })}
               </strong>
             </div>
           )}
 
-          <Button
-            type='submit'
-            isPending={status === 'loading'}
-            className='w-full bg-accent text-white font-semibold'
-            size='lg'
+          {/* CTA */}
+          <button
+            type="submit"
+            disabled={status === 'loading'}
+            className="group relative w-full h-12 rounded-xl text-white font-semibold text-sm overflow-hidden transition-all duration-300 hover:-translate-y-px active:translate-y-0 disabled:opacity-70 disabled:translate-y-0 shadow-md shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/35"
+            style={{ background: 'linear-gradient(135deg, #ff7e2d 0%, #ff9a5a 100%)' }}
           >
-            {({ isPending }) => (
-              <>
-                {isPending && <Spinner color='current' size='sm' />}
-                {isPending ? 'Enviando...' : 'Solicitar cotización'}
-              </>
-            )}
-          </Button>
-        </form>
+            {/* Shimmer on hover */}
+            <span
+              className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out"
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.22) 50%, transparent 100%)',
+              }}
+            />
+            {/* Subtle overlay que aclara en hover */}
+            <span className="pointer-events-none absolute inset-0 bg-white/0 group-hover:bg-white/[0.06] transition-colors duration-300 rounded-xl" />
+            <span className="relative flex items-center justify-center gap-2">
+              {status === 'loading' ? (
+                <>
+                  <Spinner color="current" size="sm" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <LuSend size={15} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                  Solicitar cotización
+                </>
+              )}
+            </span>
+          </button>
 
-        <div className='grid grid-cols-2 gap-2 text-xs text-muted'>
-          <p className='inline-flex items-center gap-1'><LuShieldCheck />Reserva segura</p>
-          <p className='text-right'>Soporte 24/7</p>
-        </div>
+          <div className="flex items-center justify-between text-[11px] text-muted pt-0.5">
+            <span className="flex items-center gap-1">
+              <LuShieldCheck size={12} className="text-accent" />
+              Datos seguros
+            </span>
+            <span>Sin compromiso</span>
+            <span>Soporte 24/7</span>
+          </div>
+        </form>
       </div>
     </aside>
   );
