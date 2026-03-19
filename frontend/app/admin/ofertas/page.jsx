@@ -50,7 +50,10 @@ export default function AdminOffersPage() {
         if (active && Array.isArray(data)) setOffers(data);
       })
       .catch(() => {
-        if (active) setOffers([]);
+        if (active) {
+          setOffers([]);
+          toastError('No se pudieron cargar las ofertas. Verificá tu conexión.');
+        }
       })
       .finally(() => {
         if (active) setLoading(false);

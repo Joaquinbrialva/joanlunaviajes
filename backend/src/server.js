@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import rateLimit from 'express-rate-limit';
 import authRouter from './routes/auth.js';
 import ofertasRouter from './routes/ofertas.js';
 import destinosRouter from './routes/destinos.js';
@@ -11,6 +12,31 @@ import notificationsRouter from './routes/notifications.js';
 import settingsRouter from './routes/settings.js';
 import usersRouter from './routes/users.js';
 
+// Validar variables de entorno requeridas
+const REQUIRED_ENV = ['JWT_SECRET'];
+for (const key of REQUIRED_ENV) {
+  if (!process.env[key]) {
+    console.error(`[FATAL] Falta variable de entorno requerida: ${key}`);
+    process.exit(1);
+  }
+}
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[unhandledRejection]', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[uncaughtException]', err);
+  process.exit(1);
+});
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: 'Demasiados intentos de inicio de sesión. Intentá de nuevo en 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 const app = express();
 const PORT = process.env.PORT || 4000;
 
@@ -18,7 +44,7 @@ app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', cred
 app.use(express.json());
 app.use(cookieParser());
 
-
+app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth', authRouter);
 app.use('/api/ofertas', ofertasRouter);
 app.use('/api/destinos', destinosRouter);

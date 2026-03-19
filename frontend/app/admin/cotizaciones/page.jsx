@@ -41,7 +41,12 @@ function AdminInquiriesContent() {
           router.replace('/admin/cotizaciones', { scroll: false });
         }
       })
-      .catch(() => { if (active) setInquiries([]); })
+      .catch(() => {
+        if (active) {
+          setInquiries([]);
+          toastError('No se pudieron cargar las cotizaciones. Verificá tu conexión.');
+        }
+      })
       .finally(() => {
         if (active) setLoading(false);
       });
