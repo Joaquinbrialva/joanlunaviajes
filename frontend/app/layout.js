@@ -3,6 +3,7 @@ import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import HeroUIToastProvider from '@/components/ui/heroui-toast-provider';
 import RootShell from '@/components/ui/root-shell';
+import ErrorBoundary from '@/components/ui/error-boundary';
 
 const jakarta = Nunito({
 	variable: '--font-jakarta',
@@ -44,7 +45,9 @@ export default function RootLayout({ children }) {
 				className={`${jakarta.variable} ${fira.variable} ${cormorant.variable} ${syne.variable} font-sans antialiased`}
 			>
 				<ThemeProvider attribute='class' defaultTheme='light' enableSystem>
-					<RootShell>{children}</RootShell>
+					<ErrorBoundary>
+						<RootShell>{children}</RootShell>
+					</ErrorBoundary>
 					<HeroUIToastProvider />
 				</ThemeProvider>
 			</body>

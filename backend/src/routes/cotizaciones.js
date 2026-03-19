@@ -5,6 +5,8 @@ import { createNotification } from '../store/notifications.js';
 
 const router = Router();
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // GET /api/cotizaciones
 router.get('/', async (req, res) => {
   try {
@@ -39,15 +41,19 @@ router.post('/', optionalAuth, async (req, res) => {
     const body = req.body;
     const name = String(body.name || '').trim();
     const phone = String(body.phone || '').trim();
+    const email = String(body.email || '').trim().toLowerCase();
 
     if (!name || !phone) {
       return res.status(400).json({ error: 'Completá nombre y teléfono.' });
+    }
+    if (email && !EMAIL_RE.test(email)) {
+      return res.status(400).json({ error: 'El email no tiene un formato válido.' });
     }
 
     const newInquiry = await prisma.inquiry.create({
       data: {
         name,
-        email: String(body.email || '').trim(),
+        email,
         phone,
         passengers: Math.max(1, Number(body.passengers || 1)),
         message: String(body.message || '').trim(),
@@ -83,7 +89,7 @@ router.post('/', optionalAuth, async (req, res) => {
 });
 
 // PATCH /api/cotizaciones/:id — actualizar estado y/o notas
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', requireAuth, async (req, res) => {
   try {
     const allowed = ['pending', 'contacted', 'closed'];
     const status = String(req.body.status || '').trim();
@@ -108,7 +114,7 @@ router.patch('/:id', async (req, res) => {
 });
 
 // DELETE /api/cotizaciones/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
     await prisma.inquiry.delete({ where: { id: req.params.id } });
     res.status(204).send();
