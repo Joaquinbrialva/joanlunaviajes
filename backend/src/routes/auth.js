@@ -6,6 +6,8 @@ import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const COOKIE_NAME = 'auth_token';
 const IS_PROD = process.env.NODE_ENV === 'production';
 
@@ -32,6 +34,9 @@ router.post('/register', async (req, res) => {
 
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Nombre, email y contraseña son requeridos.' });
+    }
+    if (!EMAIL_RE.test(email)) {
+      return res.status(400).json({ error: 'El email no tiene un formato válido.' });
     }
     if (password.length < 6) {
       return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
@@ -124,6 +129,7 @@ router.patch('/me', requireAuth, async (req, res) => {
     if (email !== undefined) {
       const trimmed = String(email).trim().toLowerCase();
       if (!trimmed) return res.status(400).json({ error: 'El email no puede estar vacío.' });
+      if (!EMAIL_RE.test(trimmed)) return res.status(400).json({ error: 'El email no tiene un formato válido.' });
       const taken = await prisma.user.findFirst({ where: { email: trimmed, id: { not: req.user.id } } });
       if (taken) return res.status(409).json({ error: 'Ese email ya está en uso.' });
       updates.email = trimmed;

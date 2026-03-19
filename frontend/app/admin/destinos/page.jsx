@@ -32,7 +32,12 @@ export default function AdminDestinationsPage() {
     fetch('/api/destinos', { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => { if (active && Array.isArray(data)) setDestinations(data); })
-      .catch(() => { if (active) setDestinations([]); })
+      .catch(() => {
+        if (active) {
+          setDestinations([]);
+          toastError('No se pudieron cargar los destinos. Verificá tu conexión.');
+        }
+      })
       .finally(() => {
         if (active) setLoading(false);
       });
