@@ -91,6 +91,24 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model Subscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String   @default("")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model NewsletterCampaign {
+  id        String    @id @default(uuid())
+  subject   String
+  blocks    Json
+  html      String
+  sentCount Int       @default(0)
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
 model Notification {
   id              String   @id @default(uuid())
   type            String

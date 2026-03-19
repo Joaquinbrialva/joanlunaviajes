@@ -23,7 +23,18 @@ export default function HeroSelect({
         <ListBox>
           {options.map((option) => (
             <ListBox.Item key={option.value} id={option.value} textValue={option.label}>
-              {option.label}
+              <span className='flex items-center gap-2'>
+                {option.dotColor && (
+                  <span
+                    style={{
+                      width: 7, height: 7, borderRadius: '50%',
+                      background: option.dotColor,
+                      flexShrink: 0, display: 'inline-block',
+                    }}
+                  />
+                )}
+                {option.label}
+              </span>
               <ListBox.ItemIndicator />
             </ListBox.Item>
           ))}

@@ -51,6 +51,36 @@ function getInitials(name) {
 
 /* ─── Sub-components ─────────────────────────────────────────────────── */
 
+function UserTableSkeleton() {
+  return (
+    <div className='animate-pulse rounded-xl border border-default overflow-hidden'>
+      <div className='border-b border-default bg-surface-secondary/60 flex gap-6 px-4 py-3'>
+        {[160, 90, 80, 90, 60].map((w, i) => (
+          <div key={i} className='h-3 rounded bg-surface-secondary shrink-0' style={{ width: w }} />
+        ))}
+      </div>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className='flex items-center gap-6 px-4 py-3.5 border-b border-default'>
+          <div className='flex items-center gap-3 w-40 shrink-0'>
+            <div className='h-9 w-9 rounded-full bg-surface-secondary shrink-0' />
+            <div className='space-y-1.5'>
+              <div className='h-3 w-24 rounded bg-surface-secondary' />
+              <div className='h-2.5 w-32 rounded bg-surface-secondary' />
+            </div>
+          </div>
+          <div className='h-3 w-24 rounded bg-surface-secondary shrink-0' />
+          <div className='h-5 w-20 rounded-full bg-surface-secondary shrink-0' />
+          <div className='h-3 w-20 rounded bg-surface-secondary shrink-0' />
+          <div className='flex gap-1 ml-auto shrink-0'>
+            <div className='h-8 w-8 rounded-lg bg-surface-secondary' />
+            <div className='h-8 w-8 rounded-lg bg-surface-secondary' />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function RoleBadge({ role }) {
   const label = ROLES.find((r) => r.value === role)?.label || role;
   return (
@@ -80,6 +110,7 @@ function Avatar({ name, role }) {
 
 export default function UsuariosPage() {
   const [users, setUsers]               = useState([]);
+  const [loading, setLoading]           = useState(true);
   const [currentUser, setCurrentUser]   = useState(null);
   const [search, setSearch]             = useState('');
   const [roleFilter, setRoleFilter]     = useState('all');
@@ -99,7 +130,8 @@ export default function UsuariosPage() {
     fetch('/api/users')
       .then((r) => r.json())
       .then((d) => { if (Array.isArray(d)) setUsers(d); })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   /* ── Filtered rows ── */
@@ -384,7 +416,8 @@ export default function UsuariosPage() {
           />
         </div>
 
-        <Table>
+        {loading ? <UserTableSkeleton /> : null}
+        {!loading && <Table>
           <Table.ScrollContainer style={{ minWidth: 640 }}>
             <Table.Content aria-label='Usuarios'>
               <Table.Header>
@@ -466,7 +499,7 @@ export default function UsuariosPage() {
               </Table.Body>
             </Table.Content>
           </Table.ScrollContainer>
-        </Table>
+        </Table>}
 
         {rows.length > 0 && (
           <p className='text-xs text-muted text-right'>

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { prisma } from '../store/prisma.js';
+import { prisma, withRetry } from '../store/prisma.js';
 import { slugify, uniqueSlug } from '../store/slugify.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { createNotification } from '../store/notifications.js';
@@ -105,10 +105,13 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
         remainingSpots: Math.max(1, Number(body.seats || 1)),
       },
       hotel: {
-        name: String(body.hotelName || `${destinationCountry} Grand Hotel`),
-        stars: Math.min(5, Math.max(3, Number(body.hotelStars || 4))),
-        roomType: 'Standard',
-        amenities: ['WiFi', 'Desayuno incluido', 'Traslados'],
+        name: String(body.hotelName || '').trim(),
+        stars: String(body.hotelName || '').trim() && body.hotelStars ? Math.min(5, Math.max(1, Number(body.hotelStars))) : null,
+        address: String(body.hotelAddress || '').trim() || null,
+        placeId: String(body.hotelPlaceId || '').trim() || null,
+        mapsUrl: String(body.hotelMapsUrl || '').trim() || null,
+        roomType: null,
+        amenities: [],
       },
       includes: normalizeList(body.includes),
       notIncludes: normalizeList(body.notIncludes),
@@ -140,7 +143,10 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
         name: String(body.airline || '').trim(),
         iata: String(body.airlineIata || '').trim(),
       },
-      flight: { type: String(body.flightType || 'direct') },
+      flight: {
+        type: String(body.flightType || 'direct'),
+        layover: String(body.flightType || '') === 'stops' ? String(body.layoverCity || '').trim() || null : null,
+      },
       luggage: {
         personal: body.luggagePersonal !== false,
         carryOn: body.luggageCarryOn !== false,
@@ -152,12 +158,12 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
     };
 
     let newOffer;
-    await prisma.$transaction(async (tx) => {
+    await withRetry(() => prisma.$transaction(async (tx) => {
       if (isSpecialOffer) {
         await tx.offer.updateMany({ data: { isSpecialOffer: false } });
       }
       newOffer = await tx.offer.create({ data });
-    });
+    }));
 
     if (!coverImageUrl) {
       createNotification({
@@ -270,10 +276,13 @@ router.patch('/:id', requireAuth, async (req, res) => {
         remainingSpots: Math.max(1, Number(body.seats || 1)),
       },
       hotel: {
-        name: String(body.hotelName || existing.hotel?.name || ''),
-        stars: Math.min(5, Math.max(3, Number(body.hotelStars || existing.hotel?.stars || 4))),
-        roomType: existing.hotel?.roomType || 'Standard',
-        amenities: existing.hotel?.amenities || ['WiFi', 'Desayuno incluido', 'Traslados'],
+        name: String(body.hotelName || '').trim(),
+        stars: String(body.hotelName || '').trim() && (body.hotelStars || existing.hotel?.stars) ? Math.min(5, Math.max(1, Number(body.hotelStars || existing.hotel?.stars))) : null,
+        address: String(body.hotelAddress || '').trim() || (existing.hotel?.address ?? null),
+        placeId: String(body.hotelPlaceId || '').trim() || (existing.hotel?.placeId ?? null),
+        mapsUrl: String(body.hotelMapsUrl || '').trim() || (existing.hotel?.mapsUrl ?? null),
+        roomType: null,
+        amenities: [],
       },
       includes: normalizeList(body.includes).length > 0 ? normalizeList(body.includes) : existing.includes,
       notIncludes: normalizeList(body.notIncludes).length > 0 ? normalizeList(body.notIncludes) : existing.notIncludes,
@@ -286,7 +295,10 @@ router.patch('/:id', requireAuth, async (req, res) => {
         name: String(body.airline || '').trim(),
         iata: String(body.airlineIata || '').trim(),
       },
-      flight: { type: String(body.flightType || 'direct') },
+      flight: {
+        type: String(body.flightType || 'direct'),
+        layover: String(body.flightType || '') === 'stops' ? String(body.layoverCity || '').trim() || null : null,
+      },
       luggage: {
         personal: body.luggagePersonal !== false,
         carryOn: body.luggageCarryOn !== false,
@@ -301,12 +313,12 @@ router.patch('/:id', requireAuth, async (req, res) => {
     };
 
     let updated;
-    await prisma.$transaction(async (tx) => {
+    await withRetry(() => prisma.$transaction(async (tx) => {
       if (isSpecialOffer) {
         await tx.offer.updateMany({ where: { id: { not: req.params.id } }, data: { isSpecialOffer: false } });
       }
       updated = await tx.offer.update({ where: { id: req.params.id }, data: updateData });
-    });
+    }));
 
     if (isDesignerMediaUpload) {
       createNotification({

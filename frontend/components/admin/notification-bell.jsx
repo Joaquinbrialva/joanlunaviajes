@@ -230,8 +230,8 @@ export default function NotificationBell() {
                       </div>
 
                       <div className='min-w-0 flex-1'>
-                        <p className='truncate text-sm font-medium leading-snug'>{notif.title}</p>
-                        <p className='mt-0.5 line-clamp-2 text-xs text-muted'>{notif.body}</p>
+                        <p className='text-sm font-medium leading-snug break-words'>{notif.title}</p>
+                        <p className='mt-0.5 text-xs text-muted break-words'>{notif.body}</p>
                         <p className='mt-1 text-[11px] text-muted/50'>{timeAgo(notif.createdAt)}</p>
                       </div>
 

@@ -111,13 +111,7 @@ export default function AdminDashboardPage() {
 
   const loadingData = loadingOffers || (user?.role !== 'designer' && loadingExtras);
 
-  if (loadingUser || !user) {
-    return (
-      <div className='flex items-center justify-center py-28'>
-        <div className='h-7 w-7 animate-spin rounded-full border-2 border-accent border-t-transparent' />
-      </div>
-    );
-  }
+  if (loadingUser || !user) return <PageSkeleton />;
 
   if (user.role === 'designer') return <DesignerDashboard user={user} offers={offers} loading={loadingData} />;
   return <AdminAgentDashboard user={user} offers={offers} destinations={destinations} inquiries={inquiries} loading={loadingData} />;
@@ -167,34 +161,40 @@ function AdminAgentDashboard({ user, offers, destinations, inquiries, loading })
 
       {/* Stat cards */}
       <section className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4'>
-        <StatCard
-          title='Ofertas activas'
-          value={offers.length}
-          icon={<LuClipboardList className='h-5 w-5' />}
-          growth={calcGrowth(offers)}
-          accent='orange'
-        />
-        <StatCard
-          title='Destinos'
-          value={destinations.length}
-          icon={<LuGlobe className='h-5 w-5' />}
-          growth={calcGrowth(destinations)}
-          accent='sky'
-        />
-        <StatCard
-          title='Cotizaciones'
-          value={inquiries.length}
-          icon={<LuMessageSquare className='h-5 w-5' />}
-          growth={calcGrowth(inquiries)}
-          accent='violet'
-        />
-        <StatCard
-          title='Ingresos estimados'
-          value={formatUSD(monthlyRevenue)}
-          icon={<LuTrendingUp className='h-5 w-5' />}
-          growth={calcRevenueGrowth(offers)}
-          accent='emerald'
-        />
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+        ) : (
+          <>
+            <StatCard
+              title='Ofertas activas'
+              value={offers.length}
+              icon={<LuClipboardList className='h-5 w-5' />}
+              growth={calcGrowth(offers)}
+              accent='orange'
+            />
+            <StatCard
+              title='Destinos'
+              value={destinations.length}
+              icon={<LuGlobe className='h-5 w-5' />}
+              growth={calcGrowth(destinations)}
+              accent='sky'
+            />
+            <StatCard
+              title='Cotizaciones'
+              value={inquiries.length}
+              icon={<LuMessageSquare className='h-5 w-5' />}
+              growth={calcGrowth(inquiries)}
+              accent='violet'
+            />
+            <StatCard
+              title='Ingresos estimados'
+              value={formatUSD(monthlyRevenue)}
+              icon={<LuTrendingUp className='h-5 w-5' />}
+              growth={calcRevenueGrowth(offers)}
+              accent='emerald'
+            />
+          </>
+        )}
       </section>
 
       {/* Latest inquiries */}
@@ -213,9 +213,7 @@ function AdminAgentDashboard({ user, offers, destinations, inquiries, loading })
         </div>
 
         {loading ? (
-          <div className='flex min-h-[320px] items-center justify-center'>
-            <div className='h-7 w-7 animate-spin rounded-full border-2 border-accent border-t-transparent' />
-          </div>
+          <InquiryTableSkeleton />
         ) : latestInquiries.length === 0 ? (
           <div className='flex flex-col items-center gap-3 py-14 text-center'>
             <div className='w-12 h-12 rounded-2xl bg-surface-secondary grid place-content-center'>
@@ -289,28 +287,34 @@ function DesignerDashboard({ user, offers, loading }) {
       </section>
 
       <div className='grid grid-cols-2 gap-4'>
-        <article className='rounded-2xl border border-default bg-surface p-5'>
-          <div className='flex items-center gap-2 mb-3'>
-            <div className='w-8 h-8 rounded-xl bg-sky-100 dark:bg-sky-900/30 grid place-content-center text-sky-600 dark:text-sky-400'>
-              <LuClock className='h-4 w-4' />
-            </div>
-            <span className='text-sm font-semibold'>Pendientes</span>
-          </div>
-          <p className='text-4xl font-bold tracking-tight'>{pending.length}</p>
-          <p className='text-xs text-muted mt-1'>Ofertas sin imagen de portada</p>
-        </article>
-        <article className='rounded-2xl border border-default bg-surface p-5'>
-          <div className='flex items-center gap-2 mb-3'>
-            <div className='w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 grid place-content-center text-emerald-600 dark:text-emerald-400'>
-              <LuCircleCheck className='h-4 w-4' />
-            </div>
-            <span className='text-sm font-semibold'>Con imagen</span>
-          </div>
-          <p className='text-4xl font-bold tracking-tight'>
-            {offers.filter((o) => o.mediaReady === true).length}
-          </p>
-          <p className='text-xs text-muted mt-1'>Ofertas con imagen subida</p>
-        </article>
+        {loading ? (
+          Array.from({ length: 2 }).map((_, i) => <StatCardSkeleton key={i} />)
+        ) : (
+          <>
+            <article className='rounded-2xl border border-default bg-surface p-5'>
+              <div className='flex items-center gap-2 mb-3'>
+                <div className='w-8 h-8 rounded-xl bg-sky-100 dark:bg-sky-900/30 grid place-content-center text-sky-600 dark:text-sky-400'>
+                  <LuClock className='h-4 w-4' />
+                </div>
+                <span className='text-sm font-semibold'>Pendientes</span>
+              </div>
+              <p className='text-4xl font-bold tracking-tight'>{pending.length}</p>
+              <p className='text-xs text-muted mt-1'>Ofertas sin imagen de portada</p>
+            </article>
+            <article className='rounded-2xl border border-default bg-surface p-5'>
+              <div className='flex items-center gap-2 mb-3'>
+                <div className='w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 grid place-content-center text-emerald-600 dark:text-emerald-400'>
+                  <LuCircleCheck className='h-4 w-4' />
+                </div>
+                <span className='text-sm font-semibold'>Con imagen</span>
+              </div>
+              <p className='text-4xl font-bold tracking-tight'>
+                {offers.filter((o) => o.mediaReady === true).length}
+              </p>
+              <p className='text-xs text-muted mt-1'>Ofertas con imagen subida</p>
+            </article>
+          </>
+        )}
       </div>
 
       <section className='rounded-2xl border border-default bg-surface overflow-hidden'>
@@ -329,9 +333,7 @@ function DesignerDashboard({ user, offers, loading }) {
         </div>
 
         {loading ? (
-          <div className='flex min-h-[320px] items-center justify-center'>
-            <div className='h-7 w-7 animate-spin rounded-full border-2 border-accent border-t-transparent' />
-          </div>
+          <OfferListSkeleton />
         ) : pending.length === 0 ? (
           <div className='flex flex-col items-center gap-3 py-14 text-center'>
             <LuCircleCheck className='h-10 w-10 text-emerald-400' />
@@ -439,6 +441,113 @@ function StatCard({ title, value, icon, growth, accent = 'orange' }) {
         <p className='text-xs text-muted mt-1.5 font-medium'>{title}</p>
       </div>
     </article>
+  );
+}
+
+function PageSkeleton() {
+  return (
+    <div className='space-y-7 animate-pulse'>
+      {/* Header */}
+      <section className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
+        <div className='space-y-2'>
+          <div className='h-2.5 w-24 rounded bg-surface-secondary' />
+          <div className='h-8 w-56 rounded-lg bg-surface-secondary' />
+        </div>
+        <div className='h-10 w-36 rounded-xl bg-surface-secondary shrink-0' />
+      </section>
+
+      {/* Stat cards */}
+      <section className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4'>
+        {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
+      </section>
+
+      {/* Table section */}
+      <section className='rounded-2xl border border-default bg-surface overflow-hidden'>
+        <div className='px-5 py-4 border-b border-default flex items-center justify-between'>
+          <div className='space-y-2'>
+            <div className='h-4 w-40 rounded bg-surface-secondary' />
+            <div className='h-3 w-56 rounded bg-surface-secondary' />
+          </div>
+          <div className='h-4 w-16 rounded bg-surface-secondary' />
+        </div>
+        <InquiryTableSkeleton />
+      </section>
+    </div>
+  );
+}
+
+function StatCardSkeleton() {
+  return (
+    <article className='rounded-2xl border border-default bg-surface overflow-hidden'>
+      <div className='h-px bg-surface-secondary' />
+      <div className='p-5 animate-pulse'>
+        <div className='flex items-start justify-between mb-4'>
+          <div className='w-10 h-10 rounded-xl bg-surface-secondary' />
+          <div className='w-12 h-5 rounded-full bg-surface-secondary' />
+        </div>
+        <div className='w-20 h-8 rounded-lg bg-surface-secondary mb-2' />
+        <div className='w-28 h-3 rounded bg-surface-secondary' />
+      </div>
+    </article>
+  );
+}
+
+function InquiryTableSkeleton() {
+  return (
+    <div className='overflow-x-auto animate-pulse'>
+      <table className='w-full text-sm'>
+        <thead>
+          <tr className='bg-surface-secondary/60'>
+            <th className='px-5 py-3'><div className='h-3 w-14 rounded bg-surface-secondary' /></th>
+            <th className='px-5 py-3'><div className='h-3 w-20 rounded bg-surface-secondary' /></th>
+            <th className='px-5 py-3 hidden sm:table-cell'><div className='h-3 w-14 rounded bg-surface-secondary' /></th>
+            <th className='px-5 py-3'><div className='h-3 w-12 rounded bg-surface-secondary' /></th>
+            <th className='px-5 py-3 hidden md:table-cell'><div className='h-3 w-10 rounded bg-surface-secondary' /></th>
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <tr key={i} className='border-t border-default'>
+              <td className='px-5 py-3.5 space-y-1.5'>
+                <div className='h-3 w-28 rounded bg-surface-secondary' />
+                <div className='h-2.5 w-36 rounded bg-surface-secondary' />
+              </td>
+              <td className='px-5 py-3.5 space-y-1.5'>
+                <div className='h-3 w-32 rounded bg-surface-secondary' />
+                <div className='h-2.5 w-20 rounded bg-surface-secondary' />
+              </td>
+              <td className='px-5 py-3.5 hidden sm:table-cell'>
+                <div className='h-3 w-6 rounded bg-surface-secondary' />
+              </td>
+              <td className='px-5 py-3.5'>
+                <div className='h-5 w-20 rounded-full bg-surface-secondary' />
+              </td>
+              <td className='px-5 py-3.5 hidden md:table-cell'>
+                <div className='h-2.5 w-16 rounded bg-surface-secondary' />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function OfferListSkeleton() {
+  return (
+    <ul className='divide-y divide-default animate-pulse'>
+      {Array.from({ length: 4 }).map((_, i) => (
+        <li key={i} className='flex items-center gap-4 px-5 py-4'>
+          <div className='h-14 w-20 shrink-0 rounded-xl bg-surface-secondary' />
+          <div className='flex-1 space-y-2'>
+            <div className='h-3 w-40 rounded bg-surface-secondary' />
+            <div className='h-2.5 w-28 rounded bg-surface-secondary' />
+            <div className='h-2.5 w-20 rounded bg-surface-secondary' />
+          </div>
+          <div className='h-9 w-28 shrink-0 rounded-xl bg-surface-secondary' />
+        </li>
+      ))}
+    </ul>
   );
 }
 

@@ -183,7 +183,7 @@ export default async function OfferDetailPage({ params }) {
       {/* ── STATS STRIP — grid de píldoras ── */}
       {(offer.duration?.days > 0 || hasRoute || offer.flight?.type || offer.availability?.remainingSpots > 0 || hasDiscount) && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-8">
-          {offer.duration?.days > 0 && (
+          {offer.duration?.days > 0 && offer.availability?.startDate && offer.availability?.endDate && (
             <StatCard icon={<LuClock size={15} className="text-accent" />} label="Duración">
               {offer.duration.days}d / {offer.duration.nights}n
             </StatCard>
@@ -339,7 +339,11 @@ export default async function OfferDetailPage({ params }) {
                             : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                         }`}
                       >
-                        {offer.flight.type === 'direct' ? '⚡ Directo' : '↩ Con escala'}
+                        {offer.flight.type === 'direct'
+                        ? '⚡ Directo'
+                        : offer.flight.layover
+                          ? `↩ Escala en ${offer.flight.layover}`
+                          : '↩ Con escala'}
                       </span>
                     </div>
                   )}
@@ -385,8 +389,16 @@ export default async function OfferDetailPage({ params }) {
                           </span>
                         )}
                       </div>
-                      {offer.hotel.roomType && (
-                        <p className="text-xs text-muted mt-0.5">{offer.hotel.roomType}</p>
+                      {offer.hotel.address && (
+                        <a
+                          href={offer.hotel.mapsUrl || `https://www.google.com/maps/search/${encodeURIComponent(offer.hotel.address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-muted hover:text-accent transition-colors mt-0.5"
+                        >
+                          <LuMapPin size={11} className="shrink-0" />
+                          {offer.hotel.address}
+                        </a>
                       )}
                       {offer.hotel.amenities?.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-3">

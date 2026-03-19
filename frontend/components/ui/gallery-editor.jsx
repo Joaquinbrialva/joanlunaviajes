@@ -1,8 +1,20 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ProgressCircle } from '@heroui/react';
 import { LuX, LuPlus, LuRefreshCw, LuTriangleAlert, LuGripVertical } from 'react-icons/lu';
+
+function CircleProgress({ value = 0 }) {
+  const r = 12, sw = 2.5, dim = (r + sw) * 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (value / 100) * circ;
+  return (
+    <svg width={dim} height={dim} className='text-white' style={{ transform: 'rotate(-90deg)' }}>
+      <circle cx={dim/2} cy={dim/2} r={r} fill='none' stroke='currentColor' strokeWidth={sw} opacity={0.35} />
+      <circle cx={dim/2} cy={dim/2} r={r} fill='none' stroke='currentColor' strokeWidth={sw}
+        strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap='round' />
+    </svg>
+  );
+}
 
 export default function GalleryEditor({ images = [], onChange, disabled = false }) {
   const inputRef = useRef(null);
@@ -158,12 +170,7 @@ export default function GalleryEditor({ images = [], onChange, disabled = false 
 
             {item.status === 'uploading' && (
               <div className='absolute inset-0 flex items-center justify-center bg-black/40'>
-                <ProgressCircle value={item.progress} minValue={0} maxValue={100} size='sm' color='default'>
-                  <ProgressCircle.Track>
-                    <ProgressCircle.TrackCircle />
-                    <ProgressCircle.FillCircle />
-                  </ProgressCircle.Track>
-                </ProgressCircle>
+                <CircleProgress value={item.progress} />
               </div>
             )}
 

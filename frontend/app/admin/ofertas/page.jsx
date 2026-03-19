@@ -258,9 +258,7 @@ export default function AdminOffersPage() {
 
         <div className='overflow-x-auto rounded-xl border border-default'>
           {tableLoading ? (
-            <div className='flex min-h-[320px] items-center justify-center'>
-              <div className='h-7 w-7 animate-spin rounded-full border-2 border-accent border-t-transparent' />
-            </div>
+            <OfferTableSkeleton />
           ) : (
             <table className='w-full min-w-[640px] text-sm'>
             <thead>
@@ -373,6 +371,34 @@ export default function AdminOffersPage() {
           )}
         </div>
       </section>
+    </div>
+  );
+}
+
+function OfferTableSkeleton() {
+  return (
+    <div className='animate-pulse min-w-[640px]'>
+      <div className='border-b border-default bg-surface-secondary/60 flex gap-4 px-4 py-3'>
+        {[10, 160, 120, 80, 80, 80, 60, 80].map((w, i) => (
+          <div key={i} className='h-3 rounded bg-surface-secondary shrink-0' style={{ width: w }} />
+        ))}
+      </div>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className='flex items-center gap-4 px-4 py-3.5 border-b border-default'>
+          <div className='h-4 w-4 rounded-sm bg-surface-secondary shrink-0' />
+          <div className='flex-1 space-y-1.5'>
+            <div className='h-3 w-40 rounded bg-surface-secondary' />
+            <div className='h-2.5 w-24 rounded bg-surface-secondary' />
+          </div>
+          <div className='h-3 w-28 rounded bg-surface-secondary shrink-0' />
+          <div className='h-3 w-16 rounded bg-surface-secondary shrink-0' />
+          <div className='h-3 w-20 rounded bg-surface-secondary shrink-0' />
+          <div className='h-5 w-16 rounded-full bg-surface-secondary shrink-0' />
+          <div className='h-3 w-12 rounded bg-surface-secondary shrink-0' />
+          <div className='h-3 w-16 rounded bg-surface-secondary shrink-0' />
+          <div className='h-6 w-20 rounded-lg bg-surface-secondary shrink-0' />
+        </div>
+      ))}
     </div>
   );
 }

@@ -11,6 +11,7 @@ import uploadRouter from './routes/upload.js';
 import notificationsRouter from './routes/notifications.js';
 import settingsRouter from './routes/settings.js';
 import usersRouter from './routes/users.js';
+import newsletterRouter from './routes/newsletter.js';
 
 // Validar variables de entorno requeridas
 const REQUIRED_ENV = ['JWT_SECRET'];
@@ -53,6 +54,7 @@ app.use('/api/upload', uploadRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/newsletter', newsletterRouter);
 
 app.get('/health', (_, res) => res.json({ status: 'ok' }));
 

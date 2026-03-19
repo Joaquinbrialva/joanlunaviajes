@@ -23,7 +23,13 @@
       "Bash(grep -r ProgressCircle C:/Users/maxi-/Documents/repositorios/joanlunaviajes/frontend/node_modules/@heroui/react --include=*.d.ts -l)",
       "Bash(xargs cat:*)",
       "WebFetch(domain:heroui.com)",
-      "WebFetch(domain:v3.heroui.com)"
+      "WebFetch(domain:v3.heroui.com)",
+      "Bash(grep:*)",
+      "Bash(find /c/Users/123/Documents/repos/joanlunaviajes/frontend/components/admin -name *.jsx)",
+      "Bash(find /c/Users/123/Documents/repos/joanlunaviajes/frontend/components -name *.jsx)",
+      "Bash(C:\\\\Users\\\\123\\\\.claude\\\\plugins\\\\cache\\\\claude-plugins-official\\\\superpowers\\\\5.0.5\\\\scripts\\\\start-server.sh --project-dir C:\\\\Users\\\\123\\\\Documents\\\\repos\\\\joanlunaviajes)",
+      "Bash(cat \"C:/Users/123/Documents/repos/joanlunaviajes/.superpowers/brainstorm/\"*\"/.server-info\")",
+      "Bash(bash \"C:/Users/123/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.5/skills/brainstorming/scripts/start-server.sh\" --project-dir \"C:/Users/123/Documents/repos/joanlunaviajes\")"
     ]
   }
 }

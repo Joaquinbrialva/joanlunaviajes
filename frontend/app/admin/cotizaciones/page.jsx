@@ -3,14 +3,47 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { AlertDialog, Button, Table, toast } from '@heroui/react';
-import { MessageCircle, Trash2, ChevronRight } from 'lucide-react';
+import { Trash2, ChevronRight } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
 import HeroSelect from '@/components/ui/hero-select';
 import InquiryPreviewDrawer from '@/components/admin/inquiry-preview-drawer';
 import {
   normalizeInquiry,
   INQUIRY_STATUS_CLASS,
+  INQUIRY_STATUS_OPTIONS,
 } from '@/lib/inquiries';
 import { toastError } from '@/lib/toast';
+
+function InquiryTableSkeleton() {
+  return (
+    <div className='animate-pulse'>
+      <div className='border-b border-default bg-surface-secondary/60 flex gap-4 px-5 py-3'>
+        {[70, 130, 150, 90, 60].map((w, i) => (
+          <div key={i} className='h-3 rounded bg-surface-secondary shrink-0' style={{ width: w }} />
+        ))}
+      </div>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className='flex items-center gap-4 px-5 py-4 border-b border-default'>
+          <div className='h-2.5 w-16 rounded bg-surface-secondary shrink-0' />
+          <div className='space-y-1.5 w-32 shrink-0'>
+            <div className='h-3 w-28 rounded bg-surface-secondary' />
+            <div className='h-2.5 w-20 rounded bg-surface-secondary' />
+          </div>
+          <div className='flex-1 space-y-1.5'>
+            <div className='h-3 w-36 rounded bg-surface-secondary' />
+            <div className='h-2.5 w-24 rounded bg-surface-secondary' />
+          </div>
+          <div className='h-6 w-24 rounded-full bg-surface-secondary shrink-0' />
+          <div className='flex gap-1 shrink-0'>
+            <div className='h-8 w-8 rounded-lg bg-surface-secondary' />
+            <div className='h-8 w-8 rounded-lg bg-surface-secondary' />
+            <div className='h-8 w-8 rounded-lg bg-surface-secondary' />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function AdminInquiriesPage() {
   return <Suspense><AdminInquiriesContent /></Suspense>;
@@ -198,9 +231,7 @@ function AdminInquiriesContent() {
         </div>
 
         {loading ? (
-          <div className='flex min-h-[320px] items-center justify-center'>
-            <div className='h-7 w-7 animate-spin rounded-full border-2 border-accent border-t-transparent' />
-          </div>
+          <InquiryTableSkeleton />
         ) : (
         <Table>
           <Table.ScrollContainer style={{ minWidth: 700 }}>
@@ -250,11 +281,7 @@ function AdminInquiriesContent() {
                       <HeroSelect
                         value={item.status}
                         onValueChange={(v) => changeStatus(item.id, v)}
-                        options={[
-                          { value: 'pending',   label: 'Pendiente' },
-                          { value: 'contacted', label: 'Contactado' },
-                          { value: 'closed',    label: 'Cerrado' },
-                        ]}
+                        options={INQUIRY_STATUS_OPTIONS}
                         triggerClassName={`h-7 rounded-full text-[11px] font-semibold px-3 border-0 ${INQUIRY_STATUS_CLASS[item.status]}`}
                       />
                     </Table.Cell>
@@ -267,7 +294,7 @@ function AdminInquiriesContent() {
                           className='w-8 h-8 rounded-lg flex items-center justify-center text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors'
                           title='Abrir WhatsApp'
                         >
-                          <MessageCircle size={14} />
+                          <FaWhatsapp size={15} />
                         </a>
                         <button
                           onClick={() => setPreviewInquiry(item)}

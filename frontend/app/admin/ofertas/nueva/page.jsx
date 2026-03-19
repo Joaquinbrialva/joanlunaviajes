@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button, Checkbox, Description, NumberField, Spinner } from '@heroui/react';
-import { Check, Minus, Plus } from 'lucide-react';
+import { Button, Checkbox, Description, NumberField, Spinner, Tooltip } from '@heroui/react';
+import { Check, Minus, Plus, Info } from 'lucide-react';
 import { toastError } from '@/lib/toast';
 import HeroSelect from '@/components/ui/hero-select';
 import AirlineCombobox from '@/components/ui/airline-combobox';
@@ -13,6 +13,8 @@ import ItemListInput from '@/components/ui/item-list-input';
 import CountryCombobox from '@/components/ui/country-combobox';
 import CoverImageInput from '@/components/ui/cover-image-input';
 import GalleryEditor from '@/components/ui/gallery-editor';
+import NewsletterOfferModal from '@/components/admin/newsletter-offer-modal';
+import HotelAddressSearch from '@/components/ui/hotel-address-search';
 
 /* ─── Opciones estáticas ─────────────────────────────────────────────── */
 
@@ -83,6 +85,7 @@ const initialForm = {
   airline: '',
   airlineIata: '',
   flightType: 'direct',
+  layoverCity: '',
   luggagePersonal: false,
   luggageCarryOn: false,
   luggageChecked: false,
@@ -101,6 +104,11 @@ const initialForm = {
   coverImage: '',
   galleryImages: [],
   hotelName: '',
+  hasHotel: false,
+  hotelStars: 0,
+  hotelAddress: '',
+  hotelPlaceId: '',
+  hotelMapsUrl: '',
 };
 
 /* ─── Componentes visuales ───────────────────────────────────────────── */
@@ -268,6 +276,26 @@ function ReviewRow({ label, value }) {
   );
 }
 
+function StarSelector({ value, onChange }) {
+  return (
+    <div className='flex items-center gap-0.5 h-11 px-1'>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          type='button'
+          onClick={() => onChange(value === n ? 0 : n)}
+          className={`text-[22px] leading-none transition-colors duration-150 px-0.5 ${n <= value ? 'text-amber-400' : 'text-muted/20 hover:text-amber-300'}`}
+        >
+          ★
+        </button>
+      ))}
+      {value > 0 && (
+        <span className='text-xs text-muted ml-1.5'>{value} estrella{value !== 1 ? 's' : ''}</span>
+      )}
+    </div>
+  );
+}
+
 const DRAFT_KEY = 'admin_nueva_oferta_draft';
 
 /* ─── Página principal ───────────────────────────────────────────────── */
@@ -280,6 +308,7 @@ export default function AdminNewOfferPage() {
   const [form, setForm] = useState(initialForm);
   const [showErrors, setShowErrors] = useState(false);
   const [role, setRole] = useState(null);
+  const [newsletterModal, setNewsletterModal] = useState({ open: false, offer: null });
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -347,11 +376,12 @@ export default function AdminNewOfferPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
+      let data = {};
+      try { data = await res.json(); } catch {}
       if (!res.ok) throw new Error(data?.error || 'No se pudo guardar la oferta.');
       try { localStorage.removeItem(DRAFT_KEY); } catch { }
-      router.push('/admin/ofertas');
       router.refresh();
+      setNewsletterModal({ open: true, offer: data });
     } catch (err) {
       toastError(err, 'No se pudo guardar la oferta');
     } finally {
@@ -378,6 +408,11 @@ export default function AdminNewOfferPage() {
 
   return (
     <div className='space-y-8 max-w-4xl'>
+      <NewsletterOfferModal
+        isOpen={newsletterModal.open}
+        offer={newsletterModal.offer}
+        onClose={() => setNewsletterModal({ open: false, offer: null })}
+      />
       {/* Encabezado */}
       <section>
         <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-muted mb-1'>
@@ -532,9 +567,15 @@ export default function AdminNewOfferPage() {
                 </div>
                 <div>
                   <FL>Tipo de vuelo</FL>
-                  <PillToggle options={opcionesTipoVuelo} value={form.flightType} onChange={(v) => update('flightType', v)} />
+                  <PillToggle options={opcionesTipoVuelo} value={form.flightType} onChange={(v) => { update('flightType', v); if (v === 'direct') update('layoverCity', ''); }} />
                 </div>
               </div>
+              {form.flightType === 'stops' && (
+                <div>
+                  <FL>Ciudad de escala</FL>
+                  <FInput value={form.layoverCity} onChange={(e) => update('layoverCity', e.target.value)} placeholder='Ej: São Paulo, Lima, Miami...' />
+                </div>
+              )}
               <div>
                 <FL>Equipaje incluido</FL>
                 <div className='flex flex-wrap gap-2'>
@@ -575,11 +616,45 @@ export default function AdminNewOfferPage() {
                   <FInput value={form.priceNote} onChange={(e) => update('priceNote', e.target.value)} placeholder='por persona' />
                 </div>
                 <NumField label='Cupos disponibles' value={form.seats} onChange={(v) => update('seats', v ?? 1)} min={1} withButtons />
-                <div>
-                  <FL>Hotel</FL>
-                  <FInput value={form.hotelName} onChange={(e) => update('hotelName', e.target.value)} placeholder='Nombre del hotel (opcional)' />
-                </div>
               </div>
+            </Panel>
+
+            <Panel title='Alojamiento'>
+              <CheckPill
+                label='¿La oferta incluye alojamiento?'
+                checked={form.hasHotel}
+                onChange={(v) => {
+                  if (!v) {
+                    setForm((prev) => ({ ...prev, hasHotel: false, hotelName: '', hotelStars: 0, hotelAddress: '', hotelPlaceId: '', hotelMapsUrl: '' }));
+                  } else {
+                    update('hasHotel', true);
+                  }
+                }}
+              />
+              {form.hasHotel && (
+                <div className='space-y-4 pt-1'>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    <div>
+                      <FL>Nombre del hotel</FL>
+                      <FInput value={form.hotelName} onChange={(e) => update('hotelName', e.target.value)} placeholder='Ej: Hotel Sheraton Buenos Aires' />
+                    </div>
+                    <div>
+                      <FL>Categoría (estrellas)</FL>
+                      <StarSelector value={form.hotelStars} onChange={(v) => update('hotelStars', v)} />
+                    </div>
+                  </div>
+                  <div>
+                    <FL>Dirección</FL>
+                    <HotelAddressSearch
+                      value={form.hotelAddress}
+                      mapsUrl={form.hotelMapsUrl}
+                      onChange={({ address, placeId, mapsUrl }) =>
+                        setForm((prev) => ({ ...prev, hotelAddress: address, hotelPlaceId: placeId, hotelMapsUrl: mapsUrl }))
+                      }
+                    />
+                  </div>
+                </div>
+              )}
             </Panel>
           </div>
         )}
@@ -652,7 +727,9 @@ export default function AdminNewOfferPage() {
               {(form.startDate || form.endDate) && <ReviewRow label='Duración' value={`${form.days} días / ${form.nights} noches`} />}
               <ReviewRow label='Precio' value={`${formatPrice(form.price, form.currency)}${form.priceNote ? ` ${form.priceNote}` : ''}`} />
               {form.originalPrice ? <ReviewRow label='Precio original' value={formatPrice(form.originalPrice, form.currency)} /> : null}
-              {form.hotelName ? <ReviewRow label='Hotel' value={form.hotelName} /> : null}
+              {form.hasHotel && form.hotelName ? (
+                <ReviewRow label='Hotel' value={`${form.hotelName}${form.hotelStars ? ` · ${'★'.repeat(form.hotelStars)}` : ''}${form.hotelAddress ? ` — ${form.hotelAddress}` : ''}`} />
+              ) : null}
               {form.includes.length > 0 && (
                 <div className='flex gap-4 py-2.5 px-4 border-b border-default/50 flex-wrap'>
                   <span className='text-[11px] uppercase tracking-[0.1em] font-semibold text-muted w-28 shrink-0 pt-0.5'>Incluye</span>
@@ -696,12 +773,23 @@ export default function AdminNewOfferPage() {
                 </div>
                 <div className='space-y-3 md:pt-6'>
                   <CheckPill label='Marcar como oferta destacada' checked={form.featured} onChange={(v) => update('featured', v)} />
-                  <CheckPill
-                    label='Marcar como oferta especial'
-                    checked={form.isSpecialOffer}
-                    onChange={(v) => update('isSpecialOffer', v)}
-                    note='Solo puede haber una a la vez. Marcar aquí desactivará la anterior.'
-                  />
+                  <div className='flex items-center gap-2'>
+                    <CheckPill
+                      label='Marcar como oferta especial'
+                      checked={form.isSpecialOffer}
+                      onChange={(v) => update('isSpecialOffer', v)}
+                    />
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <button type='button' className='text-muted/40 hover:text-muted transition-colors'>
+                          <Info size={14} />
+                        </button>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        <p className='text-xs max-w-[220px]'>Solo puede haber una a la vez. Marcar esta opción desactivará la oferta especial anterior.</p>
+                      </Tooltip.Content>
+                    </Tooltip>
+                  </div>
                 </div>
               </div>
             </Panel>

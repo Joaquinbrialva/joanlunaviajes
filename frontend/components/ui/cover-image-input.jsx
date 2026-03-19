@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { ProgressCircle } from '@heroui/react';
 import { LuUpload, LuX, LuImage } from 'react-icons/lu';
 
 /**
@@ -11,6 +10,19 @@ import { LuUpload, LuX, LuImage } from 'react-icons/lu';
  *   onChange     {fn}       – called with the new URL after upload
  *   disabled     {boolean}
  */
+function CircleProgress({ value = 0 }) {
+  const r = 12, sw = 2.5, dim = (r + sw) * 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (value / 100) * circ;
+  return (
+    <svg width={dim} height={dim} className='text-accent' style={{ transform: 'rotate(-90deg)' }}>
+      <circle cx={dim/2} cy={dim/2} r={r} fill='none' stroke='currentColor' strokeWidth={sw} opacity={0.2} />
+      <circle cx={dim/2} cy={dim/2} r={r} fill='none' stroke='currentColor' strokeWidth={sw}
+        strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap='round' />
+    </svg>
+  );
+}
+
 export default function CoverImageInput({ value, onChange, disabled = false }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
@@ -113,12 +125,7 @@ export default function CoverImageInput({ value, onChange, disabled = false }) {
         >
           {uploading ? (
             <>
-              <ProgressCircle value={progress} minValue={0} maxValue={100} size='sm' color='accent'>
-                <ProgressCircle.Track>
-                  <ProgressCircle.TrackCircle />
-                  <ProgressCircle.FillCircle />
-                </ProgressCircle.Track>
-              </ProgressCircle>
+              <CircleProgress value={progress} />
               <span>Subiendo… {progress}%</span>
             </>
           ) : (

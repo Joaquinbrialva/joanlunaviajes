@@ -180,9 +180,7 @@ export default function AdminDestinationsPage() {
 
         <div className='overflow-x-auto rounded-xl border border-default'>
           {tableLoading ? (
-            <div className='flex min-h-[320px] items-center justify-center'>
-              <div className='h-7 w-7 animate-spin rounded-full border-2 border-accent border-t-transparent' />
-            </div>
+            <DestinationTableSkeleton />
           ) : (
             <table className='w-full min-w-[600px] text-sm'>
             <thead>
@@ -285,6 +283,32 @@ export default function AdminDestinationsPage() {
           )}
         </div>
       </section>
+    </div>
+  );
+}
+
+function DestinationTableSkeleton() {
+  return (
+    <div className='animate-pulse min-w-[600px]'>
+      <div className='border-b border-default bg-surface-secondary/60 flex gap-4 px-4 py-3'>
+        {[10, 140, 100, 110, 100, 70].map((w, i) => (
+          <div key={i} className='h-3 rounded bg-surface-secondary shrink-0' style={{ width: w }} />
+        ))}
+      </div>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className='flex items-center gap-4 px-4 py-3.5 border-b border-default'>
+          <div className='h-4 w-4 rounded-sm bg-surface-secondary shrink-0' />
+          <div className='flex-1 space-y-1.5'>
+            <div className='h-3 w-36 rounded bg-surface-secondary' />
+            <div className='h-2.5 w-20 rounded bg-surface-secondary' />
+          </div>
+          <div className='h-3 w-24 rounded bg-surface-secondary shrink-0' />
+          <div className='h-3 w-28 rounded bg-surface-secondary shrink-0' />
+          <div className='h-3 w-20 rounded bg-surface-secondary shrink-0' />
+          <div className='h-5 w-16 rounded-full bg-surface-secondary shrink-0' />
+          <div className='h-6 w-16 rounded-lg bg-surface-secondary shrink-0' />
+        </div>
+      ))}
     </div>
   );
 }

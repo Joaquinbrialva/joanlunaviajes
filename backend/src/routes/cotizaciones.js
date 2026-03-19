@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { prisma } from '../store/prisma.js';
+import { prisma, withRetry } from '../store/prisma.js';
 import { requireAuth, optionalAuth } from '../middleware/auth.js';
 import { createNotification } from '../store/notifications.js';
+import { sendInquiryToAgency, sendConfirmationToClient } from '../store/mailer.js';
 
 const router = Router();
 
@@ -81,6 +82,10 @@ router.post('/', optionalAuth, async (req, res) => {
       inquiryId: newInquiry.id,
     }).catch(() => {});
 
+    // Emails — non-blocking, never fail the request
+    sendInquiryToAgency(newInquiry).catch(() => {});
+    sendConfirmationToClient(newInquiry).catch(() => {});
+
     res.status(201).json(newInquiry);
   } catch (err) {
     console.error('[POST /api/cotizaciones]', err);
@@ -101,10 +106,10 @@ router.patch('/:id', requireAuth, async (req, res) => {
     if (status) updates.status = status;
     if (req.body.notes !== undefined) updates.notes = String(req.body.notes);
 
-    const updated = await prisma.inquiry.update({
+    const updated = await withRetry(() => prisma.inquiry.update({
       where: { id: req.params.id },
       data: updates,
-    });
+    }));
 
     res.json(updated);
   } catch (err) {

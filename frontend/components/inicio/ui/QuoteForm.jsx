@@ -207,7 +207,7 @@ export default function QuoteForm({ offer }) {
         {/* Info pills */}
         {(offer.duration?.days > 0 || hasStartDate || hasEndDate || hasAvailableMonths || remainingSpots > 0) && (
           <div className="grid grid-cols-2 gap-2 px-5 py-4 border-b border-border">
-            {offer.duration?.days > 0 && (
+            {offer.duration?.days > 0 && offer.availability?.startDate && offer.availability?.endDate && (
               <div className="rounded-xl bg-surface-secondary px-3 py-2.5">
                 <p className="text-[10px] text-muted uppercase tracking-wide flex items-center gap-1 mb-0.5">
                   <FaRegClock size={9} /> Duración
@@ -222,7 +222,7 @@ export default function QuoteForm({ offer }) {
                 <p className="text-[10px] text-muted uppercase tracking-wide flex items-center gap-1 mb-0.5">
                   <LuUsers size={9} /> Cupos
                 </p>
-                <p className="text-xs font-semibold">Máx {remainingSpots}</p>
+                <p className="text-xs font-semibold">{remainingSpots}</p>
               </div>
             )}
             {hasStartDate && (

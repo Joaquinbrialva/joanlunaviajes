@@ -69,7 +69,7 @@ function OfferCard({ offer }) {
               {offer.rating.value}
             </span>
           )}
-          {offer.duration?.days > 0 && (
+          {offer.duration?.days > 0 && offer.availability?.startDate && offer.availability?.endDate && (
             <span className='flex items-center gap-1 text-[11px] text-muted shrink-0'>
               <LuClock3 size={10} />
               {offer.duration.days} días

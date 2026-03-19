@@ -20,6 +20,7 @@ import {
   LuUser,
   LuUsers,
   LuX,
+  LuMail,
 } from 'react-icons/lu';
 
 /* ─── Nav structure ─────────────────────────────────────────── */
@@ -38,6 +39,7 @@ const NAV_GROUPS = [
       { href: '/admin/ofertas',      label: 'Ofertas',      icon: LuClipboardList },
       { href: '/admin/destinos',     label: 'Destinos',     icon: LuGlobe },
       { href: '/admin/cotizaciones', label: 'Cotizaciones', icon: LuMessageSquare, hideForRoles: ['designer'] },
+      { href: '/admin/newsletter',   label: 'Newsletter',   icon: LuMail,          showForRoles: ['admin', 'agent'] },
     ],
   },
   {
@@ -161,42 +163,21 @@ function SidebarBrand() {
   );
 }
 
-/* ─── Layout ────────────────────────────────────────────────── */
+/* ─── UserButton — own state so desktop and mobile don't share ── */
 
-export default function AdminLayout({ children }) {
-  const pathname = usePathname();
-  const router   = useRouter();
-
-  const [user, setUser]               = useState(null);
-  const [menuOpen, setMenuOpen]       = useState(false);
-  const [mobileOpen, setMobileOpen]   = useState(false);
-  const [mounted, setMounted]         = useState(false);
-
+function UserButton({ user, onLogout }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted]   = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
 
   useEffect(() => setMounted(true), []);
 
-  useEffect(() => {
-    fetch('/api/auth/me')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (d?.user) setUser(d.user); })
-      .catch(() => {});
-  }, []);
-
-  // Close mobile drawer on route change
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
-
-  async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
-    router.refresh();
-  }
+  if (!user) return null;
 
   const initials  = getInitials(user?.name);
   const roleColor = ROLE_COLORS[user?.role] || ROLE_COLORS.client;
 
-  /* ── Shared user button ── */
-  const userButton = user && (
+  return (
     <div
       className='px-3 py-3'
       style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
@@ -284,7 +265,7 @@ export default function AdminLayout({ children }) {
             </Link>
             <button
               type='button'
-              onClick={handleLogout}
+              onClick={onLogout}
               className='flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-colors'
               style={{ color: '#f87171' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(248,113,113,0.1)')}
@@ -298,6 +279,32 @@ export default function AdminLayout({ children }) {
       </Popover>
     </div>
   );
+}
+
+/* ─── Layout ────────────────────────────────────────────────── */
+
+export default function AdminLayout({ children }) {
+  const pathname = usePathname();
+  const router   = useRouter();
+
+  const [user, setUser]               = useState(null);
+  const [mobileOpen, setMobileOpen]   = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d?.user) setUser(d.user); })
+      .catch(() => {});
+  }, []);
+
+  // Close mobile drawer on route change
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
+
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+    router.refresh();
+  }
 
   return (
     <>
@@ -322,7 +329,7 @@ export default function AdminLayout({ children }) {
         <NavList user={user} pathname={pathname} onLinkClick={undefined} />
 
         {/* User section */}
-        {userButton}
+        <UserButton user={user} onLogout={handleLogout} />
       </aside>
 
       {/* ══════════════════════════════════════════════════════
@@ -380,7 +387,7 @@ export default function AdminLayout({ children }) {
           </button>
         </div>
         <NavList user={user} pathname={pathname} onLinkClick={() => setMobileOpen(false)} />
-        {userButton}
+        <UserButton user={user} onLogout={handleLogout} />
       </div>
 
       {/* ══════════════════════════════════════════════════════

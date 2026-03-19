@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Spinner, ProgressCircle } from '@heroui/react';
+import { Spinner } from '@heroui/react';
 import {
   LuUpload, LuImage, LuVideo, LuCheck,
   LuInfo, LuChevronDown, LuSave, LuRotateCcw, LuCrop, LuX,
@@ -152,6 +152,8 @@ export default function AparienciaPage() {
     setPendingCrop({ src: mediaUrl, file: null });
   }
 
+  if (!loaded) return <AparienciaSkeleton />;
+
   if (loaded && role && !['admin', 'designer'].includes(role)) {
     return (
       <div className="flex items-center justify-center py-20 text-sm text-muted">
@@ -197,12 +199,7 @@ export default function AparienciaPage() {
           <div className="relative aspect-video bg-black">
             {uploadingMedia ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/70">
-                <ProgressCircle value={uploadMediaProgress} minValue={0} maxValue={100} size="md" color="default">
-                  <ProgressCircle.Track>
-                    <ProgressCircle.TrackCircle />
-                    <ProgressCircle.FillCircle />
-                  </ProgressCircle.Track>
-                </ProgressCircle>
+                <CircleProgress value={uploadMediaProgress} size="md" className="text-white" />
                 <span className="text-[11px] font-semibold text-white/70">{uploadMediaProgress}%</span>
               </div>
             ) : mediaUrl && type === 'image' ? (
@@ -330,12 +327,7 @@ export default function AparienciaPage() {
                 >
                   {uploadingMedia ? (
                     <div className="flex flex-col items-center gap-2">
-                      <ProgressCircle value={uploadMediaProgress} minValue={0} maxValue={100} size="sm" color="accent">
-                        <ProgressCircle.Track>
-                          <ProgressCircle.TrackCircle />
-                          <ProgressCircle.FillCircle />
-                        </ProgressCircle.Track>
-                      </ProgressCircle>
+                      <CircleProgress value={uploadMediaProgress} size="sm" className="text-accent" />
                       <p className="text-xs text-muted">Subiendo… {uploadMediaProgress}%</p>
                     </div>
                   ) : (
@@ -413,12 +405,7 @@ export default function AparienciaPage() {
               >
                 {uploadingPoster ? (
                   <div className="flex items-center justify-center gap-2">
-                    <ProgressCircle value={uploadPosterProgress} minValue={0} maxValue={100} size="sm" color="accent">
-                      <ProgressCircle.Track>
-                        <ProgressCircle.TrackCircle />
-                        <ProgressCircle.FillCircle />
-                      </ProgressCircle.Track>
-                    </ProgressCircle>
+                    <CircleProgress value={uploadPosterProgress} size="sm" className="text-accent" />
                     <span className="text-xs text-muted">Subiendo… {uploadPosterProgress}%</span>
                   </div>
                 ) : posterUrl ? (
@@ -523,12 +510,64 @@ export default function AparienciaPage() {
   );
 }
 
+function AparienciaSkeleton() {
+  return (
+    <div className='max-w-5xl space-y-6 animate-pulse'>
+      <div className='space-y-2'>
+        <div className='h-7 w-56 rounded-lg bg-surface-secondary' />
+        <div className='h-4 w-72 rounded bg-surface-secondary' />
+      </div>
+      <div className='grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5'>
+        <div className='rounded-2xl border border-default bg-surface overflow-hidden'>
+          <div className='px-5 py-3.5 border-b border-default'>
+            <div className='h-3 w-24 rounded bg-surface-secondary' />
+          </div>
+          <div className='aspect-video bg-surface-secondary' />
+          <div className='px-5 py-2.5 bg-surface-secondary/40 border-t border-default'>
+            <div className='h-3 w-64 rounded bg-surface-secondary' />
+          </div>
+        </div>
+        <div className='flex flex-col gap-3.5'>
+          <div className='rounded-2xl border border-default bg-surface p-4 space-y-3'>
+            <div className='h-3 w-24 rounded bg-surface-secondary' />
+            <div className='h-9 w-full rounded-xl bg-surface-secondary' />
+          </div>
+          <div className='rounded-2xl border border-default bg-surface p-4 space-y-3'>
+            <div className='h-3 w-28 rounded bg-surface-secondary' />
+            <div className='h-24 w-full rounded-xl bg-surface-secondary' />
+          </div>
+          <div className='rounded-2xl border border-default bg-surface p-3'>
+            <div className='h-10 w-full rounded-xl bg-surface-secondary' />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Tip({ children }) {
   return (
     <p className="flex gap-2 text-xs text-muted">
       <span className="text-accent shrink-0 mt-px">→</span>
       <span>{children}</span>
     </p>
+  );
+}
+
+// ─── Circle Progress ──────────────────────────────────────────────────────────
+
+function CircleProgress({ value = 0, size = 'sm', className = '' }) {
+  const r = size === 'md' ? 18 : 12;
+  const sw = size === 'md' ? 3 : 2.5;
+  const dim = (r + sw) * 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (value / 100) * circ;
+  return (
+    <svg width={dim} height={dim} className={className} style={{ transform: 'rotate(-90deg)' }}>
+      <circle cx={dim / 2} cy={dim / 2} r={r} fill="none" stroke="currentColor" strokeWidth={sw} opacity={0.2} />
+      <circle cx={dim / 2} cy={dim / 2} r={r} fill="none" stroke="currentColor" strokeWidth={sw}
+        strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round" />
+    </svg>
   );
 }
 
@@ -693,12 +732,7 @@ function CropEditor({ src, initialFocalPoint, onConfirm, onCancel, uploading, up
         {/* Cargando imagen */}
         {!natural && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-            <ProgressCircle isIndeterminate size="sm" color="default">
-              <ProgressCircle.Track>
-                <ProgressCircle.TrackCircle />
-                <ProgressCircle.FillCircle />
-              </ProgressCircle.Track>
-            </ProgressCircle>
+            <Spinner size="sm" color="current" className="text-white" />
           </div>
         )}
 
@@ -747,12 +781,7 @@ function CropEditor({ src, initialFocalPoint, onConfirm, onCancel, uploading, up
         >
           {uploading ? (
             <>
-              <ProgressCircle value={uploadProgress} minValue={0} maxValue={100} size="sm" color="default">
-                <ProgressCircle.Track>
-                  <ProgressCircle.TrackCircle />
-                  <ProgressCircle.FillCircle />
-                </ProgressCircle.Track>
-              </ProgressCircle>
+              <CircleProgress value={uploadProgress} size="sm" className="text-white" />
               Subiendo… {uploadProgress}%
             </>
           ) : (
