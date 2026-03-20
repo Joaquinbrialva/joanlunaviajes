@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { LuMessageSquare, LuCircleCheck, LuClock, LuPhone, LuUser, LuLogOut } from 'react-icons/lu';
+import { LuMessageSquare, LuCircleCheck, LuClock, LuPhone, LuUser } from 'react-icons/lu';
 
 const STATUS_LABEL = {
   pending: 'Pendiente de respuesta',
@@ -35,8 +34,6 @@ export default function CuentaPage() {
   const [user, setUser] = useState(null);
   const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
-
   useEffect(() => {
     Promise.all([
       fetch('/api/auth/me').then((r) => r.ok ? r.json() : null),
@@ -55,8 +52,56 @@ export default function CuentaPage() {
 
   if (loading) {
     return (
-      <div className='flex items-center justify-center py-24'>
-        <div className='h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent' />
+      <div className='max-w-3xl mx-auto space-y-6 py-8'>
+        {/* Header skeleton */}
+        <div className='flex items-start justify-between'>
+          <div className='space-y-2'>
+            <div className='h-9 w-40 rounded-xl bg-muted/20 animate-pulse' />
+            <div className='h-4 w-64 rounded-lg bg-muted/20 animate-pulse' />
+          </div>
+          <div className='h-5 w-28 rounded-lg bg-muted/20 animate-pulse' />
+        </div>
+
+        {/* User card skeleton */}
+        <div className='rounded-2xl border border-default bg-surface p-5 flex items-center gap-4'>
+          <div className='h-12 w-12 rounded-full bg-muted/20 animate-pulse shrink-0' />
+          <div className='space-y-2 flex-1'>
+            <div className='h-5 w-36 rounded-lg bg-muted/20 animate-pulse' />
+            <div className='h-4 w-48 rounded-lg bg-muted/20 animate-pulse' />
+          </div>
+        </div>
+
+        {/* Stats skeleton */}
+        <div className='grid grid-cols-3 gap-3'>
+          {[0, 1, 2].map(i => (
+            <div key={i} className='rounded-2xl border border-default bg-surface p-4 text-center space-y-2'>
+              <div className='h-8 w-8 rounded-lg bg-muted/20 animate-pulse mx-auto' />
+              <div className='h-3 w-20 rounded-md bg-muted/20 animate-pulse mx-auto' />
+            </div>
+          ))}
+        </div>
+
+        {/* Inquiries skeleton */}
+        <div className='rounded-2xl border border-default bg-surface overflow-hidden'>
+          <div className='flex items-center justify-between px-5 py-4 border-b border-default'>
+            <div className='h-6 w-32 rounded-lg bg-muted/20 animate-pulse' />
+            <div className='h-4 w-28 rounded-lg bg-muted/20 animate-pulse' />
+          </div>
+          <ul className='divide-y divide-default'>
+            {[0, 1, 2].map(i => (
+              <li key={i} className='px-5 py-4 space-y-2'>
+                <div className='flex items-start justify-between gap-3'>
+                  <div className='space-y-1.5 flex-1'>
+                    <div className='h-4 w-48 rounded-lg bg-muted/20 animate-pulse' />
+                    <div className='h-3 w-24 rounded-md bg-muted/20 animate-pulse' />
+                  </div>
+                  <div className='h-6 w-28 rounded-full bg-muted/20 animate-pulse shrink-0' />
+                </div>
+                <div className='h-3 w-3/4 rounded-md bg-muted/20 animate-pulse' />
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     );
   }
@@ -68,18 +113,9 @@ export default function CuentaPage() {
     <div className='max-w-3xl mx-auto space-y-6 py-8'>
 
       {/* Header */}
-      <div className='flex items-start justify-between'>
-        <div>
-          <h1 className='text-4xl font-bold'>Mi cuenta</h1>
-          <p className='text-muted mt-1'>Sigue el estado de tus consultas y viajes.</p>
-        </div>
-        <button
-          onClick={handleLogout}
-          className='flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors'
-        >
-          <LuLogOut className='h-4 w-4' />
-          Cerrar sesión
-        </button>
+      <div>
+        <h1 className='text-4xl font-bold'>Mi cuenta</h1>
+        <p className='text-muted mt-1'>Sigue el estado de tus consultas y viajes.</p>
       </div>
 
       {/* Info del usuario */}
@@ -138,36 +174,38 @@ export default function CuentaPage() {
         ) : (
           <ul className='divide-y divide-default'>
             {inquiries.map((inq) => (
-              <li key={inq.id} className='px-5 py-4 space-y-2'>
-                <div className='flex items-start justify-between gap-3'>
-                  <div className='min-w-0'>
-                    <p className='font-semibold truncate'>
-                      <InquiryTitle inquiry={inq} />
-                    </p>
-                    <p className='text-xs text-muted mt-0.5'>{formatDate(inq.createdAt)}</p>
+              <li key={inq.id}>
+                <Link href={`/cuenta/cotizaciones/${inq.id}`} className='block px-5 py-4 space-y-2 hover:bg-surface-secondary transition-colors'>
+                  <div className='flex items-start justify-between gap-3'>
+                    <div className='min-w-0'>
+                      <p className='font-semibold truncate'>
+                        <InquiryTitle inquiry={inq} />
+                      </p>
+                      <p className='text-xs text-muted mt-0.5'>{formatDate(inq.createdAt)}</p>
+                    </div>
+                    <span className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_CLASS[inq.status] || STATUS_CLASS.pending}`}>
+                      {inq.status === 'closed'
+                        ? <LuCircleCheck className='h-3 w-3' />
+                        : <LuClock className='h-3 w-3' />}
+                      {STATUS_LABEL[inq.status] || inq.status}
+                    </span>
                   </div>
-                  <span className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_CLASS[inq.status] || STATUS_CLASS.pending}`}>
-                    {inq.status === 'closed'
-                      ? <LuCircleCheck className='h-3 w-3' />
-                      : <LuClock className='h-3 w-3' />}
-                    {STATUS_LABEL[inq.status] || inq.status}
-                  </span>
-                </div>
-                {inq.message && (
-                  <p className='text-sm text-muted line-clamp-2'>{inq.message}</p>
-                )}
-                <div className='flex items-center gap-4 text-xs text-muted'>
-                  {inq.passengers > 1 && (
-                    <span className='flex items-center gap-1'>
-                      <LuUser className='h-3 w-3' /> {inq.passengers} pasajeros
-                    </span>
+                  {inq.message && (
+                    <p className='text-sm text-muted line-clamp-2'>{inq.message}</p>
                   )}
-                  {inq.phone && (
-                    <span className='flex items-center gap-1'>
-                      <LuPhone className='h-3 w-3' /> {inq.phone}
-                    </span>
-                  )}
-                </div>
+                  <div className='flex items-center gap-4 text-xs text-muted'>
+                    {inq.passengers > 1 && (
+                      <span className='flex items-center gap-1'>
+                        <LuUser className='h-3 w-3' /> {inq.passengers} pasajeros
+                      </span>
+                    )}
+                    {inq.phone && (
+                      <span className='flex items-center gap-1'>
+                        <LuPhone className='h-3 w-3' /> {inq.phone}
+                      </span>
+                    )}
+                  </div>
+                </Link>
               </li>
             ))}
           </ul>

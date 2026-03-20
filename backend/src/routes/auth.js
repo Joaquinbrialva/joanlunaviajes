@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { randomInt } from 'node:crypto';
+import { randomInt, randomBytes, createHash } from 'node:crypto';
 import { prisma } from '../store/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
-import { sendVerificationCode } from '../store/mailer.js';
+import { sendVerificationCode, sendPasswordReset } from '../store/mailer.js';
 
 const router = Router();
 
@@ -124,7 +124,7 @@ router.post('/verify', async (req, res) => {
     });
 
     const token = jwt.sign(
-      { id: updated.id, email: updated.email, name: updated.name, role: updated.role },
+      { id: updated.id, email: updated.email, name: updated.name, role: updated.role, mustChangePassword: updated.mustChangePassword },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
@@ -192,14 +192,18 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    // Raw query para leer mustChangePassword (campo agregado después de generate)
+    const [flags] = await prisma.$queryRaw`SELECT "mustChangePassword" FROM "User" WHERE id = ${user.id}`;
+    const mustChangePassword = flags?.mustChangePassword ?? false;
+
     const token = jwt.sign(
-      { id: user.id, email: user.email, name: user.name, role: user.role },
+      { id: user.id, email: user.email, name: user.name, role: user.role, mustChangePassword },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
     res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
-    res.json({ user: sanitizeUser(user) });
+    res.json({ user: { ...sanitizeUser(user), mustChangePassword } });
   } catch {
     res.status(500).json({ error: 'Error al iniciar sesión.' });
   }
@@ -219,6 +223,101 @@ router.get('/me', requireAuth, async (req, res) => {
     res.json({ user: sanitizeUser(user) });
   } catch {
     res.status(500).json({ error: 'Error al obtener usuario.' });
+  }
+});
+
+// POST /api/auth/change-temp-password
+router.post('/change-temp-password', requireAuth, async (req, res) => {
+  try {
+    const password = String(req.body.password || '');
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado.' });
+
+    const hashed = await bcrypt.hash(password, 10);
+    await prisma.$executeRaw`UPDATE "User" SET password = ${hashed}, "mustChangePassword" = false, "updatedAt" = now() WHERE id = ${user.id}`;
+
+    // Emitir nuevo JWT sin mustChangePassword
+    const token = jwt.sign(
+      { id: user.id, email: user.email, name: user.name, role: user.role, mustChangePassword: false },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
+    res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+    res.json({ ok: true });
+  } catch {
+    res.status(500).json({ error: 'Error al cambiar la contraseña.' });
+  }
+});
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const email = String(req.body.email || '').trim().toLowerCase();
+    if (!email) return res.status(400).json({ error: 'El email es requerido.' });
+
+    // Respuesta genérica siempre para no revelar si el email existe
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (user && user.verified) {
+      const token  = randomBytes(32).toString('hex');
+      const hash   = createHash('sha256').update(token).digest('hex');
+      const expiry = new Date(Date.now() + 30 * 60 * 1000);
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data:  { resetToken: hash, resetTokenExpiry: expiry },
+      });
+
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const resetUrl = `${frontendUrl}/olvide-contrasena/restablecer?token=${token}&email=${encodeURIComponent(email)}`;
+      sendPasswordReset({ email, name: user.name, resetUrl }).catch(() => {});
+    }
+
+    res.json({ message: 'Si el email existe, recibirás un enlace para restablecer tu contraseña.' });
+  } catch {
+    res.status(500).json({ error: 'Error al procesar la solicitud.' });
+  }
+});
+
+// POST /api/auth/reset-password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const email    = String(req.body.email    || '').trim().toLowerCase();
+    const token    = String(req.body.token    || '').trim();
+    const password = String(req.body.password || '');
+
+    if (!email || !token || !password) {
+      return res.status(400).json({ error: 'Email, token y contraseña son requeridos.' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !user.resetToken || !user.resetTokenExpiry) {
+      return res.status(400).json({ error: 'El enlace es inválido o ya fue usado.' });
+    }
+    if (new Date() > new Date(user.resetTokenExpiry)) {
+      return res.status(400).json({ error: 'El enlace expiró. Solicitá uno nuevo.' });
+    }
+
+    const hash = createHash('sha256').update(token).digest('hex');
+    if (hash !== user.resetToken) {
+      return res.status(400).json({ error: 'El enlace es inválido o ya fue usado.' });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data:  { password: hashed, resetToken: null, resetTokenExpiry: null },
+    });
+
+    res.json({ message: 'Contraseña actualizada correctamente.' });
+  } catch {
+    res.status(500).json({ error: 'Error al restablecer la contraseña.' });
   }
 });
 

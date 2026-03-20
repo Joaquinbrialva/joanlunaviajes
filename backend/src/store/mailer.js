@@ -260,6 +260,45 @@ export function sendVerificationCode({ email, name, code }) {
   });
 }
 
+/* ─── Email: reseteo de contraseña ────────────────────────── */
+
+export function sendPasswordReset({ email, name, resetUrl }) {
+  const safeName = escapeHtml(name);
+  const safeUrl  = escapeHtml(resetUrl);
+
+  const html = baseTemplate({
+    title: 'Restablecé tu contraseña',
+    preheader: 'Recibimos una solicitud para restablecer tu contraseña en Joanluna Viajes.',
+    body: `
+      <h1 style="margin:0 0 6px;font-size:22px;color:#1c1917;font-weight:700;">Hola, ${safeName}</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#78716c;">
+        Recibimos una solicitud para restablecer la contraseña de tu cuenta. Hacé clic en el botón para elegir una nueva.
+      </p>
+
+      <div style="text-align:center;margin:28px 0;">
+        <a href="${safeUrl}" target="_blank"
+          style="display:inline-block;background:#ff7e2d;color:#fff;text-decoration:none;font-family:sans-serif;font-size:14px;font-weight:700;padding:14px 32px;border-radius:12px;letter-spacing:0.03em;">
+          Restablecer contraseña
+        </a>
+      </div>
+
+      <p style="margin:0 0 8px;font-size:14px;color:#78716c;text-align:center;">
+        Este enlace expira en <strong style="color:#1c1917;">30 minutos</strong>.
+      </p>
+      <p style="margin:0;font-size:13px;color:#a8a29e;text-align:center;">
+        Si no solicitaste este cambio, ignorá este mensaje. Tu contraseña no cambiará.
+      </p>
+    `,
+  });
+
+  return sendMail({
+    to: email,
+    subject: 'Restablecé tu contraseña · Joanluna Viajes',
+    html,
+    text: `Hola ${name}, hacé clic en este enlace para restablecer tu contraseña: ${resetUrl} (válido 30 minutos).`,
+  });
+}
+
 /* ─── Newsletter: envío masivo ─────────────────────────────── */
 
 export async function sendNewsletterCampaign({ subject, html, emails }) {

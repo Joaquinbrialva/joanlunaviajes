@@ -93,6 +93,22 @@ router.post('/', optionalAuth, async (req, res) => {
   }
 });
 
+// GET /api/cotizaciones/:id — detalle (admin o dueño de la cotización)
+router.get('/:id', requireAuth, async (req, res) => {
+  try {
+    const inquiry = await prisma.inquiry.findUnique({ where: { id: req.params.id } });
+    if (!inquiry) return res.status(404).json({ error: 'Cotización no encontrada.' });
+
+    const isStaff = ['admin', 'agent', 'designer'].includes(req.user.role);
+    const isOwner = inquiry.userId === req.user.id || inquiry.email === req.user.email;
+    if (!isStaff && !isOwner) return res.status(403).json({ error: 'Sin acceso.' });
+
+    res.json(inquiry);
+  } catch {
+    res.status(500).json({ error: 'No se pudo obtener la cotización.' });
+  }
+});
+
 // PATCH /api/cotizaciones/:id — actualizar estado y/o notas
 router.patch('/:id', requireAuth, async (req, res) => {
   try {
