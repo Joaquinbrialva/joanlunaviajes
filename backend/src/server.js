@@ -57,6 +57,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api/auth/login', loginLimiter);
+app.post('/api/auth/register',    publicLimiter);
+app.post('/api/auth/resend-code', publicLimiter);
 app.use('/api/auth', authRouter);
 app.use('/api/ofertas', ofertasRouter);
 app.use('/api/destinos', destinosRouter);
