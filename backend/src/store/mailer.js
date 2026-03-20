@@ -217,6 +217,88 @@ export function sendConfirmationToClient(inquiry) {
   });
 }
 
+/* ─── Email: código de verificación ───────────────────────── */
+
+export function sendVerificationCode({ email, name, code }) {
+  const safeName = escapeHtml(name);
+  const safeCode = escapeHtml(code);
+
+  const html = baseTemplate({
+    title: 'Verificá tu cuenta',
+    preheader: `Tu código de verificación es ${safeCode}. Válido por 15 minutos.`,
+    body: `
+      <h1 style="margin:0 0 6px;font-size:22px;color:#1c1917;font-weight:700;">Hola, ${safeName}</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#78716c;">
+        Para activar tu cuenta en Joanluna Viajes, ingresá el siguiente código:
+      </p>
+
+      <div style="text-align:center;margin:28px 0;">
+        <div style="display:inline-block;background:#fff7ed;border:2px solid #fed7aa;border-radius:16px;padding:20px 40px;">
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#a8a29e;">
+            Código de verificación
+          </p>
+          <p style="margin:0;font-size:36px;font-weight:800;letter-spacing:0.2em;color:#ff7e2d;font-family:monospace;">
+            ${safeCode}
+          </p>
+        </div>
+      </div>
+
+      <p style="margin:0 0 8px;font-size:14px;color:#78716c;text-align:center;">
+        Este código expira en <strong style="color:#1c1917;">15 minutos</strong>.
+      </p>
+      <p style="margin:0;font-size:13px;color:#a8a29e;text-align:center;">
+        Si no creaste esta cuenta, ignorá este mensaje.
+      </p>
+    `,
+  });
+
+  return sendMail({
+    to: email,
+    subject: `${safeCode} — tu código de verificación · Joanluna Viajes`,
+    html,
+    text: `Hola ${name}, tu código de verificación es: ${code}. Válido por 15 minutos.`,
+  });
+}
+
+/* ─── Email: reseteo de contraseña ────────────────────────── */
+
+export function sendPasswordReset({ email, name, resetUrl }) {
+  const safeName = escapeHtml(name);
+  const safeUrl  = escapeHtml(resetUrl);
+
+  const html = baseTemplate({
+    title: 'Restablecé tu contraseña',
+    preheader: 'Recibimos una solicitud para restablecer tu contraseña en Joanluna Viajes.',
+    body: `
+      <h1 style="margin:0 0 6px;font-size:22px;color:#1c1917;font-weight:700;">Hola, ${safeName}</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#78716c;">
+        Recibimos una solicitud para restablecer la contraseña de tu cuenta. Hacé clic en el botón para elegir una nueva.
+      </p>
+
+      <div style="text-align:center;margin:28px 0;">
+        <a href="${safeUrl}" target="_blank"
+          style="display:inline-block;background:#ff7e2d;color:#fff;text-decoration:none;font-family:sans-serif;font-size:14px;font-weight:700;padding:14px 32px;border-radius:12px;letter-spacing:0.03em;">
+          Restablecer contraseña
+        </a>
+      </div>
+
+      <p style="margin:0 0 8px;font-size:14px;color:#78716c;text-align:center;">
+        Este enlace expira en <strong style="color:#1c1917;">30 minutos</strong>.
+      </p>
+      <p style="margin:0;font-size:13px;color:#a8a29e;text-align:center;">
+        Si no solicitaste este cambio, ignorá este mensaje. Tu contraseña no cambiará.
+      </p>
+    `,
+  });
+
+  return sendMail({
+    to: email,
+    subject: 'Restablecé tu contraseña · Joanluna Viajes',
+    html,
+    text: `Hola ${name}, hacé clic en este enlace para restablecer tu contraseña: ${resetUrl} (válido 30 minutos).`,
+  });
+}
+
 /* ─── Newsletter: envío masivo ─────────────────────────────── */
 
 export async function sendNewsletterCampaign({ subject, html, emails }) {

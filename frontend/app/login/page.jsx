@@ -40,7 +40,18 @@ export default function LoginPage() {
         new Promise(r => setTimeout(r, 1200)),
       ]);
       const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Error al iniciar sesión.'); return; }
+      if (!res.ok) {
+        if (res.status === 403 && data.unverified) {
+          window.location.href = `/registro/verificar?email=${encodeURIComponent(data.email)}`;
+          return;
+        }
+        setError(data.error || 'Error al iniciar sesión.');
+        return;
+      }
+      if (data.user.mustChangePassword) {
+        window.location.href = '/cambiar-contrasena';
+        return;
+      }
       window.location.href = STAFF_ROLES.includes(data.user.role) ? '/admin' : '/cuenta';
     } catch {
       setError('No se pudo conectar con el servidor.');
@@ -174,6 +185,12 @@ export default function LoginPage() {
                 {error}
               </p>
             )}
+
+            <div className="flex justify-end">
+              <Link href="/olvide-contrasena" className="text-[12px] text-muted hover:text-accent transition-colors" style={S}>
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
 
             <button
               type="submit" disabled={loading}
