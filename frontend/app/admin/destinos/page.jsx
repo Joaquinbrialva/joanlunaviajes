@@ -8,6 +8,8 @@ import { AlertDialog, Button, toast } from '@heroui/react';
 import { Eye, PenLine, Trash2, Globe } from 'lucide-react';
 import DestinationPreviewDrawer from '@/components/admin/destination-preview-drawer';
 import { toastError } from '@/lib/toast';
+import { usePagination } from '@/hooks/use-pagination';
+import AdminTablePagination from '@/components/ui/admin-table-pagination';
 
 export default function AdminDestinationsPage() {
   const [destinations, setDestinations] = useState([]);
@@ -60,6 +62,8 @@ export default function AdminDestinationsPage() {
       return searchMatch && continentMatch;
     });
   }, [destinations, continent, search]);
+
+  const { page, setPage, pageItems, totalPages, from, to } = usePagination(rows);
 
   function executeDelete() {
     if (!pendingDelete) return;
@@ -188,8 +192,8 @@ export default function AdminDestinationsPage() {
                 {!isDesigner && (
                   <th className='w-10 px-4 py-3'>
                     <SquareCheckbox
-                      checked={rows.length > 0 && rows.every((d) => selected.has(d.id))}
-                      onChange={(v) => setSelected(v ? new Set(rows.map((d) => d.id)) : new Set())}
+                      checked={pageItems.length > 0 && pageItems.every((d) => selected.has(d.id))}
+                      onChange={(v) => setSelected(v ? new Set(pageItems.map((d) => d.id)) : new Set())}
                     />
                   </th>
                 )}
@@ -216,7 +220,7 @@ export default function AdminDestinationsPage() {
                     )}
                   </td>
                 </tr>
-              ) : rows.map((destination) => {
+              ) : pageItems.map((destination) => {
                 const isSelected = selected.has(destination.id);
                 return (
                   <tr key={destination.id} className={`transition-colors ${isSelected ? 'bg-orange-50 dark:bg-orange-900/20' : 'hover:bg-surface-secondary/50'}`}>
@@ -282,6 +286,14 @@ export default function AdminDestinationsPage() {
             </table>
           )}
         </div>
+        <AdminTablePagination
+          page={page}
+          totalPages={totalPages}
+          from={from}
+          to={to}
+          total={rows.length}
+          onChange={setPage}
+        />
       </section>
     </div>
   );
