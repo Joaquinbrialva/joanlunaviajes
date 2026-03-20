@@ -2,6 +2,13 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../store/prisma.js';
 import { requireRole } from '../middleware/auth.js';
+import { sendWelcomeWithPassword } from '../store/mailer.js';
+import { validatePassword } from '../store/utils.js';
+
+function generateTempPassword(length = 10) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
 
 const router = Router();
 
@@ -27,17 +34,13 @@ router.get('/', requireRole('admin'), async (req, res) => {
 // POST /api/users — create user (admin only)
 router.post('/', requireRole('admin'), async (req, res) => {
   try {
-    const name = String(req.body.name || '').trim();
+    const name  = String(req.body.name  || '').trim();
     const email = String(req.body.email || '').trim().toLowerCase();
-    const password = String(req.body.password || '');
     const phone = String(req.body.phone || '').trim();
-    const role = String(req.body.role || 'client');
+    const role  = String(req.body.role  || 'client');
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Nombre, email y contraseña son requeridos.' });
-    }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
+    if (!name || !email) {
+      return res.status(400).json({ error: 'Nombre y email son requeridos.' });
     }
     if (!VALID_ROLES.includes(role)) {
       return res.status(400).json({ error: 'Rol inválido.' });
@@ -48,9 +51,15 @@ router.post('/', requireRole('admin'), async (req, res) => {
       return res.status(409).json({ error: 'Ya existe una cuenta con ese email.' });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
+    const tempPassword = generateTempPassword();
+    const hashed = await bcrypt.hash(tempPassword, 10);
     const user = await prisma.user.create({
-      data: { name, email, phone, password: hashed, role },
+      data: { name, email, phone, password: hashed, role, verified: true, mustChangePassword: true },
+    });
+
+    const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login`;
+    sendWelcomeWithPassword({ email, name, password: tempPassword, loginUrl }).catch((err) => {
+      console.warn('[mailer] No se pudo enviar email de bienvenida:', err.message);
     });
 
     res.status(201).json(sanitizeUser(user));
@@ -94,9 +103,8 @@ router.patch('/:id', requireRole('admin'), async (req, res) => {
     }
 
     if (newPassword !== undefined && newPassword !== '') {
-      if (String(newPassword).length < 6) {
-        return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
-      }
+      const pwdErr = validatePassword(String(newPassword));
+      if (pwdErr) return res.status(400).json({ error: pwdErr });
       updates.password = await bcrypt.hash(String(newPassword), 10);
     }
 

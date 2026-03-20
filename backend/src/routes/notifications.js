@@ -59,7 +59,7 @@ router.post('/:id/read', requireAuth, async (req, res) => {
   }
 });
 
-// DELETE /api/notifications/read — elimina todas las leídas por el usuario
+// DELETE /api/notifications/read — elimina todas las leídas por el usuario (debe ir antes de /:id)
 router.delete('/read', requireAuth, async (req, res) => {
   try {
     const { id: userId, role: userRole } = req.user;
@@ -74,6 +74,20 @@ router.delete('/read', requireAuth, async (req, res) => {
     res.json({ deleted: toDelete.length });
   } catch {
     res.status(500).json({ error: 'Error al eliminar notificaciones.' });
+  }
+});
+
+// DELETE /api/notifications/:id — elimina una notificación individual
+router.delete('/:id', requireAuth, async (req, res) => {
+  try {
+    const { role: userRole } = req.user;
+    const notification = await prisma.notification.findUnique({ where: { id: req.params.id } });
+    if (!notification) return res.status(404).json({ error: 'Notificación no encontrada.' });
+    if (!notification.forRoles.includes(userRole)) return res.status(403).json({ error: 'Sin permiso.' });
+    await prisma.notification.delete({ where: { id: req.params.id } });
+    res.json({ ok: true });
+  } catch {
+    res.status(500).json({ error: 'Error al eliminar notificación.' });
   }
 });
 

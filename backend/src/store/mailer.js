@@ -299,6 +299,60 @@ export function sendPasswordReset({ email, name, resetUrl }) {
   });
 }
 
+/* ─── Email: bienvenida con contraseña temporal (usuario creado por admin) ── */
+
+export function sendWelcomeWithPassword({ email, name, password, loginUrl }) {
+  const safeName     = escapeHtml(name);
+  const safePassword = escapeHtml(password);
+  const safeUrl      = escapeHtml(loginUrl);
+
+  const html = baseTemplate({
+    title: 'Tu acceso a Joanluna Viajes',
+    preheader: `Bienvenido/a ${safeName}. Tu contraseña temporal es: ${safePassword}`,
+    body: `
+      <h1 style="margin:0 0 6px;font-size:22px;color:#1c1917;font-weight:700;">¡Bienvenido/a, ${safeName}!</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#78716c;">
+        Tu cuenta en <strong style="color:#1c1917;">Joanluna Viajes</strong> fue creada.
+        A continuación encontrás tus credenciales de acceso:
+      </p>
+
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr>
+          <td style="padding:12px 16px;background:#f5f5f4;border-radius:10px 10px 0 0;border-bottom:1px solid #e7e5e4;">
+            <p style="margin:0 0 2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#a8a29e;">Email</p>
+            <p style="margin:0;font-size:14px;color:#1c1917;font-weight:600;">${escapeHtml(email)}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;background:#fff7ed;border-radius:0 0 10px 10px;border:1px solid #fed7aa;border-top:none;">
+            <p style="margin:0 0 2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#a8a29e;">Contraseña temporal</p>
+            <p style="margin:0;font-size:20px;font-weight:800;letter-spacing:0.15em;color:#ff7e2d;font-family:monospace;">${safePassword}</p>
+          </td>
+        </tr>
+      </table>
+
+      <div style="text-align:center;margin:28px 0;">
+        <a href="${safeUrl}"
+          style="display:inline-block;background:#ff7e2d;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;">
+          Iniciar sesión
+        </a>
+      </div>
+
+      <p style="margin:0;font-size:13px;color:#a8a29e;text-align:center;">
+        Al ingresar se te pedirá que elijas una contraseña nueva.<br/>
+        Si no esperabas este mensaje, ignoralo.
+      </p>
+    `,
+  });
+
+  return sendMail({
+    to: email,
+    subject: 'Tu acceso a Joanluna Viajes',
+    html,
+    text: `Hola ${name}, tu cuenta fue creada en Joanluna Viajes.\nEmail: ${email}\nContraseña temporal: ${password}\nIngresá en: ${loginUrl}\nSe te pedirá cambiar la contraseña al iniciar sesión.`,
+  });
+}
+
 /* ─── Newsletter: envío masivo ─────────────────────────────── */
 
 export async function sendNewsletterCampaign({ subject, html, emails }) {

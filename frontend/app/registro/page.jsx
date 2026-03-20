@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Spinner } from '@heroui/react';
 import { LuEye, LuEyeOff, LuArrowLeft, LuCheck } from 'react-icons/lu';
@@ -37,6 +37,13 @@ const PREFIX_OPTIONS = [
   { value: '+49', label: 'DE +49' },
 ];
 
+const REQS = [
+  { key: 'len',     label: 'Al menos 8 caracteres',           test: (p) => p.length >= 8 },
+  { key: 'upper',   label: 'Una letra mayúscula',              test: (p) => /[A-Z]/.test(p) },
+  { key: 'number',  label: 'Un número',                        test: (p) => /[0-9]/.test(p) },
+  { key: 'special', label: 'Un carácter especial (!@#$%...)',  test: (p) => /[^A-Za-z0-9]/.test(p) },
+];
+
 const PERKS = [
   'Sigue el estado de tus reservas en tiempo real',
   'Guarda destinos y ofertas favoritas',
@@ -53,9 +60,15 @@ export default function RegistroPage() {
   const [showPwd,       setShowPwd]       = useState(false);
   const [status,        setStatus]        = useState('idle');
 
+  const reqsMet    = useMemo(() => REQS.map((r) => ({ ...r, ok: r.test(password) })), [password]);
+  const allReqsMet = reqsMet.every((r) => r.ok);
+  const matchOk    = confirmPwd.length > 0 && password === confirmPwd;
+  const matchFail  = confirmPwd.length > 0 && password !== confirmPwd;
+
   async function handleSubmit(e) {
     e.preventDefault();
-    if (password !== confirmPwd) { toastError('Las contraseñas no coinciden.'); return; }
+    if (!allReqsMet)              { toastError('La contraseña no cumple los requisitos de seguridad.'); return; }
+    if (password !== confirmPwd)  { toastError('Las contraseñas no coinciden.'); return; }
     setStatus('loading');
     try {
       const res = await fetch('/api/auth/register', {
@@ -214,43 +227,61 @@ export default function RegistroPage() {
               </div>
             </div>
 
-            {/* Contraseñas en grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted" style={S}>
-                  Contraseña <span className="text-accent normal-case">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    required type={showPwd ? 'text' : 'password'}
-                    value={password} onChange={e => setPassword(e.target.value)}
-                    placeholder="Mín. 6 caracteres"
-                    className={`${inputClass} pr-11`} style={S}
-                  />
-                  <button
-                    type="button" onClick={() => setShowPwd(v => !v)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
-                  >
-                    {showPwd ? <LuEyeOff className="w-4 h-4" /> : <LuEye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted" style={S}>
-                  Confirmar <span className="text-accent normal-case">*</span>
-                </label>
+            {/* Contraseña */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted" style={S}>
+                Contraseña <span className="text-accent normal-case">*</span>
+              </label>
+              <div className="relative">
                 <input
                   required type={showPwd ? 'text' : 'password'}
-                  value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)}
-                  placeholder="Repite tu contraseña"
-                  className={inputClass} style={S}
+                  value={password} onChange={e => setPassword(e.target.value)}
+                  placeholder="Mín. 8 caracteres"
+                  className={`${inputClass} pr-11`} style={S}
                 />
+                <button
+                  type="button" onClick={() => setShowPwd(v => !v)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
+                >
+                  {showPwd ? <LuEyeOff className="w-4 h-4" /> : <LuEye className="w-4 h-4" />}
+                </button>
               </div>
+
+              {/* Checklist de requisitos */}
+              {password.length > 0 && (
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 pt-1">
+                  {reqsMet.map((r) => (
+                    <div key={r.key} className="flex items-center gap-1.5">
+                      <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 transition-all ${r.ok ? 'bg-emerald-50 border border-emerald-300 dark:bg-emerald-900/20 dark:border-emerald-600/40' : 'bg-surface-secondary border border-default'}`}>
+                        {r.ok && <span className="text-emerald-600 dark:text-emerald-400" style={{ fontSize: 8, lineHeight: 1 }}>✓</span>}
+                      </div>
+                      <span className={`text-[11px] transition-colors ${r.ok ? 'text-foreground/60' : 'text-muted/50'}`} style={S}>
+                        {r.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Confirmar contraseña */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted" style={S}>
+                Confirmar contraseña <span className="text-accent normal-case">*</span>
+              </label>
+              <input
+                required type={showPwd ? 'text' : 'password'}
+                value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)}
+                placeholder="Repite tu contraseña"
+                className={`${inputClass} ${matchFail ? 'border-red-400 focus:border-red-400' : matchOk ? 'border-emerald-400 focus:border-emerald-400' : ''}`}
+                style={S}
+              />
+              {matchFail && <p className="text-[11px] text-red-500" style={S}>Las contraseñas no coinciden</p>}
+              {matchOk   && <p className="text-[11px] text-emerald-600 dark:text-emerald-400" style={S}>Las contraseñas coinciden</p>}
             </div>
 
             <button
-              type="submit" disabled={status === 'loading'}
+              type="submit" disabled={status === 'loading' || (password.length > 0 && (!allReqsMet || matchFail))}
               className="w-full h-11 mt-1 rounded-xl bg-accent text-white text-[13px] font-semibold hover:bg-orange-500 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/20 disabled:opacity-70 flex items-center justify-center gap-2"
               style={S}
             >

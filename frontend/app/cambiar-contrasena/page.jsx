@@ -8,14 +8,17 @@ const S = { fontFamily: 'var(--font-syne)' };
 
 const grain = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)'/%3E%3C/svg%3E")`;
 
+const REQS = [
+  { key: 'len',     label: 'Al menos 8 caracteres',          test: (p) => p.length >= 8 },
+  { key: 'upper',   label: 'Una letra mayúscula',             test: (p) => /[A-Z]/.test(p) },
+  { key: 'number',  label: 'Un número',                       test: (p) => /[0-9]/.test(p) },
+  { key: 'special', label: 'Un carácter especial (!@#$%...)', test: (p) => /[^A-Za-z0-9]/.test(p) },
+];
+
 function getStrength(pwd) {
-  let score = 0;
-  if (pwd.length >= 8)               score++;
-  if (pwd.length >= 12)              score++;
-  if (/[A-Z]/.test(pwd))            score++;
-  if (/[0-9]/.test(pwd))            score++;
-  if (/[^A-Za-z0-9]/.test(pwd))     score++;
-  return score; // 0–5
+  const base = REQS.filter((r) => r.test(pwd)).length; // 0–4
+  const bonus = pwd.length >= 12 ? 1 : 0;              // +1 si es larga
+  return Math.min(base + bonus, 5);
 }
 
 const STRENGTH_LABEL = ['', 'Muy débil', 'Débil', 'Regular', 'Buena', 'Excelente'];
@@ -28,15 +31,18 @@ export default function CambiarContrasenaPage() {
   const [status,     setStatus]     = useState('idle'); // idle | loading | done
   const [error,      setError]      = useState('');
 
-  const strength  = useMemo(() => getStrength(password), [password]);
-  const matchOk   = confirmPwd.length > 0 && password === confirmPwd;
-  const matchFail = confirmPwd.length > 0 && password !== confirmPwd;
+  const strength   = useMemo(() => getStrength(password), [password]);
+  const reqsMet    = useMemo(() => REQS.map((r) => ({ ...r, ok: r.test(password) })), [password]);
+  const allReqsMet = reqsMet.every((r) => r.ok);
+  const matchOk    = confirmPwd.length > 0 && password === confirmPwd;
+  const matchFail  = confirmPwd.length > 0 && password !== confirmPwd;
+  const canSubmit  = allReqsMet && matchOk;
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    if (password !== confirmPwd) { setError('Las contraseñas no coinciden.'); return; }
-    if (password.length < 6)     { setError('Mínimo 6 caracteres.'); return; }
+    if (!allReqsMet)               { setError('La contraseña no cumple los requisitos.'); return; }
+    if (password !== confirmPwd)  { setError('Las contraseñas no coinciden.'); return; }
 
     setStatus('loading');
     try {
@@ -57,7 +63,7 @@ export default function CambiarContrasenaPage() {
 
   return (
     <div
-      className="w-screen -mx-[calc((100vw-100%)/2)] min-h-screen flex items-center justify-center relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
       style={{ background: '#060b10' }}
     >
       {/* Grain */}
@@ -112,12 +118,12 @@ export default function CambiarContrasenaPage() {
               </div>
 
               <h1 className="text-white leading-[1.05] mb-3" style={{ ...C, fontSize: 'clamp(2rem, 6vw, 2.8rem)', fontWeight: 400 }}>
-                Establecé tu<br />
+                Establece tu<br />
                 <em className="font-semibold" style={{ color: '#ff9a5c' }}>contraseña</em>
               </h1>
 
               <p className="text-[13px] leading-relaxed" style={{ ...S, color: 'rgba(255,255,255,0.35)' }}>
-                Estás usando una contraseña temporal. Creá una nueva para continuar.
+                Estás usando una contraseña temporal. Crea una nueva para continuar.
               </p>
             </div>
 
@@ -150,24 +156,38 @@ export default function CambiarContrasenaPage() {
                   </button>
                 </div>
 
-                {/* Indicador de fortaleza */}
+                {/* Requisitos + barra de fortaleza */}
                 {password.length > 0 && (
-                  <div className="space-y-1.5" style={{ animation: 'appear 0.3s ease both' }}>
+                  <div className="space-y-2.5" style={{ animation: 'appear 0.3s ease both' }}>
+                    {/* Barra */}
                     <div className="flex gap-1">
                       {[1,2,3,4,5].map(i => (
                         <div
                           key={i}
                           className="flex-1 h-1 rounded-full transition-all duration-300"
-                          style={{
-                            background: i <= strength ? STRENGTH_COLOR[strength] : 'rgba(255,255,255,0.08)',
-                            opacity: i <= strength ? 1 : 1,
-                          }}
+                          style={{ background: i <= strength ? STRENGTH_COLOR[strength] : 'rgba(255,255,255,0.08)' }}
                         />
                       ))}
                     </div>
-                    <p className="text-[11px] font-medium transition-colors" style={{ ...S, color: STRENGTH_COLOR[strength] }}>
+                    <p className="text-[11px] font-medium" style={{ ...S, color: STRENGTH_COLOR[strength] }}>
                       {STRENGTH_LABEL[strength]}
                     </p>
+                    {/* Checklist de requisitos */}
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                      {reqsMet.map((r) => (
+                        <div key={r.key} className="flex items-center gap-1.5">
+                          <div
+                            className="w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 transition-all duration-200"
+                            style={{ background: r.ok ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.06)', border: `1px solid ${r.ok ? 'rgba(16,185,129,0.5)' : 'rgba(255,255,255,0.12)'}` }}
+                          >
+                            {r.ok && <span style={{ color: '#10b981', fontSize: 8, lineHeight: 1 }}>✓</span>}
+                          </div>
+                          <span className="text-[11px] transition-colors" style={{ ...S, color: r.ok ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.25)' }}>
+                            {r.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -180,7 +200,7 @@ export default function CambiarContrasenaPage() {
                 <input
                   type={showPwd ? 'text' : 'password'} required
                   value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)}
-                  placeholder="Repetí la contraseña"
+                  placeholder="Repite la contraseña"
                   className="w-full h-12 px-4 rounded-xl text-[13px] transition-all outline-none"
                   style={{
                     ...S,
@@ -205,7 +225,7 @@ export default function CambiarContrasenaPage() {
 
               <button
                 type="submit"
-                disabled={status === 'loading' || matchFail || !password || !confirmPwd}
+                disabled={status === 'loading' || !canSubmit}
                 className="w-full h-12 rounded-xl font-semibold text-[13px] transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 mt-2"
                 style={{
                   ...S,
@@ -229,7 +249,7 @@ export default function CambiarContrasenaPage() {
             {/* Nota de seguridad */}
             <p className="mt-6 text-center text-[11px] leading-relaxed" style={{ ...S, color: 'rgba(255,255,255,0.18)' }}>
               Tu contraseña está cifrada y nunca se almacena en texto plano.<br />
-              Podés cambiarla en cualquier momento desde tu perfil.
+              Puedes cambiarla en cualquier momento desde tu perfil.
             </p>
           </>
         )}
