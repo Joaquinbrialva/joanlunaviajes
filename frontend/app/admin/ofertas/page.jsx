@@ -9,6 +9,8 @@ import { AlertDialog, Button, toast } from '@heroui/react';
 import { Eye, PenLine, Star, Trash2, ClipboardList } from 'lucide-react';
 import OfferPreviewDrawer from '@/components/admin/offer-preview-drawer';
 import { toastError } from '@/lib/toast';
+import { usePagination } from '@/hooks/use-pagination';
+import AdminTablePagination from '@/components/ui/admin-table-pagination';
 
 function getOfferPrice(offer) {
   return offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || 0;
@@ -100,7 +102,9 @@ export default function AdminOffersPage() {
     });
   }, [offers, search, status]);
 
-  const allRowsSelected = rows.length > 0 && rows.every((offer) => selected.has(offer.id));
+  const { page, setPage, pageItems, totalPages, from, to } = usePagination(rows);
+
+  const allRowsSelected = pageItems.length > 0 && pageItems.every((offer) => selected.has(offer.id));
 
   function executeDelete() {
     if (!pendingDelete) return;
@@ -267,7 +271,7 @@ export default function AdminOffersPage() {
                   <th className='w-10 px-4 py-3'>
                     <SquareCheckbox
                       checked={allRowsSelected}
-                      onChange={(v) => setSelected(v ? new Set(rows.map((o) => o.id)) : new Set())}
+                      onChange={(v) => setSelected(v ? new Set(pageItems.map((o) => o.id)) : new Set())}
                     />
                   </th>
                 )}
@@ -296,7 +300,7 @@ export default function AdminOffersPage() {
                     )}
                   </td>
                 </tr>
-              ) : rows.map((offer) => {
+              ) : pageItems.map((offer) => {
                 const price = getOfferPrice(offer);
                 const offerStatus = getStatus(offer);
                 const isSelected = selected.has(offer.id);
@@ -370,6 +374,14 @@ export default function AdminOffersPage() {
             </table>
           )}
         </div>
+        <AdminTablePagination
+          page={page}
+          totalPages={totalPages}
+          from={from}
+          to={to}
+          total={rows.length}
+          onChange={setPage}
+        />
       </section>
     </div>
   );
