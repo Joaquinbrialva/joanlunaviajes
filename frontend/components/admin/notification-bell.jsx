@@ -158,7 +158,7 @@ export default function NotificationBell() {
 
       {/* ── Panel ── */}
       {open && (
-        <div className='absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[22rem] max-w-[calc(100vw-1rem)] rounded-2xl border border-default bg-surface shadow-2xl'>
+        <div className='fixed right-1 top-[3.75rem] md:absolute md:right-0 md:top-[calc(100%+0.5rem)] z-50 w-[22rem] max-w-[calc(100vw-0.5rem)] rounded-2xl border border-default bg-surface shadow-2xl'>
 
           {/* Header */}
           <div className='flex items-center justify-between border-b border-default px-4 py-3'>
