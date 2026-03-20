@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button, Chip, Spinner } from '@heroui/react';
@@ -51,19 +51,23 @@ export default function OffersPageWrapper() {
 
 function OffersPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [offersData, setOffersData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('price-asc');
+  const [sortBy, setSortBy] = useState(() => searchParams.get('sort') || 'price-asc');
   const [durationFilter, setDurationFilter] = useState(() => searchParams.get('dur') || 'all');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
+  const [minPrice, setMinPrice] = useState(() => searchParams.get('min') || '');
+  const [maxPrice, setMaxPrice] = useState(() => searchParams.get('max') || '');
   const [search, setSearch] = useState(() => searchParams.get('q') || '');
   const [dateFilter, setDateFilter] = useState(() => searchParams.get('date') || '');
   const [page, setPage] = useState(1);
-  const [selectedDestinations, setSelectedDestinations] = useState([]);
-  const [onlyDirect, setOnlyDirect] = useState(false);
-  const [onlyDiscount, setOnlyDiscount] = useState(false);
-  const [onlyFeatured, setOnlyFeatured] = useState(false);
+  const [selectedDestinations, setSelectedDestinations] = useState(() => {
+    const d = searchParams.get('dest');
+    return d ? d.split(',').filter(Boolean) : [];
+  });
+  const [onlyDirect, setOnlyDirect] = useState(() => searchParams.get('direct') === '1');
+  const [onlyDiscount, setOnlyDiscount] = useState(() => searchParams.get('discount') === '1');
+  const [onlyFeatured, setOnlyFeatured] = useState(() => searchParams.get('featured') === '1');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -75,6 +79,22 @@ function OffersPage() {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (search) params.set('q', search);
+    if (durationFilter !== 'all') params.set('dur', durationFilter);
+    if (dateFilter) params.set('date', dateFilter);
+    if (sortBy !== 'price-asc') params.set('sort', sortBy);
+    if (minPrice) params.set('min', minPrice);
+    if (maxPrice) params.set('max', maxPrice);
+    if (selectedDestinations.length > 0) params.set('dest', selectedDestinations.join(','));
+    if (onlyDirect) params.set('direct', '1');
+    if (onlyDiscount) params.set('discount', '1');
+    if (onlyFeatured) params.set('featured', '1');
+    const qs = params.toString();
+    router.replace(qs ? `/ofertas?${qs}` : '/ofertas', { scroll: false });
+  }, [search, durationFilter, dateFilter, sortBy, minPrice, maxPrice, selectedDestinations, onlyDirect, onlyDiscount, onlyFeatured, router]);
 
   const globalMin = useMemo(() => {
     const prices = offersData.map(getOfferPrice).filter(Boolean);
@@ -126,8 +146,7 @@ function OffersPage() {
     return [...next].sort((a, b) => {
       if (sortBy === 'price-asc') return getOfferPrice(a) - getOfferPrice(b);
       if (sortBy === 'price-desc') return getOfferPrice(b) - getOfferPrice(a);
-      if (sortBy === 'rating') return b.rating.value - a.rating.value;
-      if (sortBy === 'duration-asc') return a.duration.days - b.duration.days;
+if (sortBy === 'duration-asc') return a.duration.days - b.duration.days;
       if (sortBy === 'duration-desc') return b.duration.days - a.duration.days;
       return 0;
     });
@@ -277,7 +296,6 @@ function OffersPage() {
                 options={[
                   { value: 'price-asc', label: 'Precio ↑' },
                   { value: 'price-desc', label: 'Precio ↓' },
-                  { value: 'rating', label: 'Mejor puntuadas' },
                   { value: 'duration-asc', label: 'Duración ↑' },
                   { value: 'duration-desc', label: 'Duración ↓' },
                 ]}

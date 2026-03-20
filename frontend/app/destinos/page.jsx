@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button, Chip, Spinner } from '@heroui/react';
@@ -24,18 +25,30 @@ function getVisiblePages(current, total) {
   return [1, '…', current - 1, current, current + 1, '…', total];
 }
 
-export default function DestinationsPage() {
+export default function DestinationsPageWrapper() {
+  return <Suspense><DestinationsPage /></Suspense>;
+}
+
+function DestinationsPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [destinationsData, setDestinationsData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [continent, setContinent] = useState('all');
-  const [selectedStyles, setSelectedStyles] = useState([]);
-  const [selectedClimates, setSelectedClimates] = useState([]);
-  const [minBudget, setMinBudget] = useState('');
-  const [maxBudget, setMaxBudget] = useState('');
-  const [onlyPopular, setOnlyPopular] = useState(false);
-  const [onlySafe, setOnlySafe] = useState(false);
-  const [sortBy, setSortBy] = useState('popular');
+  const [search, setSearch] = useState(() => searchParams.get('q') || '');
+  const [continent, setContinent] = useState(() => searchParams.get('cont') || 'all');
+  const [selectedStyles, setSelectedStyles] = useState(() => {
+    const s = searchParams.get('styles');
+    return s ? s.split(',').filter(Boolean) : [];
+  });
+  const [selectedClimates, setSelectedClimates] = useState(() => {
+    const c = searchParams.get('climates');
+    return c ? c.split(',').filter(Boolean) : [];
+  });
+  const [minBudget, setMinBudget] = useState(() => searchParams.get('minb') || '');
+  const [maxBudget, setMaxBudget] = useState(() => searchParams.get('maxb') || '');
+  const [onlyPopular, setOnlyPopular] = useState(() => searchParams.get('popular') === '1');
+  const [onlySafe, setOnlySafe] = useState(() => searchParams.get('safe') === '1');
+  const [sortBy, setSortBy] = useState(() => searchParams.get('sort') || 'popular');
   const [page, setPage] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -48,6 +61,21 @@ export default function DestinationsPage() {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (search) params.set('q', search);
+    if (continent !== 'all') params.set('cont', continent);
+    if (selectedStyles.length > 0) params.set('styles', selectedStyles.join(','));
+    if (selectedClimates.length > 0) params.set('climates', selectedClimates.join(','));
+    if (minBudget) params.set('minb', minBudget);
+    if (maxBudget) params.set('maxb', maxBudget);
+    if (onlyPopular) params.set('popular', '1');
+    if (onlySafe) params.set('safe', '1');
+    if (sortBy !== 'popular') params.set('sort', sortBy);
+    const qs = params.toString();
+    router.replace(qs ? `/destinos?${qs}` : '/destinos', { scroll: false });
+  }, [search, continent, selectedStyles, selectedClimates, minBudget, maxBudget, onlyPopular, onlySafe, sortBy, router]);
 
   const continents = useMemo(() => {
     const set = new Set(destinationsData.map((d) => d.continent).filter(Boolean));
