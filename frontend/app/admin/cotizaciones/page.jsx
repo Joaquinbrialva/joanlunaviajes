@@ -212,7 +212,7 @@ function AdminInquiriesContent() {
       </section>
 
       {/* Table card */}
-      <section className='rounded-2xl border border-default bg-surface overflow-hidden'>
+      <section className='rounded-2xl border border-default bg-surface'>
         {/* Filter bar */}
         <div className='px-5 py-4 border-b border-default flex flex-col sm:flex-row gap-3'>
           <input
@@ -237,6 +237,7 @@ function AdminInquiriesContent() {
         {loading ? (
           <InquiryTableSkeleton />
         ) : (
+        <div className='overflow-x-auto'>
         <Table>
           <Table.ScrollContainer style={{ minWidth: 700 }}>
             <Table.Content aria-label='Solicitudes de cotización'>
@@ -322,6 +323,7 @@ function AdminInquiriesContent() {
             </Table.Content>
           </Table.ScrollContainer>
         </Table>
+        </div>
         )}
 
         <AdminTablePagination

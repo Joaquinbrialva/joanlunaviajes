@@ -158,7 +158,7 @@ export default function NotificationBell() {
 
       {/* ── Panel ── */}
       {open && (
-        <div className='absolute left-0 top-[calc(100%+0.5rem)] z-50 w-[22rem] rounded-2xl border border-default bg-surface shadow-2xl'>
+        <div className='absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[22rem] max-w-[calc(100vw-1rem)] rounded-2xl border border-default bg-surface shadow-2xl'>
 
           {/* Header */}
           <div className='flex items-center justify-between border-b border-default px-4 py-3'>
@@ -272,7 +272,7 @@ export default function NotificationBell() {
                       type='button'
                       onClick={(e) => handleDeleteOne(e, notif.id)}
                       title='Eliminar notificación'
-                      className='absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-md text-muted opacity-0 transition-opacity hover:bg-surface-tertiary hover:text-foreground group-hover:opacity-100'
+                      className='absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-md text-muted opacity-0 transition-opacity hover:bg-surface-tertiary hover:text-foreground group-hover:opacity-100 [@media(hover:none)]:opacity-100'
                     >
                       <LuX className='h-3 w-3' />
                     </button>
