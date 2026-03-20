@@ -40,7 +40,14 @@ export default function LoginPage() {
         new Promise(r => setTimeout(r, 1200)),
       ]);
       const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Error al iniciar sesión.'); return; }
+      if (!res.ok) {
+        if (res.status === 403 && data.unverified) {
+          window.location.href = `/registro/verificar?email=${encodeURIComponent(data.email)}`;
+          return;
+        }
+        setError(data.error || 'Error al iniciar sesión.');
+        return;
+      }
       window.location.href = STAFF_ROLES.includes(data.user.role) ? '/admin' : '/cuenta';
     } catch {
       setError('No se pudo conectar con el servidor.');
