@@ -356,20 +356,23 @@ export default function AdminLayout({ children }) {
       </div>
 
       {/* Mobile drawer overlay */}
-      {mobileOpen && (
-        <div
-          className='md:hidden fixed inset-0 z-50 bg-black/60'
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+      <div
+        className='md:hidden fixed inset-0 z-50 bg-black/60 transition-opacity duration-300'
+        style={{
+          opacity: mobileOpen ? 1 : 0,
+          pointerEvents: mobileOpen ? 'auto' : 'none',
+        }}
+        onClick={() => setMobileOpen(false)}
+      />
 
       {/* Mobile drawer panel */}
       <div
-        className='md:hidden fixed top-0 left-0 bottom-0 z-50 flex flex-col overflow-hidden transition-transform duration-300'
+        className='md:hidden fixed top-0 left-0 bottom-0 z-50 flex flex-col overflow-hidden'
         style={{
           width: 280,
           background: '#0c1018',
           transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
         <div
