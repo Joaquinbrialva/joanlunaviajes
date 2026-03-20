@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { LuArrowRight, LuClock3, LuMapPin, LuStar, LuPlane } from 'react-icons/lu';
+import { LuArrowRight, LuClock3, LuMapPin, LuPlane } from 'react-icons/lu';
 import { getLogoUrl } from '@/lib/airlines';
 
 function getPrice(offer) {
@@ -63,12 +63,6 @@ function OfferCard({ offer }) {
 
         {/* Stats strip */}
         <div className='flex items-center gap-3 px-4 py-2 bg-surface-secondary border-b border-border'>
-          {offer.rating?.value > 0 && (
-            <span className='flex items-center gap-1 text-[11px] font-bold text-foreground shrink-0'>
-              <LuStar size={10} fill='currentColor' className='text-amber-400' />
-              {offer.rating.value}
-            </span>
-          )}
           {offer.duration?.days > 0 && offer.availability?.startDate && offer.availability?.endDate && (
             <span className='flex items-center gap-1 text-[11px] text-muted shrink-0'>
               <LuClock3 size={10} />

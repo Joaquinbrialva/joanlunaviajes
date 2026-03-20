@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { prisma, withRetry } from '../store/prisma.js';
-import { requireAuth, optionalAuth } from '../middleware/auth.js';
+import { requireAuth, requireRole, optionalAuth } from '../middleware/auth.js';
 import { createNotification } from '../store/notifications.js';
 import { sendInquiryToAgency, sendConfirmationToClient } from '../store/mailer.js';
 
@@ -9,7 +9,7 @@ const router = Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // GET /api/cotizaciones
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
     const inquiries = await prisma.inquiry.findMany({ orderBy: { createdAt: 'desc' } });
     res.json(inquiries);

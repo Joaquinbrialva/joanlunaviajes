@@ -10,6 +10,7 @@ import {
   LuClipboardList,
   LuTrash2,
   LuCheckCheck,
+  LuX,
 } from 'react-icons/lu';
 
 const POLL_MS = 30_000;
@@ -34,6 +35,7 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen]                   = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [freshIds, setFreshIds]           = useState(new Set());
   const panelRef = useRef(null);
   const router   = useRouter();
 
@@ -79,16 +81,17 @@ export default function NotificationBell() {
   async function handleToggle() {
     const wasOpen = open;
     setOpen((v) => !v);
-    if (wasOpen) { setDeleteConfirm(false); return; }
+    if (wasOpen) { setDeleteConfirm(false); setFreshIds(new Set()); return; }
 
     if (unread > 0) {
+      // Guardar qué IDs eran nuevas ANTES de marcar como leídas
+      setFreshIds(new Set(notifications.filter((n) => !n.isRead).map((n) => n.id)));
       // Optimistic update
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       try {
         const res = await fetch('/api/notifications/read-all', { method: 'POST' });
         if (!res.ok) throw new Error();
       } catch {
-        // Si falló, re-sincronizar con el servidor
         fetchNotifs();
       }
     }
@@ -106,6 +109,19 @@ export default function NotificationBell() {
       await fetchNotifs();
     } catch {
       // Si falló, restaurar desde el servidor
+      fetchNotifs();
+    }
+  }
+
+  /* ── delete single ──────────────────────────────────────────── */
+  async function handleDeleteOne(e, id) {
+    e.stopPropagation();
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    setFreshIds((prev) => { const s = new Set(prev); s.delete(id); return s; });
+    try {
+      const res = await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+    } catch {
       fetchNotifs();
     }
   }
@@ -200,46 +216,67 @@ export default function NotificationBell() {
               notifications.slice(0, 20).map((notif) => {
                 const Icon = (TYPE_META[notif.type] || {}).icon || LuBell;
                 const isClickable = !!(notif.inquiryId || notif.offerSlug);
+                const isFresh = freshIds.has(notif.id);
                 return (
-                  <button
+                  <div
                     key={notif.id}
-                    type='button'
-                    onClick={() => handleClick(notif)}
                     className={[
-                      'relative w-full border-b border-default px-4 py-3 text-left',
-                      'last:border-b-0 transition-colors hover:bg-surface-secondary',
-                      !notif.isRead ? 'bg-accent/5' : '',
-                      isClickable ? 'cursor-pointer' : 'cursor-default',
+                      'group relative border-b border-default last:border-b-0 transition-colors',
+                      isFresh
+                        ? 'bg-accent/[0.07] ring-1 ring-inset ring-accent/20 hover:bg-accent/10'
+                        : 'hover:bg-surface-secondary',
                     ].join(' ')}
                   >
-                    {/* Unread accent bar */}
-                    {!notif.isRead && (
-                      <div className='absolute bottom-3 left-0 top-3 w-0.5 rounded-r-full bg-accent' />
+                    {/* Accent bar para nuevas */}
+                    {isFresh && (
+                      <div className='absolute bottom-0 left-0 top-0 w-[3px] rounded-r-full bg-accent' />
                     )}
 
-                    <div className='flex items-start gap-3'>
-                      <div
-                        className={[
-                          'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg',
-                          !notif.isRead
-                            ? 'bg-accent/10 text-accent'
-                            : 'bg-surface-secondary text-muted',
-                        ].join(' ')}
-                      >
-                        <Icon className='h-3.5 w-3.5' />
-                      </div>
+                    <button
+                      type='button'
+                      onClick={() => handleClick(notif)}
+                      className={[
+                        'w-full px-4 py-3 text-left',
+                        isClickable ? 'cursor-pointer' : 'cursor-default',
+                      ].join(' ')}
+                    >
+                      <div className='flex items-start gap-3'>
+                        <div
+                          className={[
+                            'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg',
+                            isFresh
+                              ? 'bg-accent/15 text-accent'
+                              : 'bg-surface-secondary text-muted',
+                          ].join(' ')}
+                        >
+                          <Icon className='h-3.5 w-3.5' />
+                        </div>
 
-                      <div className='min-w-0 flex-1'>
-                        <p className='text-sm font-medium leading-snug break-words'>{notif.title}</p>
-                        <p className='mt-0.5 text-xs text-muted break-words'>{notif.body}</p>
-                        <p className='mt-1 text-[11px] text-muted/50'>{timeAgo(notif.createdAt)}</p>
+                        <div className='min-w-0 flex-1 pr-5'>
+                          <div className='flex items-center gap-2'>
+                            <p className='text-sm font-medium leading-snug break-words'>{notif.title}</p>
+                            {isFresh && (
+                              <span className='shrink-0 rounded-full bg-accent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white'>
+                                Nueva
+                              </span>
+                            )}
+                          </div>
+                          <p className='mt-0.5 text-xs text-muted break-words'>{notif.body}</p>
+                          <p className='mt-1 text-[11px] text-muted/50'>{timeAgo(notif.createdAt)}</p>
+                        </div>
                       </div>
+                    </button>
 
-                      {!notif.isRead && (
-                        <div className='mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent' />
-                      )}
-                    </div>
-                  </button>
+                    {/* Botón X individual */}
+                    <button
+                      type='button'
+                      onClick={(e) => handleDeleteOne(e, notif.id)}
+                      title='Eliminar notificación'
+                      className='absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-md text-muted opacity-0 transition-opacity hover:bg-surface-tertiary hover:text-foreground group-hover:opacity-100'
+                    >
+                      <LuX className='h-3 w-3' />
+                    </button>
+                  </div>
                 );
               })
             )}

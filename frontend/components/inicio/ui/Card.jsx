@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import { LuMapPin } from "react-icons/lu";
-import { FaStar } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { formatCurrency } from "@/util/utils";
@@ -66,10 +65,6 @@ export default function Card({
                 {title}
               </h3>
 
-              <div className="flex items-center gap-1 text-sm font-bold shrink-0">
-                <FaStar className="text-yellow-400" />
-                {rating.value}
-              </div>
             </div>
 
             <p className="text-sm text-muted ">

@@ -5,6 +5,7 @@ import { randomInt, randomBytes, createHash } from 'node:crypto';
 import { prisma } from '../store/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
 import { sendVerificationCode, sendPasswordReset } from '../store/mailer.js';
+import { validatePassword } from '../store/utils.js';
 
 const router = Router();
 
@@ -44,9 +45,8 @@ router.post('/register', async (req, res) => {
     if (!EMAIL_RE.test(email)) {
       return res.status(400).json({ error: 'El email no tiene un formato válido.' });
     }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
-    }
+    const pwdErrReg = validatePassword(password);
+    if (pwdErrReg) return res.status(400).json({ error: pwdErrReg });
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -230,9 +230,8 @@ router.get('/me', requireAuth, async (req, res) => {
 router.post('/change-temp-password', requireAuth, async (req, res) => {
   try {
     const password = String(req.body.password || '');
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
-    }
+    const pwdErrTemp = validatePassword(password);
+    if (pwdErrTemp) return res.status(400).json({ error: pwdErrTemp });
 
     const user = await prisma.user.findUnique({ where: { id: req.user.id } });
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado.' });
@@ -292,9 +291,8 @@ router.post('/reset-password', async (req, res) => {
     if (!email || !token || !password) {
       return res.status(400).json({ error: 'Email, token y contraseña son requeridos.' });
     }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
-    }
+    const pwdErrReset = validatePassword(password);
+    if (pwdErrReset) return res.status(400).json({ error: pwdErrReset });
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user || !user.resetToken || !user.resetTokenExpiry) {
@@ -349,9 +347,8 @@ router.patch('/me', requireAuth, async (req, res) => {
       if (!currentPassword) return res.status(400).json({ error: 'Ingresá tu contraseña actual.' });
       const valid = await bcrypt.compare(String(currentPassword), user.password);
       if (!valid) return res.status(401).json({ error: 'Contraseña actual incorrecta.' });
-      if (String(newPassword).length < 6) {
-        return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 6 caracteres.' });
-      }
+      const pwdErrProfile = validatePassword(String(newPassword));
+      if (pwdErrProfile) return res.status(400).json({ error: pwdErrProfile });
       updates.password = await bcrypt.hash(String(newPassword), 10);
     }
 

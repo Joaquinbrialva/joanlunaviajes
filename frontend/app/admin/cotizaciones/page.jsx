@@ -13,6 +13,8 @@ import {
   INQUIRY_STATUS_OPTIONS,
 } from '@/lib/inquiries';
 import { toastError } from '@/lib/toast';
+import { usePagination } from '@/hooks/use-pagination';
+import AdminTablePagination from '@/components/ui/admin-table-pagination';
 
 function InquiryTableSkeleton() {
   return (
@@ -100,6 +102,8 @@ function AdminInquiriesContent() {
       return statusMatch && searchMatch;
     });
   }, [inquiries, statusFilter, search]);
+
+  const { page, setPage, pageItems, totalPages, from, to } = usePagination(rows);
 
   async function changeStatus(id, newStatus) {
     try {
@@ -252,7 +256,7 @@ function AdminInquiriesContent() {
                 <Table.Column> </Table.Column>
               </Table.Header>
               <Table.Body
-                items={rows}
+                items={pageItems}
                 renderEmptyState={() => (
                   <p className='py-12 text-center text-sm text-muted'>
                     No hay solicitudes que coincidan con los filtros.
@@ -320,11 +324,14 @@ function AdminInquiriesContent() {
         </Table>
         )}
 
-        {!loading && rows.length > 0 && (
-          <div className='px-5 py-3 border-t border-default'>
-            <p className='text-xs text-muted'>{rows.length} resultado{rows.length !== 1 ? 's' : ''}</p>
-          </div>
-        )}
+        <AdminTablePagination
+          page={page}
+          totalPages={totalPages}
+          from={from}
+          to={to}
+          total={rows.length}
+          onChange={setPage}
+        />
       </section>
     </div>
   );

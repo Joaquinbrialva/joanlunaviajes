@@ -35,7 +35,7 @@ const inputClass =
 
 const labelClass = 'block text-[11px] uppercase tracking-[0.18em] font-semibold text-muted mb-1.5';
 
-const EMPTY_FORM = { name: '', email: '', phone: '', role: 'client', password: '' };
+const EMPTY_FORM = { name: '', email: '', phone: '', role: 'client', password: '' }; // password solo usado en edición
 
 /* ─── Helpers ────────────────────────────────────────────────────────── */
 
@@ -205,17 +205,16 @@ export default function UsuariosPage() {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({
-            name:     form.name,
-            email:    form.email,
-            phone:    form.phone,
-            role:     form.role,
-            password: form.password,
+            name:  form.name,
+            email: form.email,
+            phone: form.phone,
+            role:  form.role,
           }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al crear.');
         setUsers((prev) => [data, ...prev]);
-        toastSuccess('Usuario creado correctamente');
+        toastSuccess('Usuario creado. Se envió la contraseña temporal al email.');
         closeDrawer();
       }
     } catch (err) {
@@ -342,23 +341,29 @@ export default function UsuariosPage() {
             />
           </div>
 
-          <div>
-            <label className={labelClass}>
-              Contraseña
-              {editingUser
-                ? <span className='normal-case font-normal text-muted ml-1'>(dejar en blanco para no cambiar)</span>
-                : <span className='text-accent normal-case ml-1'>*</span>
-              }
-            </label>
-            <input
-              type='password'
-              required={!editingUser}
-              value={form.password}
-              onChange={(e) => updateForm('password', e.target.value)}
-              placeholder={editingUser ? '••••••••' : 'Mín. 6 caracteres'}
-              className={inputClass}
-            />
-          </div>
+          {editingUser ? (
+            <div>
+              <label className={labelClass}>
+                Contraseña
+                <span className='normal-case font-normal text-muted ml-1'>(dejar en blanco para no cambiar)</span>
+              </label>
+              <input
+                type='password'
+                value={form.password}
+                onChange={(e) => updateForm('password', e.target.value)}
+                placeholder='••••••••'
+                className={inputClass}
+              />
+            </div>
+          ) : (
+            <div className='flex items-start gap-3 rounded-xl border border-dashed border-accent/40 bg-accent/5 px-4 py-3'>
+              <span className='mt-0.5 text-accent text-base'>✉</span>
+              <p className='text-[13px] text-muted leading-snug'>
+                Se generará una <strong className='text-foreground'>contraseña temporal</strong> y se enviará
+                al email del usuario. Al iniciar sesión se le pedirá que la cambie.
+              </p>
+            </div>
+          )}
 
           <div className='pt-2 flex gap-3'>
             <button

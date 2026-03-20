@@ -7,7 +7,6 @@ import {
   LuMapPin,
   LuClock,
   LuPlane,
-  LuStar,
   LuCheck,
   LuX,
   LuBedDouble,
@@ -164,18 +163,6 @@ export default async function OfferDetailPage({ params }) {
                 .filter(Boolean)
                 .join(', ')}
             </span>
-          )}
-          {offer.rating?.value > 0 && (
-            <>
-              <span className="text-border">·</span>
-              <span className="flex items-center gap-1 text-sm text-muted">
-                <LuStar size={12} fill="currentColor" className="text-amber-400" />
-                <strong className="text-foreground">{offer.rating.value}</strong>
-                {offer.rating.reviewsCount > 0 && (
-                  <span className="text-muted">({offer.rating.reviewsCount} reseñas)</span>
-                )}
-              </span>
-            </>
           )}
         </div>
       </div>
