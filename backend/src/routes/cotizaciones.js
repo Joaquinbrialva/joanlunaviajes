@@ -9,7 +9,7 @@ const router = Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // GET /api/cotizaciones
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   try {
     const inquiries = await prisma.inquiry.findMany({ orderBy: { createdAt: 'desc' } });
     res.json(inquiries);

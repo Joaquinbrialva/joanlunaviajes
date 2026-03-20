@@ -7,11 +7,12 @@ import { Button, Spinner } from '@heroui/react';
 import {
   Plus, Trash2, ChevronUp, ChevronDown, Eye, EyeOff,
   Image as ImageIcon, Type, Tag, MapPin, MousePointer, Minus,
-  Send,
+  Send, Save,
 } from 'lucide-react';
 import { toastError, toastSuccess } from '@/lib/toast';
 import { blocksToHtml, BLOCK_DEFAULTS, BLOCK_LABELS } from '@/lib/newsletter-html';
 import HeroSelect from '@/components/ui/hero-select';
+import CoverImageInput from '@/components/ui/cover-image-input';
 
 /* ─── Block type icons ────────────────────────────────────── */
 const BLOCK_ICONS = {
@@ -130,8 +131,8 @@ function BlockCard({ block, index, total, onChange, onDelete, onMove, offers, de
           {block.type === 'header' && (
             <>
               <div>
-                <label style={labelStyle}>URL de imagen (opcional)</label>
-                <input style={fieldStyle} value={block.data.imageUrl || ''} onChange={(e) => update('imageUrl', e.target.value)} placeholder='https://...' />
+                <label style={labelStyle}>Imagen (opcional)</label>
+                <CoverImageInput value={block.data.imageUrl || ''} onChange={(url) => update('imageUrl', url)} />
               </div>
               <div>
                 <label style={labelStyle}>Eyebrow</label>
@@ -234,10 +235,30 @@ function NewsletterComposer() {
   const [blocks, setBlocks]         = useState([{ type: 'header', data: BLOCK_DEFAULTS.header() }]);
   const [showPreview, setShowPreview] = useState(false);
   const [sending, setSending]       = useState(false);
+  const [saving, setSaving]         = useState(false);
+  const [draftId, setDraftId]       = useState(null);
   const [offers, setOffers]         = useState([]);
   const [destinations, setDestinations] = useState([]);
 
   const iframeRef = useRef(null);
+
+  // Load draft if ?id= is present
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (!id) return;
+    fetch(`/api/newsletter/campaigns/${id}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((draft) => {
+        if (!draft || draft.status !== 'draft') return;
+        setDraftId(draft.id);
+        setSubject(draft.subject || '');
+        setBlocks(Array.isArray(draft.blocks) && draft.blocks.length > 0
+          ? draft.blocks
+          : [{ type: 'header', data: BLOCK_DEFAULTS.header() }]);
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Fetch offers and destinations for block selectors
   useEffect(() => {
@@ -292,17 +313,53 @@ function NewsletterComposer() {
     doc.open(); doc.write(previewHtml); doc.close();
   }, [showPreview, previewHtml]);
 
+  async function handleSaveDraft() {
+    if (!subject.trim()) { toastError('El asunto es requerido para guardar.'); return; }
+    setSaving(true);
+    try {
+      const html = blocksToHtml(subject, blocks);
+      const isUpdate = Boolean(draftId);
+      const res = await fetch(
+        isUpdate ? `/api/newsletter/campaigns/${draftId}` : '/api/newsletter/campaigns',
+        {
+          method: isUpdate ? 'PATCH' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subject, blocks, html }),
+        },
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al guardar.');
+      if (!isUpdate) setDraftId(data.id);
+      toastSuccess('Borrador guardado.');
+    } catch (err) {
+      toastError(err, 'No se pudo guardar el borrador');
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleSend() {
     if (!subject.trim()) { toastError('El asunto es requerido.'); return; }
     if (blocks.length === 0) { toastError('Agregá al menos un bloque.'); return; }
     setSending(true);
     try {
       const html = blocksToHtml(subject, blocks);
-      const res  = await fetch('/api/newsletter/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject, blocks, html }),
-      });
+      let res;
+      if (draftId) {
+        // First update draft content, then send
+        await fetch(`/api/newsletter/campaigns/${draftId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subject, blocks, html }),
+        });
+        res = await fetch(`/api/newsletter/campaigns/${draftId}/send`, { method: 'POST' });
+      } else {
+        res = await fetch('/api/newsletter/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subject, blocks, html }),
+        });
+      }
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al enviar.');
       toastSuccess(`¡Newsletter enviado a ${data.sent} suscriptores!`);
@@ -339,6 +396,23 @@ function NewsletterComposer() {
             {showPreview ? <EyeOff size={14} /> : <Eye size={14} />}
             {showPreview ? 'Editar' : 'Vista previa'}
           </button>
+          <Button
+            isPending={saving}
+            onClick={handleSaveDraft}
+            style={{
+              height: 38, padding: '0 14px', borderRadius: 10,
+              background: 'var(--surface)', color: 'var(--foreground)',
+              border: '1px solid var(--border)',
+              fontSize: 13, fontWeight: 600,
+            }}
+          >
+            {({ isPending }) => (
+              <span className='flex items-center gap-2'>
+                {isPending ? <Spinner size='sm' /> : <Save size={13} />}
+                {isPending ? 'Guardando...' : draftId ? 'Actualizar borrador' : 'Guardar borrador'}
+              </span>
+            )}
+          </Button>
           <Button
             isPending={sending}
             onClick={handleSend}

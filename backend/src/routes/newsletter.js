@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { prisma } from '../store/prisma.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 import { sendNewsletterCampaign } from '../store/mailer.js';
 
 const router = Router();
@@ -78,16 +78,111 @@ router.patch('/subscribers/:id', requireAuth, async (req, res) => {
 
 router.get('/campaigns', requireAuth, async (req, res) => {
   try {
-    const campaigns = await prisma.newsletterCampaign.findMany({ orderBy: { createdAt: 'desc' } });
+    const { status } = req.query;
+    const where = status ? { status } : {};
+    const campaigns = await prisma.newsletterCampaign.findMany({ where, orderBy: { createdAt: 'desc' } });
     res.json(campaigns);
   } catch {
     res.status(500).json({ error: 'No se pudieron obtener las campañas.' });
   }
 });
 
-/* ─── Admin: send campaign ──────────────────────────────────── */
+/* ─── Admin: get single campaign ────────────────────────────── */
 
-router.post('/send', requireAuth, async (req, res) => {
+router.get('/campaigns/:id', requireAuth, async (req, res) => {
+  try {
+    const campaign = await prisma.newsletterCampaign.findUnique({ where: { id: req.params.id } });
+    if (!campaign) return res.status(404).json({ error: 'Campaña no encontrada.' });
+    res.json(campaign);
+  } catch {
+    res.status(500).json({ error: 'No se pudo obtener la campaña.' });
+  }
+});
+
+/* ─── Admin: create draft ───────────────────────────────────── */
+
+router.post('/campaigns', requireAuth, async (req, res) => {
+  try {
+    const subject = String(req.body.subject || '').trim();
+    const blocks  = req.body.blocks || [];
+    const html    = String(req.body.html || '').trim();
+
+    const draft = await prisma.newsletterCampaign.create({
+      data: { subject, blocks, html, status: 'draft', sentCount: 0 },
+    });
+
+    res.status(201).json(draft);
+  } catch (err) {
+    console.error('[POST /newsletter/campaigns]', err);
+    res.status(500).json({ error: 'No se pudo guardar el borrador.' });
+  }
+});
+
+/* ─── Admin: update draft ───────────────────────────────────── */
+
+router.patch('/campaigns/:id', requireAuth, async (req, res) => {
+  try {
+    const campaign = await prisma.newsletterCampaign.findUnique({ where: { id: req.params.id } });
+    if (!campaign) return res.status(404).json({ error: 'Campaña no encontrada.' });
+    if (campaign.status !== 'draft') return res.status(400).json({ error: 'Solo se pueden editar borradores.' });
+
+    const subject = req.body.subject !== undefined ? String(req.body.subject).trim() : campaign.subject;
+    const blocks  = req.body.blocks  !== undefined ? req.body.blocks               : campaign.blocks;
+    const html    = req.body.html    !== undefined ? String(req.body.html).trim()  : campaign.html;
+
+    const updated = await prisma.newsletterCampaign.update({
+      where: { id: req.params.id },
+      data:  { subject, blocks, html },
+    });
+
+    res.json(updated);
+  } catch (err) {
+    console.error('[PATCH /newsletter/campaigns/:id]', err);
+    res.status(500).json({ error: 'No se pudo actualizar el borrador.' });
+  }
+});
+
+/* ─── Admin: send draft ─────────────────────────────────────── */
+
+router.post('/campaigns/:id/send', requireAuth, async (req, res) => {
+  try {
+    const campaign = await prisma.newsletterCampaign.findUnique({ where: { id: req.params.id } });
+    if (!campaign) return res.status(404).json({ error: 'Campaña no encontrada.' });
+    if (campaign.status !== 'draft') return res.status(400).json({ error: 'Esta campaña ya fue enviada.' });
+
+    const subscribers = await prisma.subscriber.findMany({ where: { active: true } });
+    if (subscribers.length === 0) return res.status(400).json({ error: 'No hay suscriptores activos.' });
+
+    const emails = subscribers.map((s) => s.email);
+    const { sent, failed } = await sendNewsletterCampaign({ subject: campaign.subject, html: campaign.html, emails });
+
+    const updated = await prisma.newsletterCampaign.update({
+      where: { id: req.params.id },
+      data:  { status: 'sent', sentCount: sent, sentAt: new Date() },
+    });
+
+    res.json({ campaign: updated, sent, failed });
+  } catch (err) {
+    console.error('[POST /newsletter/campaigns/:id/send]', err);
+    res.status(500).json({ error: 'No se pudo enviar la campaña.' });
+  }
+});
+
+/* ─── Admin: delete campaign/draft ─────────────────────────── */
+
+router.delete('/campaigns/:id', requireAuth, async (req, res) => {
+  try {
+    await prisma.newsletterCampaign.delete({ where: { id: req.params.id } });
+    res.status(204).send();
+  } catch (err) {
+    if (err.code === 'P2025') return res.status(404).json({ error: 'Campaña no encontrada.' });
+    res.status(500).json({ error: 'No se pudo eliminar.' });
+  }
+});
+
+/* ─── Admin: send campaign (new, no draft) ──────────────────── */
+
+router.post('/send', ...requireRole('admin'), async (req, res) => {
   try {
     const subject = String(req.body.subject || '').trim();
     const html    = String(req.body.html    || '').trim();
@@ -105,13 +200,7 @@ router.post('/send', requireAuth, async (req, res) => {
     const { sent, failed } = await sendNewsletterCampaign({ subject, html, emails });
 
     const campaign = await prisma.newsletterCampaign.create({
-      data: {
-        subject,
-        blocks,
-        html,
-        sentCount: sent,
-        sentAt:    new Date(),
-      },
+      data: { subject, blocks, html, status: 'sent', sentCount: sent, sentAt: new Date() },
     });
 
     res.status(201).json({ campaign, sent, failed });

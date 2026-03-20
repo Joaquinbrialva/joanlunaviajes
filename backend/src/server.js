@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
 import authRouter from './routes/auth.js';
 import ofertasRouter from './routes/ofertas.js';
 import destinosRouter from './routes/destinos.js';
@@ -41,6 +42,7 @@ const loginLimiter = rateLimit({
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+app.use(helmet());
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 app.use(cookieParser());

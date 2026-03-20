@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { AlertDialog, Button, toast } from '@heroui/react';
-import { Mail, Plus, Trash2, Users, Send, ToggleLeft, ToggleRight } from 'lucide-react';
-import { toastError } from '@/lib/toast';
+import { useRouter } from 'next/navigation';
+import { AlertDialog, Button, Spinner, Switch, toast } from '@heroui/react';
+import { Mail, Plus, Trash2, Users, Send, Pencil, FileText } from 'lucide-react';
+import { toastError, toastSuccess } from '@/lib/toast';
 
 /* ─── Date helper ─────────────────────────────────────────── */
 function fmtDate(v) {
@@ -60,20 +61,25 @@ function Tab({ label, active, onClick }) {
 /* ─── Main page ───────────────────────────────────────────── */
 
 export default function NewsletterPage() {
+  const router = useRouter();
   const [tab, setTab]                 = useState('subscribers');
   const [subscribers, setSubscribers] = useState([]);
   const [campaigns, setCampaigns]     = useState([]);
+  const [drafts, setDrafts]           = useState([]);
   const [loading, setLoading]         = useState(true);
-  const [pendingDelete, setPendingDelete] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null); // { id, type: 'subscriber'|'campaign' }
+  const [sendingId, setSendingId]         = useState(null);
 
   useEffect(() => {
     Promise.all([
       fetch('/api/newsletter/subscribers').then((r) => r.json()),
-      fetch('/api/newsletter/campaigns').then((r) => r.json()),
+      fetch('/api/newsletter/campaigns?status=sent').then((r) => r.json()),
+      fetch('/api/newsletter/campaigns?status=draft').then((r) => r.json()),
     ])
-      .then(([subs, cams]) => {
+      .then(([subs, cams, drs]) => {
         setSubscribers(Array.isArray(subs) ? subs : []);
         setCampaigns(Array.isArray(cams) ? cams : []);
+        setDrafts(Array.isArray(drs) ? drs : []);
       })
       .catch(() => toastError('No se pudo cargar el newsletter.'))
       .finally(() => setLoading(false));
@@ -92,17 +98,47 @@ export default function NewsletterPage() {
 
   function executeDelete() {
     if (!pendingDelete) return;
-    const id = pendingDelete;
-    const deleteFn = async () => {
-      const res = await fetch(`/api/newsletter/subscribers/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('No se pudo eliminar.');
-      setSubscribers((prev) => prev.filter((s) => s.id !== id));
-    };
-    toast.promise(deleteFn, {
-      loading: 'Eliminando...',
-      success: 'Suscriptor eliminado',
-      error: (err) => err?.message || 'Error al eliminar',
-    });
+    const { id, type } = pendingDelete;
+
+    if (type === 'subscriber') {
+      const deleteFn = async () => {
+        const res = await fetch(`/api/newsletter/subscribers/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('No se pudo eliminar.');
+        setSubscribers((prev) => prev.filter((s) => s.id !== id));
+      };
+      toast.promise(deleteFn, {
+        loading: 'Eliminando...',
+        success: 'Suscriptor eliminado',
+        error: (err) => err?.message || 'Error al eliminar',
+      });
+    } else {
+      const deleteFn = async () => {
+        const res = await fetch(`/api/newsletter/campaigns/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('No se pudo eliminar.');
+        setDrafts((prev) => prev.filter((d) => d.id !== id));
+      };
+      toast.promise(deleteFn, {
+        loading: 'Eliminando borrador...',
+        success: 'Borrador eliminado',
+        error: (err) => err?.message || 'Error al eliminar',
+      });
+    }
+  }
+
+  async function sendDraft(draft) {
+    setSendingId(draft.id);
+    try {
+      const res = await fetch(`/api/newsletter/campaigns/${draft.id}/send`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al enviar.');
+      setDrafts((prev) => prev.filter((d) => d.id !== draft.id));
+      setCampaigns((prev) => [{ ...draft, status: 'sent', sentCount: data.sent, sentAt: new Date().toISOString() }, ...prev]);
+      toastSuccess(`¡Newsletter enviado a ${data.sent} suscriptores!`);
+    } catch (err) {
+      toastError(err, 'No se pudo enviar la campaña');
+    } finally {
+      setSendingId(null);
+    }
   }
 
   const activeCount = subscribers.filter((s) => s.active).length;
@@ -117,7 +153,9 @@ export default function NewsletterPage() {
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status='danger' />
-                <AlertDialog.Heading>¿Eliminar suscriptor?</AlertDialog.Heading>
+                <AlertDialog.Heading>
+                  {pendingDelete?.type === 'subscriber' ? '¿Eliminar suscriptor?' : '¿Eliminar borrador?'}
+                </AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className='text-sm text-muted'>Esta acción no se puede deshacer.</p>
@@ -148,16 +186,18 @@ export default function NewsletterPage() {
       </section>
 
       {/* Stats */}
-      <div className='grid grid-cols-2 sm:grid-cols-3 gap-3'>
-        <StatCard label='Suscriptores activos' value={activeCount}          icon={Users} color='#34d399' />
-        <StatCard label='Total suscriptores'   value={subscribers.length}   icon={Mail}  color='#38bdf8' />
-        <StatCard label='Campañas enviadas'    value={campaigns.length}     icon={Send}  color='#ff7e2d' />
+      <div className='grid grid-cols-2 sm:grid-cols-4 gap-3'>
+        <StatCard label='Suscriptores activos' value={activeCount}        icon={Users}     color='#34d399' />
+        <StatCard label='Total suscriptores'   value={subscribers.length} icon={Mail}      color='#38bdf8' />
+        <StatCard label='Campañas enviadas'    value={campaigns.length}   icon={Send}      color='#ff7e2d' />
+        <StatCard label='Borradores'           value={drafts.length}      icon={FileText}  color='#a78bfa' />
       </div>
 
       {/* Tabs */}
       <div className='rounded-2xl border border-default bg-surface overflow-hidden'>
         <div className='px-5 py-3 border-b border-default flex gap-2'>
           <Tab label='Suscriptores' active={tab === 'subscribers'} onClick={() => setTab('subscribers')} />
+          <Tab label='Borradores'   active={tab === 'drafts'}      onClick={() => setTab('drafts')} />
           <Tab label='Campañas'     active={tab === 'campaigns'}   onClick={() => setTab('campaigns')} />
         </div>
 
@@ -204,17 +244,18 @@ export default function NewsletterPage() {
                       </td>
                       <td className='px-5 py-3 text-xs text-muted whitespace-nowrap'>{fmtDate(sub.createdAt)}</td>
                       <td className='px-5 py-3'>
-                        <div className='flex items-center justify-end gap-1'>
-                          <button
-                            onClick={() => toggleActive(sub)}
-                            title={sub.active ? 'Desactivar' : 'Activar'}
-                            className='w-8 h-8 rounded-lg flex items-center justify-center transition-colors'
-                            style={{ color: sub.active ? '#34d399' : 'var(--muted)' }}
+                        <div className='flex items-center justify-end gap-3'>
+                          <Switch
+                            isSelected={sub.active}
+                            onChange={() => toggleActive(sub)}
+                            size='sm'
                           >
-                            {sub.active ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
-                          </button>
+                            <Switch.Control>
+                              <Switch.Thumb />
+                            </Switch.Control>
+                          </Switch>
                           <button
-                            onClick={() => setPendingDelete(sub.id)}
+                            onClick={() => setPendingDelete({ id: sub.id, type: 'subscriber' })}
                             className='w-8 h-8 rounded-lg flex items-center justify-center text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors'
                             title='Eliminar'
                           >
@@ -230,6 +271,82 @@ export default function NewsletterPage() {
             {subscribers.length > 0 && (
               <div className='px-5 py-3 border-t border-default'>
                 <p className='text-xs text-muted'>{subscribers.length} suscriptor{subscribers.length !== 1 ? 'es' : ''}</p>
+              </div>
+            )}
+          </div>
+
+        ) : tab === 'drafts' ? (
+
+          /* ── Drafts list ── */
+          <div>
+            {drafts.length === 0 ? (
+              <div className='py-16 text-center'>
+                <FileText size={32} style={{ color: 'var(--muted)', margin: '0 auto 12px' }} />
+                <p className='text-sm text-muted'>No hay borradores guardados.</p>
+                <Link
+                  href='/admin/newsletter/nuevo'
+                  className='inline-flex items-center gap-1.5 mt-4 text-sm font-semibold text-accent hover:underline'
+                >
+                  <Plus size={14} /> Nueva campaña
+                </Link>
+              </div>
+            ) : (
+              <div className='divide-y divide-default'>
+                {drafts.map((d) => (
+                  <div key={d.id} className='px-5 py-4 flex items-center gap-4 hover:bg-surface-secondary/40 transition-colors'>
+                    <div
+                      style={{
+                        width: 38, height: 38, borderRadius: 11, flexShrink: 0,
+                        background: 'rgba(167,139,250,0.12)', color: '#a78bfa',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}
+                    >
+                      <FileText size={16} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p className='font-semibold text-[13px] truncate'>{d.subject || <span className='text-muted italic'>Sin asunto</span>}</p>
+                      <p className='text-xs text-muted mt-0.5'>Creado {fmtDate(d.createdAt)}</p>
+                    </div>
+                    <div className='flex items-center gap-2 shrink-0'>
+                      <Link
+                        href={`/admin/newsletter/nuevo?id=${d.id}`}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 5,
+                          height: 32, padding: '0 12px', borderRadius: 9,
+                          border: '1px solid var(--border)', background: 'var(--surface)',
+                          color: 'var(--foreground)', fontSize: 12, fontWeight: 600,
+                          textDecoration: 'none',
+                        }}
+                      >
+                        <Pencil size={12} /> Editar
+                      </Link>
+                      <Button
+                        isPending={sendingId === d.id}
+                        isDisabled={sendingId !== null}
+                        onClick={() => sendDraft(d)}
+                        style={{
+                          height: 32, padding: '0 12px', borderRadius: 9,
+                          background: '#ff7e2d', color: '#fff',
+                          fontSize: 12, fontWeight: 600,
+                        }}
+                      >
+                        {({ isPending }) => (
+                          <span className='flex items-center gap-1.5'>
+                            {isPending ? <Spinner size='sm' style={{ color: '#fff' }} /> : <Send size={12} />}
+                            {isPending ? 'Enviando...' : 'Enviar'}
+                          </span>
+                        )}
+                      </Button>
+                      <button
+                        onClick={() => setPendingDelete({ id: d.id, type: 'campaign' })}
+                        className='w-8 h-8 rounded-lg flex items-center justify-center text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors'
+                        title='Eliminar borrador'
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
