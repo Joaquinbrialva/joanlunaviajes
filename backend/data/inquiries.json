@@ -1,0 +1,17 @@
+[
+  {
+    "id": "inq-1007",
+    "name": "Joaquin Alvarez",
+    "email": "joaquinbrialva@gmail.com",
+    "phone": "1163041071",
+    "passengers": 1,
+    "message": "Prueba",
+    "offerSlug": "vuelos-nacionales-conoce-argentina-buenos-aires-argentina-3",
+    "offerTitle": "Vuelos nacionales, conoce Argentina",
+    "destinationSlug": null,
+    "notes": "",
+    "status": "closed",
+    "createdAt": "2026-03-09T01:20:47.501Z",
+    "updatedAt": "2026-03-09T02:14:04.732Z"
+  }
+]

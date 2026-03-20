@@ -1,0 +1,56 @@
+[
+  {
+    "id": "dest-001",
+    "slug": "roma-italia",
+    "name": "Roma",
+    "country": "Italia",
+    "continent": "Europa",
+    "description": "Roma es la capital de Italia y una de las ciudades más fascinantes del mundo. Con más de 2.500 años de historia, alberga el Coliseo, el Vaticano, la Fontana di Trevi y una gastronomía inigualable. Cada rincón de la ciudad eterna cuenta una historia.",
+    "shortDescription": "La ciudad eterna te espera con historia, arte y gastronomía incomparable.",
+    "travelInfo": {
+      "airport": "FCO — Leonardo da Vinci",
+      "currency": "EUR",
+      "language": "Italiano",
+      "timezone": "Europe/Rome",
+      "visaRequired": false,
+      "recommendedStayDays": 7
+    },
+    "climate": {
+      "type": "Mediterráneo",
+      "averageTemperatureC": 20,
+      "bestMonthsToVisit": [
+        "Abril",
+        "Mayo",
+        "Septiembre",
+        "Octubre"
+      ]
+    },
+    "highlights": [
+      "Coliseo Romano,Ciudad del Vaticano,Fontana di Trevi,Foro Romano,Galería Borghese"
+    ],
+    "travelStyles": [
+      "Cultural,Histórico,Gastronómico,Urbano"
+    ],
+    "featuredImage": "https://picsum.photos/seed/roma-coliseo/1200/800",
+    "gallery": [
+      "https://picsum.photos/seed/roma-vaticano/1200/800",
+      "https://picsum.photos/seed/roma-trevi/1200/800",
+      "https://picsum.photos/seed/roma-foro/1200/800"
+    ],
+    "stats": {
+      "annualVisitorsMillions": 8.4,
+      "safetyIndex": 66,
+      "averageDailyBudgetUSD": 120
+    },
+    "seo": {
+      "metaTitle": "Viajes a Roma, Italia | Joan Luna Viajes",
+      "metaDescription": "Descubrí Roma con Joan Luna Viajes. Paquetes con hotel, vuelo y excursiones al Coliseo, Vaticano y más."
+    },
+    "isPopular": true,
+    "isFeatured": false,
+    "status": "published",
+    "createdAt": "2026-01-10T09:00:00Z",
+    "updatedAt": "2026-03-09T01:14:19.921Z",
+    "isRecommended": true
+  }
+]

@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(cmd:*)",
+      "Bash(wmic process:*)",
+      "Bash(curl:*)",
+      "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); print\\(list\\(p.get\\(''exports'',{}\\).keys\\(\\)\\)[:30]\\)\")",
+      "Bash(ls /c/joanlunaviajes/frontend/node_modules/@internationalized/date/dist/*.mjs)",
+      "Bash(grep -l \"CalendarGridBody\" /c/joanlunaviajes/frontend/node_modules/react-aria-components/dist/*.d.ts)",
+      "Bash(npm run build)",
+      "Bash(xargs grep:*)",
+      "Bash(ls:*)",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k: d.get\\(k\\) for k in [''''dependencies'''',''''peerDependencies'''']}, indent=2\\)\\)\")",
+      "Bash(npx prisma:*)",
+      "Bash(grep -n \"airline\\\\|iata\\\\|logo\\\\|Logo\\\\|getLogoUrl\" C:/Users/maxi-/Documents/repositorios/joanlunaviajes/frontend/app/ofertas/*/page.jsx)",
+      "Bash(grep -n \"GalleryEditor\\\\|gallery\" C:/Users/maxi-/Documents/repositorios/joanlunaviajes/frontend/app/admin/destinos/*/editar/page.jsx)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "Bash(find /c/Users/maxi-/Documents/repositorios/joanlunaviajes/frontend/components/ui -type f -name *.tsx -o -name *.jsx)",
+      "Bash(grep -r \"ProgressCircle\\\\|progress-circle\" C:/Users/maxi-/Documents/repositorios/joanlunaviajes/frontend/node_modules/@heroui/react/dist --include=*.js -l)",
+      "Bash(grep -r ProgressCircle C:/Users/maxi-/Documents/repositorios/joanlunaviajes/frontend/node_modules/@heroui/react --include=*.d.ts -l)",
+      "Bash(xargs cat:*)",
+      "WebFetch(domain:heroui.com)",
+      "WebFetch(domain:v3.heroui.com)",
+      "Bash(grep:*)",
+      "Bash(find /c/Users/123/Documents/repos/joanlunaviajes/frontend/components/admin -name *.jsx)",
+      "Bash(find /c/Users/123/Documents/repos/joanlunaviajes/frontend/components -name *.jsx)",
+      "Bash(C:\\\\Users\\\\123\\\\.claude\\\\plugins\\\\cache\\\\claude-plugins-official\\\\superpowers\\\\5.0.5\\\\scripts\\\\start-server.sh --project-dir C:\\\\Users\\\\123\\\\Documents\\\\repos\\\\joanlunaviajes)",
+      "Bash(cat \"C:/Users/123/Documents/repos/joanlunaviajes/.superpowers/brainstorm/\"*\"/.server-info\")",
+      "Bash(bash \"C:/Users/123/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.5/skills/brainstorming/scripts/start-server.sh\" --project-dir \"C:/Users/123/Documents/repos/joanlunaviajes\")"
+    ]
+  }
+}

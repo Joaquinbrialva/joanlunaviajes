@@ -1,0 +1,190 @@
+[
+  {
+    "id": "of-4006",
+    "slug": "oferta-de-prueba-lima-peru-2",
+    "title": "Oferta de prueba",
+    "subtitle": "Experiencia destacada en Lima.",
+    "location": {
+      "city": "Lima",
+      "country": "Perú",
+      "airport": "LIM"
+    },
+    "category": "Internacional",
+    "tags": [
+      "Experiencia",
+      "Turismo",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.7,
+      "reviewsCount": 0
+    },
+    "duration": {
+      "nights": 3,
+      "days": 4
+    },
+    "pricing": {
+      "currency": "USD",
+      "originalPrice": 450,
+      "discountPercentage": 29,
+      "finalPrice": 320,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-03-14",
+      "endDate": "2026-03-17",
+      "limitedSpots": false,
+      "remainingSpots": 12
+    },
+    "hotel": {
+      "name": "Perú Grand Hotel",
+      "stars": 4,
+      "roomType": "Standard",
+      "amenities": [
+        "WiFi",
+        "Desayuno incluido",
+        "Traslados"
+      ]
+    },
+    "includes": [
+      "a"
+    ],
+    "notIncludes": [
+      "a"
+    ],
+    "images": [
+      {
+        "id": "img-of-4006-1",
+        "url": "https://picsum.photos/seed/oferta-de-prueba-lima-peru-2-1772892053910/1200/800",
+        "alt": "Vista de Perú",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "a"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": false,
+    "isPopular": false,
+    "createdAt": "2026-03-07T14:00:53.906Z",
+    "updatedAt": "2026-03-08T23:45:03.346Z",
+    "origin": {
+      "city": "Buenos Aires",
+      "country": "Argentina"
+    },
+    "airline": {
+      "name": "LATAM Airlines",
+      "iata": "LA"
+    },
+    "flight": {
+      "type": "direct"
+    },
+    "luggage": {
+      "personal": true,
+      "carryOn": true,
+      "checked": false
+    },
+    "status": "published",
+    "isSpecialOffer": false
+  },
+  {
+    "id": "of-4004",
+    "slug": "vuelos-nacionales-conoce-argentina-buenos-aires-argentina-3",
+    "title": "Vuelos nacionales, conoce Argentina",
+    "subtitle": "Experiencia destacada en Buenos Aires.",
+    "location": {
+      "city": "Lima",
+      "country": "Perú",
+      "airport": "LIM"
+    },
+    "category": "Internacional",
+    "tags": [
+      "Experiencia",
+      "Turismo",
+      "Premium"
+    ],
+    "rating": {
+      "value": 4.7,
+      "reviewsCount": 0
+    },
+    "duration": {
+      "nights": 7,
+      "days": 8
+    },
+    "pricing": {
+      "currency": "ARS",
+      "originalPrice": 800000,
+      "discountPercentage": 31,
+      "finalPrice": 550000,
+      "pricePer": "persona",
+      "installments": {
+        "available": false
+      }
+    },
+    "availability": {
+      "startDate": "2026-03-13",
+      "endDate": "2026-03-20",
+      "limitedSpots": false,
+      "remainingSpots": 12
+    },
+    "hotel": {
+      "name": "Perú Grand Hotel",
+      "stars": 4,
+      "roomType": "Standard",
+      "amenities": [
+        "WiFi",
+        "Desayuno incluido",
+        "Traslados"
+      ]
+    },
+    "includes": [
+      "a"
+    ],
+    "notIncludes": [
+      "a"
+    ],
+    "images": [
+      {
+        "id": "img-of-4004-1",
+        "url": "https://picsum.photos/seed/vuelos-nacionales-conoce-argentina-buenos-aires-argentina-3-1772806155972/1200/800",
+        "alt": "Vista de Perú",
+        "isCover": true,
+        "order": 0
+      }
+    ],
+    "highlights": [
+      "a"
+    ],
+    "cancellationPolicy": {
+      "refundable": false
+    },
+    "isFeatured": true,
+    "isPopular": false,
+    "createdAt": "2026-03-06T14:09:15.972Z",
+    "updatedAt": "2026-03-09T00:59:29.841Z",
+    "origin": {
+      "city": "Buenos Aires",
+      "country": "Argentina"
+    },
+    "airline": {
+      "name": "LATAM Airlines",
+      "iata": "LA"
+    },
+    "flight": {
+      "type": "direct"
+    },
+    "luggage": {
+      "personal": true,
+      "carryOn": true,
+      "checked": false
+    },
+    "status": "published",
+    "isSpecialOffer": true
+  }
+]

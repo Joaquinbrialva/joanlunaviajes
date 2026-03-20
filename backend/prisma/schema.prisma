@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Offer {
+  id                 String   @id @default(uuid())
+  slug               String   @unique
+  title              String
+  subtitle           String   @default("")
+  status             String   @default("draft")
+  isSpecialOffer     Boolean  @default(false)
+  isFeatured         Boolean  @default(false)
+  isPopular          Boolean  @default(false)
+  mediaReady         Boolean  @default(false)
+  category           String   @default("Internacional")
+  tags               String[]
+  location           Json
+  rating             Json
+  duration           Json
+  pricing            Json
+  availability       Json
+  hotel              Json
+  includes           String[]
+  notIncludes        String[]
+  images             Json
+  highlights         String[]
+  cancellationPolicy Json
+  origin             Json
+  airline            Json
+  flight             Json
+  luggage            Json
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Destination {
+  id               String   @id @default(uuid())
+  slug             String   @unique
+  name             String
+  country          String
+  continent        String   @default("América")
+  description      String   @default("")
+  shortDescription String   @default("")
+  featuredImage    String   @default("")
+  isPopular        Boolean  @default(false)
+  isFeatured       Boolean  @default(false)
+  isRecommended    Boolean  @default(false)
+  mediaReady       Boolean  @default(false)
+  status           String   @default("draft")
+  travelInfo       Json
+  climate          Json
+  highlights       String[]
+  travelStyles     String[]
+  gallery          String[]
+  stats            Json
+  seo              Json
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Inquiry {
+  id              String   @id @default(uuid())
+  name            String
+  email           String   @default("")
+  phone           String
+  passengers      Int      @default(1)
+  message         String   @default("")
+  offerSlug       String?
+  offerTitle      String?
+  destinationSlug String?
+  notes           String   @default("")
+  status          String   @default("pending")
+  userId          String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  phone     String   @default("")
+  password  String
+  role      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Subscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String   @default("")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model NewsletterCampaign {
+  id        String    @id @default(uuid())
+  subject   String
+  blocks    Json
+  html      String
+  status    String    @default("sent")
+  sentCount Int       @default(0)
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Notification {
+  id              String   @id @default(uuid())
+  type            String
+  title           String
+  body            String
+  forRoles        String[]
+  readBy          String[]
+  offerId         String?
+  offerSlug       String?
+  offerTitle      String?
+  destinationId   String?
+  destinationSlug String?
+  destinationName String?
+  inquiryId       String?
+  createdAt       DateTime @default(now())
+}

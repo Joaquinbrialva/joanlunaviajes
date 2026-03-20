@@ -1,0 +1,84 @@
+<h2>¿Cómo el admin compone el newsletter?</h2>
+<p class="subtitle">Elegí el tipo de editor que prefierías usar para armar cada mail</p>
+
+<div class="cards" style="grid-template-columns: repeat(3, 1fr);">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #0f1117;">
+      <div style="background:#1e2330;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.1em;">Asunto</div>
+        <div style="background:#2a3040;height:24px;border-radius:4px;"></div>
+        <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.1em;margin-top:4px;">Imagen principal</div>
+        <div style="background:#2a3040;height:48px;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:18px;">🖼️</span>
+        </div>
+        <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.1em;margin-top:4px;">Título</div>
+        <div style="background:#2a3040;height:20px;border-radius:4px;"></div>
+        <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.1em;margin-top:4px;">Cuerpo del texto</div>
+        <div style="background:#2a3040;height:48px;border-radius:4px;"></div>
+        <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.1em;margin-top:4px;">Botón CTA</div>
+        <div style="background:#ff7e2d;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:9px;color:white;font-weight:700;">Ver ofertas →</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Campos estructurados</h3>
+      <p>Formulario fijo: asunto, imagen, título, texto, botón. Siempre el mismo esqueleto, solo cambia el contenido. Más simple de usar.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #0f1117;">
+      <div style="background:#1e2330;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;">
+        <div style="background:#2a3040;height:20px;border-radius:4px;"></div>
+        <div style="border:1px dashed #3a4060;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:5px;">
+          <div style="font-size:9px;color:#ff7e2d;">+ Bloque de imagen</div>
+          <div style="background:#2a3040;height:36px;border-radius:4px;"></div>
+        </div>
+        <div style="border:1px dashed #3a4060;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:5px;">
+          <div style="font-size:9px;color:#ff7e2d;">+ Bloque de texto</div>
+          <div style="background:#2a3040;height:28px;border-radius:4px;"></div>
+          <div style="background:#2a3040;height:16px;border-radius:4px;width:70%;"></div>
+        </div>
+        <div style="border:1px dashed #3a4060;border-radius:6px;padding:8px;">
+          <div style="font-size:9px;color:#ff7e2d;">+ Bloque de oferta</div>
+          <div style="background:#2a3040;height:30px;border-radius:4px;margin-top:4px;"></div>
+        </div>
+        <div style="font-size:9px;color:#555;text-align:center;">+ Agregar bloque</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Bloques apilables</h3>
+      <p>El admin agrega secciones: imagen, texto, oferta destacada, botón. Más flexible, mails únicos cada vez.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #0f1117;">
+      <div style="background:#1e2330;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;">
+        <div style="background:#2a3040;height:20px;border-radius:4px;"></div>
+        <div style="background:#2a3040;border-radius:6px;padding:8px;min-height:80px;">
+          <div style="display:flex;gap:4px;margin-bottom:6px;">
+            <div style="background:#3a4060;width:16px;height:14px;border-radius:2px;font-size:8px;display:flex;align-items:center;justify-content:center;color:#aaa;font-weight:700;">B</div>
+            <div style="background:#3a4060;width:16px;height:14px;border-radius:2px;font-size:8px;display:flex;align-items:center;justify-content:center;color:#aaa;font-style:italic;">I</div>
+            <div style="background:#3a4060;width:16px;height:14px;border-radius:2px;font-size:8px;display:flex;align-items:center;justify-content:center;color:#aaa;">🔗</div>
+            <div style="background:#3a4060;width:16px;height:14px;border-radius:2px;font-size:8px;display:flex;align-items:center;justify-content:center;color:#aaa;">📷</div>
+          </div>
+          <div style="background:#2a3040;height:10px;border-radius:2px;margin-bottom:4px;"></div>
+          <div style="background:#2a3040;height:10px;border-radius:2px;width:80%;margin-bottom:4px;"></div>
+          <div style="background:#2a3040;height:10px;border-radius:2px;width:60%;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Editor rico (WYSIWYG)</h3>
+      <p>Editor tipo Notion/Word: escribís con formato, insertás imágenes inline, ves el resultado al escribir. Más poder, más complejidad.</p>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:16px;padding:12px 16px;background:rgba(255,126,45,0.08);border:1px solid rgba(255,126,45,0.2);border-radius:8px;">
+  <p style="margin:0;font-size:12px;color:#ff7e2d;"><strong>Mi recomendación:</strong> B — bloques apilables. Más flexible que A sin la complejidad de implementar un WYSIWYG completo. El admin puede armar mails diferentes cada vez sin saber HTML.</p>
+</div>
