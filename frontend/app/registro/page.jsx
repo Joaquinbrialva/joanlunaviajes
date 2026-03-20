@@ -70,7 +70,7 @@ export default function RegistroPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'Error al crear la cuenta.');
-      window.location.href = '/cuenta';
+      window.location.href = `/registro/verificar?email=${encodeURIComponent(email.trim())}`;
     } catch (err) {
       toastError(err, 'Error al registrarse');
       setStatus('idle');
