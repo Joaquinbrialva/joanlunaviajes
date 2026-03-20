@@ -39,10 +39,17 @@ function formatDate(d) {
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const offer = await fetchOffer(slug);
-  if (!offer) return { title: 'Oferta no encontrada | Joanluna Viajes' };
+  if (!offer) return { title: 'Oferta no encontrada' };
   return {
-    title: `${offer.title} | Joanluna Viajes`,
+    title: offer.title,
     description: offer.subtitle,
+    openGraph: {
+      title: offer.title,
+      description: offer.subtitle,
+      images: offer.images?.[0]?.url ? [{ url: offer.images[0].url }] : [],
+      type: 'website',
+    },
+    alternates: { canonical: `/ofertas/${slug}` },
   };
 }
 

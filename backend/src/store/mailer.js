@@ -1,5 +1,16 @@
 import nodemailer from 'nodemailer';
 
+/* ─── HTML escaping ────────────────────────────────────────── */
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 /* ─── Transporter ──────────────────────────────────────────── */
 
 let _transporter = null;
@@ -95,20 +106,27 @@ export function sendInquiryToAgency(inquiry) {
     message, offerTitle, offerSlug,
   } = inquiry;
 
+  const safeName = escapeHtml(name);
+  const safePhone = escapeHtml(phone);
+  const safeEmail = escapeHtml(email);
+  const safeOfferTitle = escapeHtml(offerTitle);
+  const safeMessage = escapeHtml(message);
+  const safePassengers = escapeHtml(passengers);
+
   const offerLine = offerTitle
-    ? `<tr><td style="padding:8px 0;border-bottom:1px solid #f0efee;color:#78716c;font-size:14px;">Oferta</td><td style="padding:8px 0;border-bottom:1px solid #f0efee;font-size:14px;font-weight:600;text-align:right;">${offerTitle}</td></tr>`
+    ? `<tr><td style="padding:8px 0;border-bottom:1px solid #f0efee;color:#78716c;font-size:14px;">Oferta</td><td style="padding:8px 0;border-bottom:1px solid #f0efee;font-size:14px;font-weight:600;text-align:right;">${safeOfferTitle}</td></tr>`
     : '';
 
   const messageLine = message
     ? `<div style="margin-top:20px;padding:16px;background:#fafaf9;border-radius:10px;border-left:3px solid #ff7e2d;">
         <p style="margin:0 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#a8a29e;">Mensaje del cliente</p>
-        <p style="margin:0;font-size:14px;color:#44403c;line-height:1.6;">${message}</p>
+        <p style="margin:0;font-size:14px;color:#44403c;line-height:1.6;">${safeMessage}</p>
        </div>`
     : '';
 
   const html = baseTemplate({
     title: 'Nueva solicitud de cotización',
-    preheader: `${name} solicitó información${offerTitle ? ` sobre "${offerTitle}"` : ''}.`,
+    preheader: `${safeName} solicitó información${offerTitle ? ` sobre "${safeOfferTitle}"` : ''}.`,
     body: `
       <h1 style="margin:0 0 6px;font-size:22px;color:#1c1917;font-weight:700;">Nueva solicitud</h1>
       <p style="margin:0 0 24px;font-size:15px;color:#78716c;">Un cliente completó el formulario de cotización.</p>
@@ -116,23 +134,23 @@ export function sendInquiryToAgency(inquiry) {
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
           <td style="padding:8px 0;border-bottom:1px solid #f0efee;color:#78716c;font-size:14px;">Nombre</td>
-          <td style="padding:8px 0;border-bottom:1px solid #f0efee;font-size:14px;font-weight:600;text-align:right;">${name}</td>
+          <td style="padding:8px 0;border-bottom:1px solid #f0efee;font-size:14px;font-weight:600;text-align:right;">${safeName}</td>
         </tr>
         <tr>
           <td style="padding:8px 0;border-bottom:1px solid #f0efee;color:#78716c;font-size:14px;">Teléfono</td>
           <td style="padding:8px 0;border-bottom:1px solid #f0efee;font-size:14px;font-weight:600;text-align:right;">
-            <a href="https://wa.me/${phone.replace(/\D/g, '')}" style="color:#ff7e2d;text-decoration:none;">${phone}</a>
+            <a href="https://wa.me/${phone.replace(/\D/g, '')}" style="color:#ff7e2d;text-decoration:none;">${safePhone}</a>
           </td>
         </tr>
         ${email ? `<tr>
           <td style="padding:8px 0;border-bottom:1px solid #f0efee;color:#78716c;font-size:14px;">Email</td>
           <td style="padding:8px 0;border-bottom:1px solid #f0efee;font-size:14px;font-weight:600;text-align:right;">
-            <a href="mailto:${email}" style="color:#ff7e2d;text-decoration:none;">${email}</a>
+            <a href="mailto:${safeEmail}" style="color:#ff7e2d;text-decoration:none;">${safeEmail}</a>
           </td>
         </tr>` : ''}
         <tr>
           <td style="padding:8px 0;border-bottom:1px solid #f0efee;color:#78716c;font-size:14px;">Pasajeros</td>
-          <td style="padding:8px 0;border-bottom:1px solid #f0efee;font-size:14px;font-weight:600;text-align:right;">${passengers}</td>
+          <td style="padding:8px 0;border-bottom:1px solid #f0efee;font-size:14px;font-weight:600;text-align:right;">${safePassengers}</td>
         </tr>
         ${offerLine}
       </table>
@@ -163,15 +181,18 @@ export function sendConfirmationToClient(inquiry) {
   const { name, email, offerTitle } = inquiry;
   if (!email) return Promise.resolve(); // no email, skip
 
+  const safeName = escapeHtml(name);
+  const safeOfferTitle = escapeHtml(offerTitle);
+
   const offerMention = offerTitle
-    ? `<p style="margin:0 0 20px;font-size:15px;color:#57534e;">Recibimos tu consulta sobre <strong style="color:#1c1917;">${offerTitle}</strong>.</p>`
+    ? `<p style="margin:0 0 20px;font-size:15px;color:#57534e;">Recibimos tu consulta sobre <strong style="color:#1c1917;">${safeOfferTitle}</strong>.</p>`
     : `<p style="margin:0 0 20px;font-size:15px;color:#57534e;">Recibimos tu consulta.</p>`;
 
   const html = baseTemplate({
     title: '¡Recibimos tu consulta!',
     preheader: 'Te contactaremos a la brevedad para coordinar tu viaje.',
     body: `
-      <h1 style="margin:0 0 6px;font-size:22px;color:#1c1917;font-weight:700;">¡Hola, ${name}!</h1>
+      <h1 style="margin:0 0 6px;font-size:22px;color:#1c1917;font-weight:700;">¡Hola, ${safeName}!</h1>
       ${offerMention}
 
       <div style="background:#fff7ed;border-radius:12px;border:1px solid #fed7aa;padding:20px 24px;margin-bottom:24px;">

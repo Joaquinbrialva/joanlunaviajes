@@ -22,8 +22,15 @@ export async function generateMetadata({ params }) {
   }
 
   return {
-    title: destination.seo?.metaTitle || `${destination.name} | Joanluna Viajes`,
+    title: destination.seo?.metaTitle || destination.name,
     description: destination.seo?.metaDescription || destination.shortDescription,
+    openGraph: {
+      title: destination.seo?.metaTitle || destination.name,
+      description: destination.seo?.metaDescription || destination.shortDescription,
+      images: destination.featuredImage ? [{ url: destination.featuredImage }] : [],
+      type: 'website',
+    },
+    alternates: { canonical: `/destinos/${slug}` },
   };
 }
 

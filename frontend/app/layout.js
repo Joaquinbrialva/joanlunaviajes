@@ -33,9 +33,15 @@ const syne = Syne({
 });
 
 export const metadata = {
-	title: 'Joanluna Viajes - Viajes y Turismo',
-	description:
-		'Agencia de viajes especializada en paquetes y destinos turísticos.',
+	title: { default: 'Joanluna Viajes', template: '%s | Joanluna Viajes' },
+	description: 'Agencia de viajes especializada en paquetes turísticos. Encontrá tu próximo destino.',
+	metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+	openGraph: {
+		siteName: 'Joanluna Viajes',
+		locale: 'es_AR',
+		type: 'website',
+	},
+	robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }) {

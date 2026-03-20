@@ -4,6 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import morgan from 'morgan';
 import authRouter from './routes/auth.js';
 import ofertasRouter from './routes/ofertas.js';
 import destinosRouter from './routes/destinos.js';
@@ -39,9 +40,17 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-const app = express();
-const PORT = process.env.PORT || 4000;
+const publicLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 5,
+  message: { error: 'Demasiadas solicitudes. Intentá de nuevo en un minuto.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
+const app = express();
+
+app.use(morgan('combined'));
 app.use(helmet());
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', credentials: true }));
 app.use(express.json());
@@ -51,11 +60,13 @@ app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth', authRouter);
 app.use('/api/ofertas', ofertasRouter);
 app.use('/api/destinos', destinosRouter);
+app.post('/api/cotizaciones', publicLimiter);
 app.use('/api/cotizaciones', cotizacionesRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/users', usersRouter);
+app.post('/api/newsletter/subscribe', publicLimiter);
 app.use('/api/newsletter', newsletterRouter);
 
 app.get('/health', (_, res) => res.json({ status: 'ok' }));
@@ -68,6 +79,12 @@ app.use((err, req, res, next) => {
   res.status(status).json({ error: err.message || 'Error interno del servidor.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend corriendo en http://localhost:${PORT}`);
-});
+export default app;
+
+if (process.env.NODE_ENV !== 'production' || process.env.LOCAL_SERVER) {
+  const PORT = process.env.PORT || 4000;
+  const server = app.listen(PORT, () => {
+    console.log(`Backend corriendo en http://localhost:${PORT}`);
+  });
+  process.on('SIGTERM', () => server.close(() => process.exit(0)));
+}
