@@ -5,7 +5,7 @@ import { Calendar, Popover } from '@heroui/react';
 import { parseDate } from '@internationalized/date';
 import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function DatePickerField({ label, value, onChange, placeholder = 'Seleccionar fecha', triggerClassName }) {
+export default function DatePickerField({ label, value, onChange, placeholder = 'Seleccionar fecha', triggerClassName, minValue }) {
   const [open, setOpen] = useState(false);
 
   const calValue = (() => {
@@ -39,6 +39,7 @@ export default function DatePickerField({ label, value, onChange, placeholder = 
           <Popover.Dialog>
             <Calendar
               value={calValue}
+              minValue={minValue}
               onChange={(date) => {
                 onChange(date.toString());
                 setOpen(false);
