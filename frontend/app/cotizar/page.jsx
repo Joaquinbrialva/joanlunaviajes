@@ -301,10 +301,10 @@ export default function CotizarPage() {
           Cotización a medida
         </p>
         <h1 className="text-4xl md:text-5xl font-light text-foreground mb-3 leading-tight" style={cormorant}>
-          Armá tu viaje <em className="font-semibold">ideal</em>
+          Arma tu viaje <em className="font-semibold">ideal</em>
         </h1>
         <p className="text-sm text-muted" style={syne}>
-          Contanos qué tenés en mente y te preparamos una propuesta personalizada.
+          Cuéntanos qué tienes en mente y te preparamos una propuesta personalizada.
         </p>
       </div>
 
@@ -314,7 +314,7 @@ export default function CotizarPage() {
       {paso === 1 && (
         <div className="space-y-6">
           <div>
-            <p className="text-xl font-semibold text-foreground mb-5" style={syne}>¿A dónde querés ir?</p>
+            <p className="text-xl font-semibold text-foreground mb-5" style={syne}>¿A dónde quieres ir?</p>
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted" style={syne}>Destino *</label>
               <input
@@ -329,7 +329,7 @@ export default function CotizarPage() {
             </div>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3" style={syne}>¿Tenés fechas en mente? *</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3" style={syne}>¿Tienes fechas en mente? *</p>
             <ChipGroup
               options={FLEXIBILITY_OPTIONS}
               value={form.dateFlexibility}
@@ -367,7 +367,7 @@ export default function CotizarPage() {
             </div>
           ) : (
             <div className="rounded-xl border border-border bg-surface-secondary px-4 py-3 text-sm text-muted" style={syne}>
-              Sin fechas fijas — lo coordinamos con vos.
+              Sin fechas fijas — lo coordinamos contigo.
             </div>
           )}
 
@@ -381,7 +381,7 @@ export default function CotizarPage() {
       {/* ── Paso 3: Preferencias ── */}
       {paso === 3 && (
         <div className="space-y-6">
-          <p className="text-xl font-semibold text-foreground" style={syne}>¿Cómo te imaginás el viaje?</p>
+          <p className="text-xl font-semibold text-foreground" style={syne}>¿Cómo te imaginas el viaje?</p>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3" style={syne}>Tipo de viaje</p>
             <ChipGroup options={TRIP_TYPES} value={form.tripType} onChange={(v) => update('tripType', v)} />
