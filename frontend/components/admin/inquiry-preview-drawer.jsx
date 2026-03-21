@@ -90,20 +90,20 @@ function ContactRow({ href, icon: Icon, iconBg, iconColor, label, value, dimmed 
 function formatIsoDate(isoStr) {
   if (!isoStr) return null;
   const [y, m, d] = isoStr.split('-');
-  if (!y || !m || !d) return isoStr;
+  if (!y || !m || !d) return null;
   return `${d}/${m}/${y}`;
 }
 
+const WIZARD_LABEL_STYLE = {
+  fontSize: 9, fontWeight: 700, letterSpacing: '0.14em',
+  textTransform: 'uppercase', color: 'var(--muted)', margin: 0,
+};
+const WIZARD_VALUE_STYLE = {
+  fontSize: 13, fontWeight: 600, color: 'var(--foreground)', margin: 0,
+};
+
 function WizardDetails({ wizardData }) {
   if (!wizardData) return null;
-
-  const labelStyle = {
-    fontSize: 9, fontWeight: 700, letterSpacing: '0.14em',
-    textTransform: 'uppercase', color: 'var(--muted)', margin: 0,
-  };
-  const valueStyle = {
-    fontSize: 13, fontWeight: 600, color: 'var(--foreground)', margin: 0,
-  };
 
   const rows = [];
 
@@ -115,6 +115,7 @@ function WizardDetails({ wizardData }) {
     rows.push({ label: 'Flexibilidad', value: FLEXIBILITY_LABELS[wizardData.dateFlexibility] || wizardData.dateFlexibility });
   }
 
+  // Dates are only stored in wizardData when dateFlexibility === 'fixed' (wizard enforces this)
   if (wizardData.dateFlexibility === 'fixed') {
     const dep = formatIsoDate(wizardData.departureDate);
     const ret = formatIsoDate(wizardData.returnDate);
@@ -147,7 +148,7 @@ function WizardDetails({ wizardData }) {
 
   return (
     <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
-      <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 10 }}>
+      <p style={{ ...WIZARD_LABEL_STYLE, marginBottom: 10 }}>
         Detalles del viaje solicitado
       </p>
       <div
@@ -160,15 +161,15 @@ function WizardDetails({ wizardData }) {
       >
         {rows.map((row, i) => (
           <div
-            key={row.label}
+            key={i}
             style={{
               display: 'flex', alignItems: 'baseline', gap: 10,
               padding: '9px 14px',
               borderTop: i > 0 ? '1px solid var(--border)' : 'none',
             }}
           >
-            <p style={{ ...labelStyle, flexShrink: 0, width: 100 }}>{row.label}</p>
-            <p style={valueStyle}>{row.value}</p>
+            <p style={{ ...WIZARD_LABEL_STYLE, flexShrink: 0, width: 100 }}>{row.label}</p>
+            <p style={WIZARD_VALUE_STYLE}>{row.value}</p>
           </div>
         ))}
       </div>
