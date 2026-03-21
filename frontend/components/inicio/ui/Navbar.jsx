@@ -146,11 +146,11 @@ export default function Navbar() {
           <div className="flex-1 hidden md:flex items-center justify-end gap-2">
             {!authLoading && !isStaff && (
               <Link
-                href="/consulta"
+                href="/cotizar"
                 className="h-8 px-4 rounded-full bg-accent text-white text-[13px] font-semibold hover:bg-orange-600 transition-all shadow-md shadow-orange-500/25 flex items-center"
                 style={syneStyle}
               >
-                Consultar ahora
+                Cotizar a medida
               </Link>
             )}
 
@@ -289,11 +289,11 @@ export default function Navbar() {
                     </Link>
                     {!isStaff && (
                       <Link
-                        href="/consulta"
+                        href="/cotizar"
                         onClick={() => setMobileOpen(false)}
                         className="flex items-center justify-center px-3 py-2.5 rounded-xl text-sm font-semibold bg-accent text-white"
                       >
-                        Consultar ahora
+                        Cotizar a medida
                       </Link>
                     )}
                   </>
