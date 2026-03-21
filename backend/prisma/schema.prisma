@@ -67,7 +67,7 @@ model Inquiry {
   id              String   @id @default(uuid())
   name            String
   email           String   @default("")
-  phone           String
+  phone           String   @default("")
   passengers      Int      @default(1)
   message         String   @default("")
   offerSlug       String?
@@ -76,6 +76,7 @@ model Inquiry {
   notes           String   @default("")
   status          String   @default("pending")
   userId          String?
+  wizardData      Json?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
