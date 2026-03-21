@@ -54,6 +54,12 @@ const BUDGET_LABELS = Object.fromEntries(BUDGET_OPTIONS.map((o) => [o.value, o.l
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function formatDate(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
 /* ── Stepper ── */
 function Stepper({ paso }) {
   const steps = ['Destino', 'Fechas', 'Preferencias', 'Contacto'];
@@ -189,7 +195,7 @@ export default function CotizarPage() {
     lines.push(`Destino: ${form.destination}`);
     lines.push(`Flexibilidad de fechas: ${FLEXIBILITY_LABELS[form.dateFlexibility] || ''}`);
     if (form.dateFlexibility === 'fixed' && form.departureDate) {
-      lines.push(`Salida: ${form.departureDate} | Regreso: ${form.returnDate}`);
+      lines.push(`Salida: ${formatDate(form.departureDate)} | Regreso: ${formatDate(form.returnDate)}`);
     }
     const viajeros = `${form.adults} adulto${form.adults !== 1 ? 's' : ''}${form.children > 0 ? `, ${form.children} niño${form.children !== 1 ? 's' : ''}` : ''}`;
     lines.push(`Viajeros: ${viajeros}`);
@@ -414,7 +420,7 @@ export default function CotizarPage() {
             />
           </div>
           <div className="rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 text-sm text-muted" style={syne}>
-            📩 Te respondemos en menos de 24 horas con opciones personalizadas.
+            Te respondemos en menos de 24 horas con opciones personalizadas.
           </div>
         </div>
       )}
