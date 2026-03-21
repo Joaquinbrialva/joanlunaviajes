@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Button } from '@heroui/react';
-import { LuCheck, LuArrowRight } from 'react-icons/lu';
+import { LuCheck, LuArrowRight, LuArrowLeft } from 'react-icons/lu';
 import { today, getLocalTimeZone, parseDate } from '@internationalized/date';
 import DatePickerField from '@/components/ui/date-picker-field';
 import { toastError } from '@/lib/toast';
@@ -139,7 +139,7 @@ function ChipGroup({ options, value, onChange, multi = false }) {
 }
 
 /* ── Counter ── */
-function Counter({ label, value, onChange, min = 0 }) {
+function Counter({ label, value, onChange, min = 0, max = 20 }) {
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-2" style={syne}>{label}</p>
@@ -154,7 +154,7 @@ function Counter({ label, value, onChange, min = 0 }) {
         <span className="text-xl font-bold w-6 text-center" style={syne}>{value}</span>
         <button
           type="button"
-          onClick={() => onChange(value + 1)}
+          onClick={() => onChange(Math.min(max, value + 1))}
           className="w-8 h-8 rounded-lg border border-default flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-secondary transition-colors text-lg"
         >
           +
@@ -178,16 +178,17 @@ export default function CotizarPage() {
   }
 
   /* Validaciones por paso */
-  const canGoNext = (() => {
+  const canGoNext = useMemo(() => {
     if (paso === 1) return form.destination.trim() !== '' && form.dateFlexibility !== '';
     if (paso === 2) {
       if (form.dateFlexibility !== 'fixed') return true;
+      // ISO YYYY-MM-DD strings are lexicographically comparable
       return form.departureDate !== '' && form.returnDate !== '' && form.returnDate >= form.departureDate;
     }
     if (paso === 3) return true;
     if (paso === 4) return form.name.trim() !== '' && EMAIL_RE.test(form.email);
     return false;
-  })();
+  }, [paso, form.destination, form.dateFlexibility, form.departureDate, form.returnDate, form.name, form.email]);
 
   /* Construir message legible */
   function buildMessage() {
@@ -252,6 +253,10 @@ export default function CotizarPage() {
   }
 
   const todayDate = today(getLocalTimeZone());
+  const returnMinDate = useMemo(() => {
+    if (!form.departureDate) return todayDate;
+    try { return parseDate(form.departureDate); } catch { return todayDate; }
+  }, [form.departureDate, todayDate]);
 
   /* ── Pantalla de éxito ── */
   if (submitted) {
@@ -268,6 +273,7 @@ export default function CotizarPage() {
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
+            type="button"
             onClick={handleReset}
             className="h-11 px-7 rounded-full border border-border text-sm font-semibold text-foreground hover:bg-surface-secondary transition-colors"
             style={syne}
@@ -313,6 +319,7 @@ export default function CotizarPage() {
               <label className="text-xs font-semibold uppercase tracking-wider text-muted" style={syne}>Destino *</label>
               <input
                 autoFocus
+                maxLength={120}
                 className={inputClass}
                 placeholder="Europa, Caribe, Tailandia... o 'Sorpréndeme'"
                 value={form.destination}
@@ -354,7 +361,7 @@ export default function CotizarPage() {
                   value={form.returnDate}
                   onChange={(v) => update('returnDate', v)}
                   placeholder="Seleccionar"
-                  minValue={form.departureDate ? (() => { try { return parseDate(form.departureDate); } catch { return todayDate; } })() : todayDate}
+                  minValue={returnMinDate}
                 />
               </div>
             </div>
@@ -392,7 +399,7 @@ export default function CotizarPage() {
 
       {/* ── Paso 4: Contacto ── */}
       {paso === 4 && (
-        <div className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); if (canGoNext) handleSubmit(); }} className="space-y-4">
           <p className="text-xl font-semibold text-foreground" style={syne}>Último paso: ¿cómo te contactamos?</p>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -412,6 +419,7 @@ export default function CotizarPage() {
             <label className="text-xs font-semibold uppercase tracking-wider text-muted" style={syne}>¿Algo más que quieras contarnos? (opcional)</label>
             <textarea
               rows={4}
+              maxLength={1000}
               className="w-full rounded-xl border border-default bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all resize-none"
               placeholder="Ej: viajamos con un bebé, queremos playa y montaña..."
               value={form.notes}
@@ -422,7 +430,7 @@ export default function CotizarPage() {
           <div className="rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 text-sm text-muted" style={syne}>
             Te respondemos en menos de 24 horas con opciones personalizadas.
           </div>
-        </div>
+        </form>
       )}
 
       {/* ── Botones de navegación ── */}
@@ -431,10 +439,10 @@ export default function CotizarPage() {
           <button
             type="button"
             onClick={() => setPaso((p) => p - 1)}
-            className="h-11 px-6 rounded-full border border-border text-sm font-semibold text-muted hover:text-foreground hover:bg-surface-secondary transition-colors"
+            className="h-11 px-6 rounded-full border border-border text-sm font-semibold text-muted hover:text-foreground hover:bg-surface-secondary transition-colors flex items-center gap-2"
             style={syne}
           >
-            ← Anterior
+            <LuArrowLeft size={14} /> Anterior
           </button>
         ) : <div />}
 
