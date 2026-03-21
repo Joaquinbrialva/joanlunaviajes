@@ -381,6 +381,18 @@ if (sortBy === 'duration-asc') return a.duration.days - b.duration.days;
                 className="h-9 w-9 rounded-lg border border-default text-sm flex items-center justify-center disabled:opacity-40 hover:bg-surface-secondary transition-colors">›</button>
             </div>
           )}
+
+          {/* Banner cotización a medida */}
+          <div className="mt-12 rounded-2xl border border-accent/20 bg-accent/5 px-6 py-8 text-center">
+            <p className="text-base font-semibold text-foreground mb-1">¿No encontraste lo que buscás?</p>
+            <p className="text-sm text-muted mb-4">Armamos tu viaje a medida con el destino, fechas y presupuesto que necesitás.</p>
+            <Link
+              href="/cotizar"
+              className="inline-flex items-center gap-2 h-10 px-6 rounded-full bg-accent text-white text-sm font-semibold hover:bg-orange-500 transition-colors"
+            >
+              Armá tu viaje a medida <LuArrowRight size={14} />
+            </Link>
+          </div>
         </main>
       </section>
     </div>
