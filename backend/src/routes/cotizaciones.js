@@ -44,8 +44,8 @@ router.post('/', optionalAuth, async (req, res) => {
     const phone = String(body.phone || '').trim();
     const email = String(body.email || '').trim().toLowerCase();
 
-    if (!name || !phone) {
-      return res.status(400).json({ error: 'Completá nombre y teléfono.' });
+    if (!name) {
+      return res.status(400).json({ error: 'Completá tu nombre.' });
     }
     if (email && !EMAIL_RE.test(email)) {
       return res.status(400).json({ error: 'El email no tiene un formato válido.' });
@@ -64,6 +64,7 @@ router.post('/', optionalAuth, async (req, res) => {
         notes: '',
         status: 'pending',
         userId: req.user?.id || null,
+        wizardData: body.wizardData ?? null,
       },
     });
 
@@ -72,7 +73,9 @@ router.post('/', optionalAuth, async (req, res) => {
       ? `"${newInquiry.offerTitle}"`
       : newInquiry.destinationSlug
         ? newInquiry.destinationSlug.replace(/-/g, ' ')
-        : 'consulta general';
+        : newInquiry.wizardData?.destination
+          ? `cotización a medida: ${newInquiry.wizardData.destination}`
+          : 'consulta general';
 
     createNotification({
       type: 'new_inquiry',
