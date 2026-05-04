@@ -1,15 +1,34 @@
+import pg from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 
-const globalForPrisma = globalThis;
+function parsePostgresUrl(url) {
+  // Replace scheme so WHATWG URL parses authority correctly
+  const u = new URL(url.replace(/^[a-z][a-z0-9+\-.]*:\/\//, 'https://'));
+  return {
+    host: u.hostname,
+    port: Number(u.port) || 5432,
+    database: u.pathname.replace(/^\//, '').split('?')[0],
+    user: decodeURIComponent(u.username),
+    password: decodeURIComponent(u.password),
+  };
+}
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+const pool = new pg.Pool({
+  ...parsePostgresUrl(process.env.DATABASE_URL),
+  ssl: { rejectUnauthorized: false },
+  max: 5,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+pool.on('error', (err) => {
+  console.error('[pg pool error]', err.message);
+});
 
-/**
- * Ejecuta fn() y reintenta una vez si la conexión con Supabase se cayó
- * (ECONNRESET / connection drop por idle timeout del pooler).
- */
+const adapter = new PrismaPg(pool);
+export const prisma = new PrismaClient({ adapter });
+
 export async function withRetry(fn) {
   try {
     return await fn();
@@ -20,12 +39,9 @@ export async function withRetry(fn) {
       msg.includes('Unable to open a connection') ||
       msg.includes('Connection refused') ||
       msg.includes('terminating connection') ||
-      err?.code === 'P2024'; // Prisma: connection pool timeout
+      err?.code === 'P2024';
     if (!isConnError) throw err;
-    // Reconectar y reintentar una vez
-    try { await prisma.$disconnect(); } catch {}
     await new Promise((r) => setTimeout(r, 400));
-    try { await prisma.$connect(); } catch {}
     return await fn();
   }
 }

@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { prisma, withRetry } from '../store/prisma.js';
 import { slugify, uniqueSlug } from '../store/slugify.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
-import { createNotification } from '../store/notifications.js';
 
 const router = Router();
 
@@ -20,7 +19,8 @@ router.get('/', async (req, res) => {
   try {
     const offers = await prisma.offer.findMany({ orderBy: { createdAt: 'desc' } });
     res.json(offers);
-  } catch {
+  } catch (err) {
+    console.error('[GET /api/ofertas]', err);
     res.status(500).json({ error: 'No se pudieron obtener las ofertas.' });
   }
 });
@@ -165,18 +165,6 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       newOffer = await tx.offer.create({ data });
     }));
 
-    if (!coverImageUrl) {
-      createNotification({
-        type: 'pending_media',
-        title: 'Nueva oferta pendiente de imagen',
-        body: `La oferta "${newOffer.title}" fue creada y está esperando su imagen de portada.`,
-        forRoles: ['designer'],
-        offerId: newOffer.id,
-        offerSlug: newOffer.slug,
-        offerTitle: newOffer.title,
-      }).catch(() => {});
-    }
-
     res.status(201).json(newOffer);
   } catch (err) {
     console.error('[POST /api/ofertas]', err);
@@ -184,8 +172,8 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
   }
 });
 
-// PATCH /api/ofertas/:id  (admin, agent y designer)
-router.patch('/:id', ...requireRole('admin', 'agent', 'designer'), async (req, res) => {
+// PATCH /api/ofertas/:id  (admin y agent)
+router.patch('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
     const existing = await prisma.offer.findUnique({ where: { id: req.params.id } });
     if (!existing) return res.status(404).json({ error: 'Oferta no encontrada.' });
@@ -203,11 +191,6 @@ router.patch('/:id', ...requireRole('admin', 'agent', 'designer'), async (req, r
     const originalPrice = Number(body.originalPrice || 0);
     const hasDiscount = price != null && originalPrice > price && price > 0;
     const isSpecialOffer = Boolean(body.isSpecialOffer);
-
-    const isDesignerMediaUpload =
-      req.user?.role === 'designer' &&
-      Boolean(body.coverImage) &&
-      existing.mediaReady === false;
 
     const hasCoverChange = Boolean(body.coverImage);
     const hasGalleryChange = Array.isArray(body.galleryImages);
@@ -304,9 +287,7 @@ router.patch('/:id', ...requireRole('admin', 'agent', 'designer'), async (req, r
         carryOn: body.luggageCarryOn !== false,
         checked: Boolean(body.luggageChecked),
       },
-      status: isDesignerMediaUpload
-        ? 'published'
-        : (['draft', 'published'].includes(body.status) ? body.status : (existing.status || 'draft')),
+      status: ['draft', 'published'].includes(body.status) ? body.status : (existing.status || 'draft'),
       isFeatured: Boolean(body.featured),
       mediaReady,
       images,
@@ -319,18 +300,6 @@ router.patch('/:id', ...requireRole('admin', 'agent', 'designer'), async (req, r
       }
       updated = await tx.offer.update({ where: { id: req.params.id }, data: updateData });
     }));
-
-    if (isDesignerMediaUpload) {
-      createNotification({
-        type: 'media_uploaded',
-        title: 'Imagen subida por el diseñador',
-        body: `El diseñador subió la imagen para "${updateData.title}". La oferta fue publicada automáticamente.`,
-        forRoles: ['admin', 'agent'],
-        offerId: existing.id,
-        offerSlug: existing.slug,
-        offerTitle: updateData.title,
-      }).catch(() => {});
-    }
 
     res.json(updated);
   } catch (err) {

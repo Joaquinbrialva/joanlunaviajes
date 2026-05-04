@@ -22,7 +22,7 @@ async function deleteFromStorage(url) {
 }
 
 const router = Router();
-const ALLOWED_ROLES = ['admin', 'designer'];
+const ALLOWED_ROLES = ['admin', 'agent'];
 
 // GET /api/settings/hero — público (lo usa el Hero en el frontend)
 router.get('/hero', (_req, res) => {
@@ -30,7 +30,7 @@ router.get('/hero', (_req, res) => {
   res.json(settings.hero ?? { type: 'image', url: '/assets/images/hero-img.jpg', poster: null });
 });
 
-// PATCH /api/settings/hero — solo admin/designer
+// PATCH /api/settings/hero — solo admin/agent
 router.patch('/hero', requireAuth, async (req, res) => {
   if (!ALLOWED_ROLES.includes(req.user.role)) {
     return res.status(403).json({ error: 'No autorizado.' });
@@ -41,20 +41,24 @@ router.patch('/hero', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'type debe ser "image" o "video".' });
   }
 
-  const settings = readSettings();
-  const old = settings.hero ?? {};
+  try {
+    const settings = readSettings();
+    const old = settings.hero ?? {};
 
-  // Eliminar archivos anteriores de Storage si cambiaron
-  const urlChanged = old.url && old.url !== url;
-  const posterChanged = old.poster && old.poster !== (poster || null);
-  await Promise.all([
-    urlChanged    ? deleteFromStorage(old.url)    : Promise.resolve(),
-    posterChanged ? deleteFromStorage(old.poster) : Promise.resolve(),
-  ]);
+    const urlChanged = old.url && old.url !== url;
+    const posterChanged = old.poster && old.poster !== (poster || null);
+    await Promise.all([
+      urlChanged    ? deleteFromStorage(old.url)    : Promise.resolve(),
+      posterChanged ? deleteFromStorage(old.poster) : Promise.resolve(),
+    ]);
 
-  settings.hero = { type, url, poster: poster || null, focalPoint: focalPoint ?? null };
-  writeSettings(settings);
-  res.json(settings.hero);
+    settings.hero = { type, url, poster: poster || null, focalPoint: focalPoint ?? null };
+    writeSettings(settings);
+    res.json(settings.hero);
+  } catch (err) {
+    console.error('[PATCH /api/settings/hero]', err);
+    res.status(500).json({ error: 'No se pudo guardar la configuración.' });
+  }
 });
 
 export default router;
