@@ -1,10 +1,10 @@
 {
   "hero": {
-    "type": "video",
-    "url": "https://bsgznqgnuoixgfxtswly.supabase.co/storage/v1/object/public/images/hero/1773881913693-lb6tm8j7yi9.mp4",
+    "type": "image",
+    "url": "https://bsgznqgnuoixgfxtswly.supabase.co/storage/v1/object/public/images/hero/1777855635783-vnjjtcazlk.png",
     "poster": null,
     "focalPoint": {
-      "x": 10,
+      "x": 50,
       "y": 28
     }
   }

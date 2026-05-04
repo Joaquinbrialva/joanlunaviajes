@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { prisma, withRetry } from '../store/prisma.js';
 import { requireAuth, requireRole, optionalAuth } from '../middleware/auth.js';
-import { createNotification } from '../store/notifications.js';
 import { sendInquiryToAgency, sendConfirmationToClient } from '../store/mailer.js';
 
 const router = Router();
@@ -44,8 +43,8 @@ router.post('/', optionalAuth, async (req, res) => {
     const phone = String(body.phone || '').trim();
     const email = String(body.email || '').trim().toLowerCase();
 
-    if (!name || !phone) {
-      return res.status(400).json({ error: 'Completá nombre y teléfono.' });
+    if (!name) {
+      return res.status(400).json({ error: 'Completá tu nombre.' });
     }
     if (email && !EMAIL_RE.test(email)) {
       return res.status(400).json({ error: 'El email no tiene un formato válido.' });
@@ -64,25 +63,10 @@ router.post('/', optionalAuth, async (req, res) => {
         notes: '',
         status: 'pending',
         userId: req.user?.id || null,
+        wizardData: body.wizardData ?? null,
       },
     });
 
-    // Notificar a admins y agentes
-    const subject = newInquiry.offerTitle
-      ? `"${newInquiry.offerTitle}"`
-      : newInquiry.destinationSlug
-        ? newInquiry.destinationSlug.replace(/-/g, ' ')
-        : 'consulta general';
-
-    createNotification({
-      type: 'new_inquiry',
-      title: 'Nueva consulta recibida',
-      body: `${name} envió una consulta sobre ${subject}.`,
-      forRoles: ['admin', 'agent'],
-      inquiryId: newInquiry.id,
-    }).catch(() => {});
-
-    // Emails — non-blocking, never fail the request
     sendInquiryToAgency(newInquiry).catch(() => {});
     sendConfirmationToClient(newInquiry).catch(() => {});
 
@@ -93,13 +77,13 @@ router.post('/', optionalAuth, async (req, res) => {
   }
 });
 
-// GET /api/cotizaciones/:id — detalle (admin o dueño de la cotización)
+// GET /api/cotizaciones/:id
 router.get('/:id', requireAuth, async (req, res) => {
   try {
     const inquiry = await prisma.inquiry.findUnique({ where: { id: req.params.id } });
     if (!inquiry) return res.status(404).json({ error: 'Cotización no encontrada.' });
 
-    const isStaff = ['admin', 'agent', 'designer'].includes(req.user.role);
+    const isStaff = ['admin', 'agent'].includes(req.user.role);
     const isOwner = inquiry.userId === req.user.id || inquiry.email === req.user.email;
     if (!isStaff && !isOwner) return res.status(403).json({ error: 'Sin acceso.' });
 
@@ -109,7 +93,7 @@ router.get('/:id', requireAuth, async (req, res) => {
   }
 });
 
-// PATCH /api/cotizaciones/:id — actualizar estado y/o notas
+// PATCH /api/cotizaciones/:id
 router.patch('/:id', requireAuth, async (req, res) => {
   try {
     const allowed = ['pending', 'contacted', 'closed'];

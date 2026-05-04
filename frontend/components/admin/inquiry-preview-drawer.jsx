@@ -11,6 +11,17 @@ import HeroSelect from '@/components/ui/hero-select';
 import { INQUIRY_STATUS_OPTIONS } from '@/lib/inquiries';
 import { toastError } from '@/lib/toast';
 
+/* ─── Wizard label maps ──────────────────────────────────────── */
+
+const FLEXIBILITY_LABELS = { fixed: 'Fechas fijas', flexible: 'Flexible', unknown: 'Sin definir todavía' };
+const BUDGET_LABELS = {
+  'hasta-500': 'Hasta $500',
+  '500-1500': '$500–$1500',
+  '1500-3000': '$1500–$3000',
+  'mas-3000': '+$3000',
+  'flexible': 'Flexible',
+};
+
 /* ─── Status config ──────────────────────────────────────────── */
 
 const STATUS_CFG = {
@@ -71,6 +82,98 @@ function ContactRow({ href, icon: Icon, iconBg, iconColor, label, value, dimmed 
         </p>
       </div>
     </El>
+  );
+}
+
+/* ─── Wizard details ─────────────────────────────────────────── */
+
+function formatIsoDate(isoStr) {
+  if (!isoStr) return null;
+  const [y, m, d] = isoStr.split('-');
+  if (!y || !m || !d) return null;
+  return `${d}/${m}/${y}`;
+}
+
+const WIZARD_LABEL_STYLE = {
+  fontSize: 9, fontWeight: 700, letterSpacing: '0.14em',
+  textTransform: 'uppercase', color: 'var(--muted)', margin: 0,
+};
+const WIZARD_VALUE_STYLE = {
+  fontSize: 13, fontWeight: 600, color: 'var(--foreground)', margin: 0,
+};
+
+function WizardDetails({ wizardData }) {
+  if (!wizardData) return null;
+
+  const rows = [];
+
+  if (wizardData.destination) {
+    rows.push({ label: 'Destino', value: wizardData.destination });
+  }
+
+  if (wizardData.dateFlexibility) {
+    rows.push({ label: 'Flexibilidad', value: FLEXIBILITY_LABELS[wizardData.dateFlexibility] || wizardData.dateFlexibility });
+  }
+
+  // Dates are only stored in wizardData when dateFlexibility === 'fixed' (wizard enforces this)
+  if (wizardData.dateFlexibility === 'fixed') {
+    const dep = formatIsoDate(wizardData.departureDate);
+    const ret = formatIsoDate(wizardData.returnDate);
+    if (dep || ret) {
+      rows.push({ label: 'Salida / Regreso', value: [dep, ret].filter(Boolean).join(' → ') });
+    }
+  }
+
+  const adults = wizardData.adults ?? 0;
+  const children = wizardData.children ?? 0;
+  if (adults > 0 || children > 0) {
+    const parts = [`${adults} adulto${adults !== 1 ? 's' : ''}`];
+    if (children > 0) parts.push(`${children} niño${children !== 1 ? 's' : ''}`);
+    rows.push({ label: 'Viajeros', value: parts.join(', ') });
+  }
+
+  if (wizardData.budget) {
+    rows.push({ label: 'Presupuesto', value: BUDGET_LABELS[wizardData.budget] || wizardData.budget });
+  }
+
+  if (wizardData.tripType) {
+    rows.push({ label: 'Tipo de viaje', value: wizardData.tripType });
+  }
+
+  if (Array.isArray(wizardData.includes) && wizardData.includes.length > 0) {
+    rows.push({ label: 'Incluye', value: wizardData.includes.join(', ') });
+  }
+
+  if (rows.length === 0) return null;
+
+  return (
+    <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
+      <p style={{ ...WIZARD_LABEL_STYLE, marginBottom: 10 }}>
+        Detalles del viaje solicitado
+      </p>
+      <div
+        style={{
+          borderRadius: 12,
+          background: 'var(--surface-secondary)',
+          border: '1px solid var(--border)',
+          overflow: 'hidden',
+        }}
+      >
+        {rows.map((row, i) => (
+          <div
+            key={i}
+            style={{
+              display: 'flex', alignItems: 'baseline', gap: 10,
+              padding: '9px 14px',
+              borderTop: i > 0 ? '1px solid var(--border)' : 'none',
+            }}
+          >
+            <p style={{ ...WIZARD_LABEL_STYLE, flexShrink: 0, width: 100 }}>{row.label}</p>
+            <p style={WIZARD_VALUE_STYLE}>{row.value}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -258,6 +361,9 @@ export default function InquiryPreviewDrawer({
                   </div>
                 )}
               </div>
+
+              {/* Detalles del wizard */}
+              {displayed.wizardData && <WizardDetails wizardData={displayed.wizardData} />}
 
               {/* Contacto */}
               <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>

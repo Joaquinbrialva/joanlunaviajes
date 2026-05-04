@@ -12,26 +12,24 @@ function generateTempPassword(length = 10) {
 
 const router = Router();
 
-const VALID_ROLES = ['admin', 'agent', 'designer', 'client'];
+const VALID_ROLES = ['admin', 'agent', 'client'];
 
 function sanitizeUser(user) {
   const { password: _, ...safe } = user;
   return safe;
 }
 
-// GET /api/users — list all users (admin only)
+// GET /api/users
 router.get('/', requireRole('admin'), async (req, res) => {
   try {
-    const users = await prisma.user.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    const users = await prisma.user.findMany({ orderBy: { createdAt: 'desc' } });
     res.json(users.map(sanitizeUser));
   } catch {
     res.status(500).json({ error: 'Error al obtener los usuarios.' });
   }
 });
 
-// POST /api/users — create user (admin only)
+// POST /api/users
 router.post('/', requireRole('admin'), async (req, res) => {
   try {
     const name  = String(req.body.name  || '').trim();
@@ -68,7 +66,7 @@ router.post('/', requireRole('admin'), async (req, res) => {
   }
 });
 
-// PATCH /api/users/:id — update user (admin only)
+// PATCH /api/users/:id
 router.patch('/:id', requireRole('admin'), async (req, res) => {
   try {
     const { id } = req.params;
@@ -115,7 +113,7 @@ router.patch('/:id', requireRole('admin'), async (req, res) => {
   }
 });
 
-// DELETE /api/users/:id — delete user (admin only, cannot delete self)
+// DELETE /api/users/:id
 router.delete('/:id', requireRole('admin'), async (req, res) => {
   try {
     const { id } = req.params;
@@ -127,20 +125,7 @@ router.delete('/:id', requireRole('admin'), async (req, res) => {
     const existing = await prisma.user.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ error: 'Usuario no encontrado.' });
 
-    // 1. Desvincular cotizaciones (mantenerlas, solo quitar la referencia al usuario)
-    await prisma.inquiry.updateMany({
-      where: { userId: id },
-      data:  { userId: null },
-    });
-
-    // 2. Quitar el ID del array readBy en notificaciones
-    await prisma.$executeRaw`
-      UPDATE "Notification"
-      SET "readBy" = array_remove("readBy", ${id})
-      WHERE ${id} = ANY("readBy")
-    `;
-
-    // 3. Eliminar el usuario
+    await prisma.inquiry.updateMany({ where: { userId: id }, data: { userId: null } });
     await prisma.user.delete({ where: { id } });
 
     res.json({ ok: true });

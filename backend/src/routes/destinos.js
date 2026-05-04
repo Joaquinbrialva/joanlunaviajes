@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { prisma } from '../store/prisma.js';
 import { slugify, uniqueSlug } from '../store/slugify.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
-import { createNotification } from '../store/notifications.js';
 
 const router = Router();
 
@@ -56,7 +55,6 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
     const slug = uniqueSlug(body.slug || `${name}-${country}`, existingSlugs);
     const coverSeed = slugify(`${slug}-${Date.now()}`);
     const isRecommended = Boolean(body.isRecommended);
-
     const coverImageUrl = String(body.featuredImage || '').trim();
 
     const data = {
@@ -113,38 +111,20 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       newDestination = await tx.destination.create({ data });
     });
 
-    if (!coverImageUrl) {
-      createNotification({
-        type: 'pending_media',
-        title: 'Nuevo destino pendiente de imagen',
-        body: `El destino "${newDestination.name}" fue creado y está esperando su imagen de portada.`,
-        forRoles: ['designer'],
-        destinationId: newDestination.id,
-        destinationSlug: newDestination.slug,
-        destinationName: newDestination.name,
-      }).catch(() => {});
-    }
-
     res.status(201).json(newDestination);
   } catch {
     res.status(500).json({ error: 'No se pudo guardar el destino.' });
   }
 });
 
-// PATCH /api/destinos/:id  (todos los roles autenticados)
-router.patch('/:id', requireAuth, async (req, res) => {
+// PATCH /api/destinos/:id  (admin y agent)
+router.patch('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
     const existing = await prisma.destination.findUnique({ where: { id: req.params.id } });
     if (!existing) return res.status(404).json({ error: 'Destino no encontrado.' });
 
     const body = req.body;
     const isRecommended = Boolean(body.isRecommended);
-
-    const isDesignerMediaUpload =
-      req.user?.role === 'designer' &&
-      Boolean(body.featuredImage) &&
-      existing.mediaReady === false;
-
     const newFeaturedImage = String(body.featuredImage || existing.featuredImage).trim();
     const mediaReady = Boolean(body.featuredImage) ? true : (existing.mediaReady ?? false);
 
@@ -186,9 +166,7 @@ router.patch('/:id', requireAuth, async (req, res) => {
       isFeatured: Boolean(body.isFeatured),
       isRecommended,
       mediaReady,
-      status: isDesignerMediaUpload
-        ? 'published'
-        : String(body.status || existing.status),
+      status: String(body.status || existing.status),
     };
 
     let updated;
@@ -198,18 +176,6 @@ router.patch('/:id', requireAuth, async (req, res) => {
       }
       updated = await tx.destination.update({ where: { id: req.params.id }, data: updateData });
     });
-
-    if (isDesignerMediaUpload) {
-      createNotification({
-        type: 'media_uploaded',
-        title: 'Imagen subida por el diseñador',
-        body: `El diseñador subió la imagen para el destino "${updateData.name}". El destino fue publicado automáticamente.`,
-        forRoles: ['admin', 'agent'],
-        destinationId: existing.id,
-        destinationSlug: existing.slug,
-        destinationName: updateData.name,
-      }).catch(() => {});
-    }
 
     res.json(updated);
   } catch (err) {
