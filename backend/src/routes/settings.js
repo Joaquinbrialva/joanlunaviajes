@@ -29,12 +29,16 @@ const router = Router();
 const ALLOWED_ROLES = ['admin', 'agent', 'designer'];
 
 // GET /api/settings/hero — público (lo usa el Hero en el frontend)
-router.get('/hero', (_req, res) => {
-  const settings = readSettings();
-  res.json(settings.hero ?? { type: 'image', url: '/assets/images/hero-img.jpg', poster: null });
+router.get('/hero', async (_req, res) => {
+  try {
+    const settings = await readSettings();
+    res.json(settings.hero ?? { type: 'image', url: '/assets/images/hero-img.jpg', poster: null });
+  } catch {
+    res.json({ type: 'image', url: '/assets/images/hero-img.jpg', poster: null });
+  }
 });
 
-// PATCH /api/settings/hero — solo admin/agent
+// PATCH /api/settings/hero — solo admin/agent/designer
 router.patch('/hero', requireAuth, async (req, res) => {
   if (!ALLOWED_ROLES.includes(req.user.role)) {
     return res.status(403).json({ error: 'No autorizado.' });
@@ -46,7 +50,7 @@ router.patch('/hero', requireAuth, async (req, res) => {
   }
 
   try {
-    const settings = readSettings();
+    const settings = await readSettings();
     const old = settings.hero ?? {};
 
     const urlChanged = old.url && old.url !== url;
@@ -57,7 +61,7 @@ router.patch('/hero', requireAuth, async (req, res) => {
     ]);
 
     settings.hero = { type, url, poster: poster || null, focalPoint: focalPoint ?? null };
-    writeSettings(settings);
+    await writeSettings(settings);
     res.json(settings.hero);
   } catch (err) {
     console.error('[PATCH /api/settings/hero]', err);
