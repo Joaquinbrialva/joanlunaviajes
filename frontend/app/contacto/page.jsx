@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { LuPhone, LuMail, LuMapPin, LuClock, LuSend, LuCheck, LuArrowUpRight } from 'react-icons/lu';
 import { FaWhatsapp, FaInstagram, FaFacebook } from 'react-icons/fa';
-import NewsLetter from '@/components/inicio/sections/NewsLetter';
-
 const syne = { fontFamily: 'var(--font-syne)' };
 const cormorant = { fontFamily: 'var(--font-cormorant)' };
 
@@ -315,7 +313,6 @@ export default function ContactoPage() {
         </div>
       </section>
 
-      <NewsLetter />
     </div>
   );
 }

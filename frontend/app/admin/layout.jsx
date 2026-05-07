@@ -20,7 +20,6 @@ import {
   LuUser,
   LuUsers,
   LuX,
-  LuMail,
 } from 'react-icons/lu';
 
 /* ─── Nav structure ─────────────────────────────────────────── */
@@ -39,7 +38,6 @@ const NAV_GROUPS = [
       { href: '/admin/ofertas',      label: 'Ofertas',      icon: LuClipboardList },
       { href: '/admin/destinos',     label: 'Destinos',     icon: LuGlobe },
       { href: '/admin/cotizaciones', label: 'Cotizaciones', icon: LuMessageSquare, hideForRoles: ['designer'] },
-      { href: '/admin/newsletter',   label: 'Newsletter',   icon: LuMail,          showForRoles: ['admin', 'agent'] },
     ],
   },
   {

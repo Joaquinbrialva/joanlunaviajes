@@ -2,8 +2,6 @@ import Link from 'next/link';
 import { MdPriceCheck, MdSupportAgent } from 'react-icons/md';
 import { PiShieldCheckFill } from 'react-icons/pi';
 import { LuArrowRight, LuHeart, LuMapPin, LuUsers } from 'react-icons/lu';
-import NewsLetter from '@/components/inicio/sections/NewsLetter';
-
 const syne = { fontFamily: 'var(--font-syne)' };
 const cormorant = { fontFamily: 'var(--font-cormorant)' };
 
@@ -269,7 +267,6 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      <NewsLetter />
     </div>
   );
 }
