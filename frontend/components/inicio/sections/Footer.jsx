@@ -21,7 +21,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 sm:px-10 pt-16 pb-10">
 
         {/* Grid principal */}
-        <div className="grid grid-cols-1 md:grid-cols-[1.8fr_1fr_1fr_1.6fr] gap-10 md:gap-8 pb-12 border-b border-white/[0.07]">
+        <div className="grid grid-cols-1 md:grid-cols-[1.8fr_1fr_1fr] gap-10 md:gap-8 pb-12 border-b border-white/[0.07]">
 
           {/* Marca */}
           <div className="space-y-4">
@@ -86,33 +86,6 @@ export default function Footer() {
             </nav>
           </div>
 
-          {/* Newsletter */}
-          <div className="space-y-4">
-            <p
-              className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600"
-              style={syne}
-            >
-              Novedades
-            </p>
-            <p className="text-sm text-slate-500 leading-relaxed">
-              Recibe ofertas y destinos curados directo en tu mail.
-            </p>
-            <form className="flex gap-2">
-              <input
-                type="email"
-                placeholder="tu@email.com"
-                className="flex-1 min-w-0 h-9 bg-white/[0.05] border border-white/[0.08] rounded-lg px-3 text-sm text-slate-300 placeholder:text-slate-700 focus:outline-none focus:border-accent/40 transition-colors"
-                style={syne}
-              />
-              <button
-                type="button"
-                className="shrink-0 h-9 px-4 rounded-lg bg-accent/90 text-white text-xs font-semibold hover:bg-accent transition-colors"
-                style={syne}
-              >
-                Ir
-              </button>
-            </form>
-          </div>
         </div>
 
         {/* Footer bottom */}

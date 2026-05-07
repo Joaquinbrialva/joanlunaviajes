@@ -12,7 +12,6 @@ import cotizacionesRouter from './routes/cotizaciones.js';
 import uploadRouter from './routes/upload.js';
 import settingsRouter from './routes/settings.js';
 import usersRouter from './routes/users.js';
-import newsletterRouter from './routes/newsletter.js';
 
 const REQUIRED_ENV = ['JWT_SECRET'];
 for (const key of REQUIRED_ENV) {
@@ -63,8 +62,6 @@ app.use('/api/cotizaciones', cotizacionesRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/users', usersRouter);
-app.post('/api/newsletter/subscribe', publicLimiter);
-app.use('/api/newsletter', newsletterRouter);
 
 app.get('/health', (_, res) => res.json({ status: 'ok' }));
 

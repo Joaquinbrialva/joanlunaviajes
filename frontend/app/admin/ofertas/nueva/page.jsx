@@ -13,7 +13,6 @@ import ItemListInput from '@/components/ui/item-list-input';
 import CountryCombobox from '@/components/ui/country-combobox';
 import CoverImageInput from '@/components/ui/cover-image-input';
 import GalleryEditor from '@/components/ui/gallery-editor';
-import NewsletterOfferModal from '@/components/admin/newsletter-offer-modal';
 import HotelAddressSearch from '@/components/ui/hotel-address-search';
 
 /* ─── Opciones estáticas ─────────────────────────────────────────────── */
@@ -308,7 +307,6 @@ export default function AdminNewOfferPage() {
   const [form, setForm] = useState(initialForm);
   const [showErrors, setShowErrors] = useState(false);
   const [role, setRole] = useState(null);
-  const [newsletterModal, setNewsletterModal] = useState({ open: false, offer: null });
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -380,8 +378,7 @@ export default function AdminNewOfferPage() {
       try { data = await res.json(); } catch {}
       if (!res.ok) throw new Error(data?.error || 'No se pudo guardar la oferta.');
       try { localStorage.removeItem(DRAFT_KEY); } catch { }
-      router.refresh();
-      setNewsletterModal({ open: true, offer: data });
+      router.push('/admin/ofertas');
     } catch (err) {
       toastError(err, 'No se pudo guardar la oferta');
     } finally {
@@ -408,11 +405,6 @@ export default function AdminNewOfferPage() {
 
   return (
     <div className='space-y-8 max-w-4xl'>
-      <NewsletterOfferModal
-        isOpen={newsletterModal.open}
-        offer={newsletterModal.offer}
-        onClose={() => setNewsletterModal({ open: false, offer: null })}
-      />
       {/* Encabezado */}
       <section>
         <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-muted mb-1'>
