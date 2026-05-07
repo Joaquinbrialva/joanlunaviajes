@@ -16,13 +16,17 @@ function storagePathFromUrl(url) {
 
 async function deleteFromStorage(url) {
   const filePath = storagePathFromUrl(url);
-  if (!filePath) return; // URL local o externa, no tocar
-  const { error } = await supabase.storage.from(BUCKET).remove([filePath]);
-  if (error) console.warn('[settings] No se pudo eliminar archivo anterior:', filePath, error.message);
+  if (!filePath) return;
+  try {
+    const { error } = await supabase.storage.from(BUCKET).remove([filePath]);
+    if (error) console.warn('[settings] No se pudo eliminar archivo anterior:', filePath, error.message);
+  } catch (err) {
+    console.warn('[settings] Excepción al eliminar archivo anterior:', filePath, err?.message);
+  }
 }
 
 const router = Router();
-const ALLOWED_ROLES = ['admin', 'agent'];
+const ALLOWED_ROLES = ['admin', 'agent', 'designer'];
 
 // GET /api/settings/hero — público (lo usa el Hero en el frontend)
 router.get('/hero', (_req, res) => {

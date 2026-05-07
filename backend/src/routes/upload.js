@@ -65,7 +65,7 @@ const uploadMedia = multer({
 
 router.post('/media', requireAuth, uploadMedia.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No se recibió ningún archivo.' });
-  if (!['admin', 'agent'].includes(req.user.role)) {
+  if (!['admin', 'agent', 'designer'].includes(req.user.role)) {
     return res.status(403).json({ error: 'No autorizado.' });
   }
 
