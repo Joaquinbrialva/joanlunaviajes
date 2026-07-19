@@ -2,10 +2,7 @@
 import { useEffect, useState } from 'react';
 import CollageGrid from '../ui/CollageGrid';
 import Link from 'next/link';
-import { LuArrowRight } from 'react-icons/lu';
-
-const syne = { fontFamily: 'var(--font-syne)' };
-const cormorant = { fontFamily: 'var(--font-cormorant)' };
+import { LuArrowRight, LuCompass } from 'react-icons/lu';
 
 export default function Destinations() {
   const [destinations, setDestinations] = useState([]);
@@ -21,29 +18,24 @@ export default function Destinations() {
 
   return (
     <div className="space-y-8">
-      {/* Header editorial */}
+      {/* Header — distinto del de Ofertas: rol de descubrimiento, color secundario de marca */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-px w-8 bg-accent" />
-            <p className="text-[10px] uppercase tracking-[0.28em] font-semibold text-accent" style={syne}>
-              Inspiración
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-brand-secondary/12 flex items-center justify-center shrink-0">
+            <LuCompass size={22} className="text-brand-secondary" />
+          </div>
+          <div>
+            <h2 className="font-extrabold text-foreground leading-tight tracking-tight" style={{ fontSize: 'clamp(1.9rem, 4vw, 2.75rem)' }}>
+              Destinos que enamoran
+            </h2>
+            <p className="text-[13px] text-muted mt-2 max-w-xs leading-relaxed">
+              Los rincones del mundo que más eligen nuestros viajeros.
             </p>
           </div>
-          <h2
-            className="font-light text-foreground leading-none"
-            style={{ ...cormorant, fontSize: 'clamp(2.4rem, 5vw, 3.5rem)' }}
-          >
-            Destinos <em className="font-semibold">Trending</em>
-          </h2>
-          <p className="text-[13px] text-muted mt-3 max-w-xs leading-relaxed" style={syne}>
-            Los rincones del mundo que más eligen nuestros viajeros.
-          </p>
         </div>
         <Link
           href="/destinos"
-          className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted hover:text-accent transition-colors group shrink-0"
-          style={syne}
+          className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted hover:text-brand-secondary transition-colors group shrink-0"
         >
           Ver todos
           <LuArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
@@ -54,7 +46,7 @@ export default function Destinations() {
         <DestinationsSkeleton />
       ) : destinations.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-20 text-center rounded-2xl border border-dashed border-border">
-          <p className="font-semibold text-foreground" style={syne}>Próximamente nuevos destinos</p>
+          <p className="font-semibold text-foreground">Próximamente nuevos destinos</p>
           <p className="text-sm text-muted">Estamos sumando los mejores destinos del mundo. Vuelve pronto.</p>
         </div>
       ) : (
@@ -66,7 +58,6 @@ export default function Destinations() {
         <Link
           href="/destinos"
           className="inline-flex items-center gap-2 text-sm font-semibold text-accent"
-          style={syne}
         >
           Ver todos los destinos <LuArrowRight size={14} />
         </Link>

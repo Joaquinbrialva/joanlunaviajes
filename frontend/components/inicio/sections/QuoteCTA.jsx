@@ -1,16 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { RangeCalendar, Popover } from '@heroui/react';
+import {
+  RangeCalendar, Popover, Button, TextField, Input, TextArea, NumberField,
+} from '@heroui/react';
 import { parseDate } from '@internationalized/date';
 import {
   CalendarDays, X, MapPin, PlaneTakeoff, User, Mail, Phone,
-  Users, ArrowRight, Check, MessageSquare, ChevronRight,
+  ArrowRight, Check, MessageSquare,
 } from 'lucide-react';
-
-const syne      = { fontFamily: 'var(--font-syne)' };
-const cormorant = { fontFamily: 'var(--font-cormorant)' };
-const grain     = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")`;
 
 function fmt(dateStr) {
   if (!dateStr) return null;
@@ -19,7 +17,7 @@ function fmt(dateStr) {
   });
 }
 
-/* ─── Inline date range picker adapted for dark form ─────────── */
+/* ─── Fecha de viaje — popover con calendario de rango ────────── */
 
 function DateRangePicker({ startDate, endDate, onChange }) {
   const [open, setOpen] = useState(false);
@@ -44,7 +42,7 @@ function DateRangePicker({ startDate, endDate, onChange }) {
     startDate && endDate
       ? `${fmt(startDate)} → ${fmt(endDate)}`
       : startDate
-      ? `${fmt(startDate)} → seleccioná regreso…`
+      ? `${fmt(startDate)} → selecciona regreso…`
       : null;
 
   return (
@@ -52,15 +50,12 @@ function DateRangePicker({ startDate, endDate, onChange }) {
       <Popover.Trigger>
         <button
           type="button"
-          className="w-full h-12 flex items-center gap-3 px-4 rounded-xl text-sm text-left transition-colors"
-          style={{
-            background: 'rgba(255,255,255,0.05)',
-            border: `1px solid ${open ? 'rgba(255,126,45,0.5)' : 'rgba(255,255,255,0.1)'}`,
-            color: hasDate ? '#fff' : 'rgba(255,255,255,0.3)',
-          }}
+          className={`w-full h-12 flex items-center gap-3 px-4 rounded-xl text-sm text-left bg-field-background border transition-colors ${
+            open ? 'border-brand-primary/60' : 'border-border'
+          } ${hasDate ? 'text-foreground' : 'text-field-placeholder'}`}
         >
-          <CalendarDays size={15} style={{ color: '#ff7e2d', flexShrink: 0 }} />
-          <span className="flex-1 truncate" style={syne}>
+          <CalendarDays size={15} className="text-brand-primary shrink-0" />
+          <span className="flex-1 truncate">
             {label ?? 'Fechas de viaje (opcional)'}
           </span>
           {hasDate ? (
@@ -69,26 +64,19 @@ function DateRangePicker({ startDate, endDate, onChange }) {
               tabIndex={0}
               onClick={handleClear}
               onKeyDown={(e) => e.key === 'Enter' && handleClear(e)}
-              className="p-1 rounded transition-colors hover:bg-white/10"
-              style={{ color: 'rgba(255,255,255,0.35)' }}
+              className="p-1 rounded text-muted hover:bg-surface-tertiary transition-colors"
             >
               <X size={13} />
             </span>
           ) : (
-            <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }} className="shrink-0">
-              opcional
-            </span>
+            <span className="text-muted text-[11px] shrink-0">opcional</span>
           )}
         </button>
       </Popover.Trigger>
 
       <Popover.Content>
         <Popover.Dialog>
-          <RangeCalendar
-            aria-label="Fechas de viaje"
-            value={value}
-            onChange={handleChange}
-          >
+          <RangeCalendar aria-label="Fechas de viaje" value={value} onChange={handleChange}>
             <RangeCalendar.Header>
               <RangeCalendar.Heading />
               <RangeCalendar.NavButton slot="previous" />
@@ -103,8 +91,8 @@ function DateRangePicker({ startDate, endDate, onChange }) {
               </RangeCalendar.GridBody>
             </RangeCalendar.Grid>
             {startDate && !endDate && (
-              <p className="text-xs text-center pb-3 pt-1" style={{ color: 'var(--muted)' }}>
-                Ahora seleccioná la fecha de regreso
+              <p className="text-xs text-center pb-3 pt-1 text-muted">
+                Ahora selecciona la fecha de regreso
               </p>
             )}
           </RangeCalendar>
@@ -114,12 +102,12 @@ function DateRangePicker({ startDate, endDate, onChange }) {
   );
 }
 
-/* ─── Dark-themed primitives ─────────────────────────────────── */
+/* ─── Campo con ícono — envuelve TextField/Input de HeroUI ─────── */
 
-function DarkField({ icon, children }) {
+function IconField({ icon, children }) {
   return (
     <div className="relative">
-      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#ff7e2d' }}>
+      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-brand-primary z-10">
         {icon}
       </div>
       {children}
@@ -127,113 +115,20 @@ function DarkField({ icon, children }) {
   );
 }
 
-const inputStyle = {
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  color: '#fff',
-  fontFamily: 'var(--font-syne)',
-};
-
-function DarkInput({ icon, placeholder, value, onChange, type = 'text', required }) {
-  return (
-    <DarkField icon={icon}>
-      <input
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={required}
-        className="w-full h-12 pl-10 pr-4 rounded-xl text-sm placeholder:text-white/25 outline-none transition-colors"
-        style={inputStyle}
-        onFocus={(e) => (e.target.style.borderColor = 'rgba(255,126,45,0.55)')}
-        onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
-      />
-    </DarkField>
-  );
-}
-
-function DarkTextarea({ icon, placeholder, value, onChange }) {
-  return (
-    <div className="relative">
-      <div className="absolute left-3.5 top-3.5 pointer-events-none" style={{ color: '#ff7e2d' }}>
-        {icon}
-      </div>
-      <textarea
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        rows={3}
-        className="w-full pl-10 pr-4 pt-3.5 pb-3 rounded-xl text-sm placeholder:text-white/25 outline-none resize-none transition-colors"
-        style={inputStyle}
-        onFocus={(e) => (e.target.style.borderColor = 'rgba(255,126,45,0.55)')}
-        onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
-      />
-    </div>
-  );
-}
-
-function PassengerStepper({ value, onChange }) {
-  return (
-    <div
-      className="h-12 flex items-center rounded-xl overflow-hidden"
-      style={inputStyle}
-    >
-      <div className="pl-3.5 pr-2.5 pointer-events-none" style={{ color: '#ff7e2d' }}>
-        <Users size={15} />
-      </div>
-      <span className="flex-1 text-sm" style={{ color: value > 1 ? '#fff' : 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-syne)' }}>
-        {value} pasajero{value !== 1 ? 's' : ''}
-      </span>
-      <button
-        type="button"
-        onClick={() => onChange(Math.max(1, value - 1))}
-        disabled={value <= 1}
-        className="w-10 h-full flex items-center justify-center transition-colors disabled:opacity-20 hover:bg-white/10"
-        style={{ color: 'rgba(255,255,255,0.5)' }}
-        aria-label="Menos pasajeros"
-      >
-        −
-      </button>
-      <div className="w-px h-5 bg-white/10" />
-      <button
-        type="button"
-        onClick={() => onChange(Math.min(20, value + 1))}
-        disabled={value >= 20}
-        className="w-10 h-full flex items-center justify-center transition-colors disabled:opacity-20 hover:bg-white/10"
-        style={{ color: 'rgba(255,255,255,0.5)' }}
-        aria-label="Más pasajeros"
-      >
-        +
-      </button>
-    </div>
-  );
-}
+const inputClass = 'pl-10 pr-4 h-12 rounded-xl';
 
 /* ─── Success state ──────────────────────────────────────────── */
 
 function SuccessCard() {
   return (
-    <div
-      className="rounded-2xl p-10 flex flex-col items-center text-center"
-      style={{
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.09)',
-        backdropFilter: 'blur(16px)',
-      }}
-    >
-      <div
-        className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
-        style={{ background: 'rgba(52,211,153,0.15)' }}
-      >
-        <Check size={28} style={{ color: '#34d399' }} strokeWidth={2.5} />
+    <div className="rounded-2xl p-10 flex flex-col items-center text-center bg-surface border border-border">
+      <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 bg-success/12">
+        <Check size={28} className="text-success" strokeWidth={2.5} />
       </div>
-      <h3
-        className="text-3xl font-light text-white mb-3"
-        style={cormorant}
-      >
+      <h3 className="text-2xl font-extrabold text-foreground mb-3">
         ¡Solicitud enviada!
       </h3>
-      <p className="text-[13px] leading-relaxed" style={{ ...syne, color: 'rgba(255,255,255,0.4)', maxWidth: 300 }}>
+      <p className="text-[13px] leading-relaxed text-muted max-w-[300px]">
         Un asesor te va a contactar en las próximas 24 horas con tu cotización personalizada.
       </p>
     </div>
@@ -252,11 +147,11 @@ const BENEFITS = [
   'Respuesta en menos de 24 horas',
   'Sin costo ni compromiso',
   'Atención de expertos en cada destino',
-  'Precios exclusivos que no encontrás online',
+  'Precios exclusivos que no encontrarás online',
 ];
 
 export default function QuoteCTA() {
-  const [form, setForm]     = useState(INITIAL);
+  const [form, setForm] = useState(INITIAL);
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [errMsg, setErrMsg] = useState('');
 
@@ -269,12 +164,10 @@ export default function QuoteCTA() {
     setErrMsg('');
 
     const lines = [];
-    if (form.origen)  lines.push(`Origen: ${form.origen}`);
+    if (form.origen) lines.push(`Origen: ${form.origen}`);
     if (form.destino) lines.push(`Destino: ${form.destino}`);
-    if (form.startDate && form.endDate)
-      lines.push(`Fechas: ${fmt(form.startDate)} → ${fmt(form.endDate)}`);
-    else if (form.startDate)
-      lines.push(`Salida: ${fmt(form.startDate)}`);
+    if (form.startDate && form.endDate) lines.push(`Fechas: ${fmt(form.startDate)} → ${fmt(form.endDate)}`);
+    else if (form.startDate) lines.push(`Salida: ${fmt(form.startDate)}`);
     if (form.mensaje) lines.push('', form.mensaje);
 
     try {
@@ -282,16 +175,16 @@ export default function QuoteCTA() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name:       form.nombre.trim(),
-          email:      form.email.trim(),
-          phone:      form.telefono.trim(),
+          name: form.nombre.trim(),
+          email: form.email.trim(),
+          phone: form.telefono.trim(),
           passengers: form.pasajeros,
-          message:    lines.join('\n'),
+          message: lines.join('\n'),
           wizardData: {
-            origen:    form.origen,
-            destino:   form.destino,
+            origen: form.origen,
+            destino: form.destino,
             startDate: form.startDate,
-            endDate:   form.endDate,
+            endDate: form.endDate,
           },
         }),
       });
@@ -307,73 +200,35 @@ export default function QuoteCTA() {
   }
 
   return (
-    <div id="cotizar" className="w-screen -mx-[calc((100vw-100%)/2)] relative overflow-hidden">
-
-      {/* Layers de fondo */}
-      <div className="absolute inset-0 bg-[#0c1520]" />
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-950/40 via-[#0c1520] to-slate-950/60" />
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay"
-        style={{ backgroundImage: grain }}
-      />
-      <div className="absolute -top-40 -right-40 w-[560px] h-[560px] rounded-full bg-orange-500/[0.04] blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full bg-sky-500/[0.03] blur-3xl pointer-events-none" />
-
-      <div className="relative py-28 max-w-7xl mx-auto px-6 sm:px-10">
+    <div id="cotizar" className="w-screen -mx-[calc((100vw-100%)/2)] relative overflow-hidden bg-gradient-to-b from-surface-secondary to-brand-primary/[0.06]">
+      <div className="relative py-24 max-w-7xl mx-auto px-6 sm:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-14 lg:gap-20 items-center">
 
           {/* ── Editorial izquierdo ──────────────────────────── */}
           <div>
-            <div className="flex items-center gap-4 mb-8">
-              <div className="h-px w-8" style={{ background: 'rgba(255,126,45,0.5)' }} />
-              <span
-                className="text-[10px] font-semibold uppercase tracking-[0.28em]"
-                style={{ ...syne, color: 'rgba(255,163,80,0.55)' }}
-              >
-                Cotizador de viajes
-              </span>
-            </div>
-
             <h2
-              className="font-light text-white leading-[1.06] mb-6"
-              style={{ ...cormorant, fontSize: 'clamp(42px, 5vw, 62px)' }}
+              className="font-extrabold text-foreground leading-[1.05] mb-6 tracking-tight"
+              style={{ fontSize: 'clamp(2.4rem, 4.5vw, 3.5rem)' }}
             >
               Tu próximo viaje,{' '}
-              <em className="font-semibold" style={{ color: '#ff9a5c' }}>
-                a tu medida.
-              </em>
+              <span className="text-brand-primary">a tu medida.</span>
             </h2>
 
-            <p
-              className="leading-relaxed mb-10"
-              style={{ ...syne, fontSize: 14, color: 'rgba(255,255,255,0.38)', maxWidth: 420 }}
-            >
-              Completá el formulario y un asesor especializado te contactará con una
-              propuesta totalmente personalizada — sin costo y sin compromiso.
+            <p className="leading-relaxed mb-10 text-[15px] text-muted max-w-[420px]">
+              Completa el formulario y un asesor especializado te contactará con una propuesta
+              totalmente personalizada — sin costo y sin compromiso.
             </p>
 
             <ul className="space-y-4">
               {BENEFITS.map((b) => (
                 <li key={b} className="flex items-center gap-3.5">
-                  <div
-                    className="w-[22px] h-[22px] rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: 'rgba(255,126,45,0.14)' }}
-                  >
-                    <ChevronRight size={11} style={{ color: '#ff7e2d' }} strokeWidth={2.5} />
+                  <div className="w-[22px] h-[22px] rounded-full flex items-center justify-center shrink-0 bg-brand-primary/12">
+                    <Check size={11} className="text-brand-primary" strokeWidth={2.5} />
                   </div>
-                  <span style={{ ...syne, fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>{b}</span>
+                  <span className="text-[13px] text-foreground/80">{b}</span>
                 </li>
               ))}
             </ul>
-
-            {/* Decorative divider */}
-            <div className="mt-14 flex items-center gap-4">
-              <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.06)' }} />
-              <span style={{ ...syne, fontSize: 10, color: 'rgba(255,255,255,0.12)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-                Joan Luna Viajes
-              </span>
-              <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.06)' }} />
-            </div>
           </div>
 
           {/* ── Formulario ──────────────────────────────────── */}
@@ -383,130 +238,104 @@ export default function QuoteCTA() {
             ) : (
               <form
                 onSubmit={handleSubmit}
-                className="rounded-2xl overflow-hidden"
-                style={{
-                  background: 'rgba(255,255,255,0.035)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  backdropFilter: 'blur(20px)',
-                }}
+                className="rounded-2xl overflow-hidden bg-surface border border-border shadow-xl shadow-black/[0.04]"
               >
                 {/* Sección viaje */}
                 <div className="px-7 pt-7 pb-6 space-y-3">
-                  <p
-                    className="text-[10px] font-bold uppercase tracking-[0.22em] mb-4"
-                    style={{ ...syne, color: 'rgba(255,255,255,0.22)' }}
-                  >
+                  <p className="text-[12px] font-bold mb-4 text-muted uppercase tracking-wide">
                     Datos del viaje
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <DarkInput
-                      icon={<MapPin size={14} />}
-                      placeholder="Origen"
-                      value={form.origen}
-                      onChange={(v) => up('origen', v)}
-                    />
-                    <DarkInput
-                      icon={<PlaneTakeoff size={14} />}
-                      placeholder="Destino"
-                      value={form.destino}
-                      onChange={(v) => up('destino', v)}
-                    />
+                    <IconField icon={<MapPin size={14} />}>
+                      <TextField value={form.origen} onChange={(v) => up('origen', v)} aria-label="Origen" fullWidth>
+                        <Input placeholder="Origen" className={inputClass} />
+                      </TextField>
+                    </IconField>
+                    <IconField icon={<PlaneTakeoff size={14} />}>
+                      <TextField value={form.destino} onChange={(v) => up('destino', v)} aria-label="Destino" fullWidth>
+                        <Input placeholder="Destino" className={inputClass} />
+                      </TextField>
+                    </IconField>
                   </div>
 
-                  <DateRangePicker
-                    startDate={form.startDate}
-                    endDate={form.endDate}
-                    onChange={({ start, end }) =>
-                      setForm((prev) => ({ ...prev, startDate: start, endDate: end }))
-                    }
-                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
+                    <DateRangePicker
+                      startDate={form.startDate}
+                      endDate={form.endDate}
+                      onChange={({ start, end }) => setForm((prev) => ({ ...prev, startDate: start, endDate: end }))}
+                    />
+
+                    <NumberField
+                      value={form.pasajeros}
+                      onChange={(v) => up('pasajeros', v)}
+                      minValue={1}
+                      maxValue={20}
+                      aria-label="Pasajeros"
+                    >
+                      <NumberField.Group className="h-12 rounded-xl w-[132px]">
+                        <NumberField.DecrementButton aria-label="Menos pasajeros" />
+                        <NumberField.Input className="text-sm text-center" />
+                        <NumberField.IncrementButton aria-label="Más pasajeros" />
+                      </NumberField.Group>
+                    </NumberField>
+                  </div>
                 </div>
 
-                {/* Divider */}
-                <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
+                <div className="h-px bg-border" />
 
                 {/* Sección contacto */}
                 <div className="px-7 pt-6 pb-7 space-y-3">
-                  <p
-                    className="text-[10px] font-bold uppercase tracking-[0.22em] mb-4"
-                    style={{ ...syne, color: 'rgba(255,255,255,0.22)' }}
-                  >
+                  <p className="text-[12px] font-bold mb-4 text-muted uppercase tracking-wide">
                     Tus datos de contacto
                   </p>
 
-                  <DarkInput
-                    icon={<User size={14} />}
-                    placeholder="Nombre completo *"
-                    value={form.nombre}
-                    onChange={(v) => up('nombre', v)}
-                    required
-                  />
+                  <IconField icon={<User size={14} />}>
+                    <TextField value={form.nombre} onChange={(v) => up('nombre', v)} aria-label="Nombre completo" isRequired fullWidth>
+                      <Input placeholder="Nombre completo *" className={inputClass} />
+                    </TextField>
+                  </IconField>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <DarkInput
-                      icon={<Mail size={14} />}
-                      placeholder="Email"
-                      type="email"
-                      value={form.email}
-                      onChange={(v) => up('email', v)}
-                    />
-                    <DarkInput
-                      icon={<Phone size={14} />}
-                      placeholder="Teléfono"
-                      type="tel"
-                      value={form.telefono}
-                      onChange={(v) => up('telefono', v)}
-                    />
+                    <IconField icon={<Mail size={14} />}>
+                      <TextField value={form.email} onChange={(v) => up('email', v)} aria-label="Email" fullWidth>
+                        <Input type="email" placeholder="Email" className={inputClass} />
+                      </TextField>
+                    </IconField>
+                    <IconField icon={<Phone size={14} />}>
+                      <TextField value={form.telefono} onChange={(v) => up('telefono', v)} aria-label="Teléfono" fullWidth>
+                        <Input type="tel" placeholder="Teléfono" className={inputClass} />
+                      </TextField>
+                    </IconField>
                   </div>
 
-                  <PassengerStepper
-                    value={form.pasajeros}
-                    onChange={(v) => up('pasajeros', v)}
-                  />
-
-                  <DarkTextarea
-                    icon={<MessageSquare size={14} />}
-                    placeholder="¿Algún detalle adicional? (opcional)"
-                    value={form.mensaje}
-                    onChange={(v) => up('mensaje', v)}
-                  />
+                  <IconField icon={<MessageSquare size={14} />}>
+                    <TextField value={form.mensaje} onChange={(v) => up('mensaje', v)} aria-label="Detalle adicional" fullWidth>
+                      <TextArea placeholder="¿Algún detalle adicional? (opcional)" rows={3} className="pl-10 pr-4 pt-3.5 rounded-xl resize-none" />
+                    </TextField>
+                  </IconField>
 
                   {errMsg && (
-                    <p
-                      className="text-xs flex items-center gap-1.5"
-                      style={{ ...syne, color: '#f87171' }}
-                    >
+                    <p className="text-xs flex items-center gap-1.5 text-danger">
                       ⚠ {errMsg}
                     </p>
                   )}
 
-                  <button
+                  <Button
                     type="submit"
-                    disabled={status === 'loading'}
-                    className="w-full h-[52px] rounded-xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all disabled:opacity-60 mt-1"
-                    style={{
-                      ...syne,
-                      background: 'linear-gradient(135deg, #ff7e2d, #ff5500)',
-                      color: '#fff',
-                      boxShadow: '0 8px 28px rgba(255,126,45,0.4)',
-                      letterSpacing: '0.01em',
-                    }}
+                    isDisabled={status === 'loading'}
+                    color="primary"
+                    className="w-full h-[52px] rounded-xl font-bold text-sm mt-1"
                   >
-                    {status === 'loading' ? (
-                      'Enviando...'
-                    ) : (
-                      <>
+                    {status === 'loading' ? 'Enviando…' : (
+                      <span className="flex items-center justify-center gap-2.5">
                         Solicitar cotización gratis
                         <ArrowRight size={16} strokeWidth={2.5} />
-                      </>
+                      </span>
                     )}
-                  </button>
+                  </Button>
 
-                  <p
-                    className="text-center text-[11px]"
-                    style={{ ...syne, color: 'rgba(255,255,255,0.18)' }}
-                  >
+                  <p className="text-center text-[11px] text-muted">
                     Sin spam · Sin compromiso · Respuesta en 24 hs
                   </p>
                 </div>

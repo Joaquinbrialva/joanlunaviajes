@@ -65,29 +65,29 @@ export default async function DestinationDetailPage({ params }) {
         <div className='absolute inset-0 bg-gradient-to-b from-black/45 via-black/35 to-black/65' />
 
         <div className='absolute inset-x-0 bottom-0 p-8 md:p-12 text-white'>
-          <p className='inline-flex items-center rounded-full bg-white/20 backdrop-blur px-3 py-1 text-xs font-semibold mb-4'>
-            Destino destacado
+          <p className='inline-flex items-center gap-1.5 rounded-full bg-brand-secondary/90 backdrop-blur px-3 py-1 text-xs font-semibold mb-4'>
+            <LuGlobe size={12} /> {destination.continent}
           </p>
-          <h1 className='text-6xl md:text-7xl font-bold tracking-tight drop-shadow-sm'>{destination.name}</h1>
+          <h1 className='text-5xl md:text-6xl font-extrabold tracking-tight drop-shadow-sm'>{destination.name}</h1>
           <p className='mt-4 max-w-2xl text-lg text-white/90'>{destination.description}</p>
         </div>
       </section>
 
       <section className='grid grid-cols-1 md:grid-cols-3 gap-4'>
         <InfoCard
-          icon={<LuWallet className='text-accent' />}
+          icon={<LuWallet className='text-brand-secondary' />}
           title='Moneda'
           value={destination.travelInfo.currency}
           subtitle={destination.country}
         />
         <InfoCard
-          icon={<LuGlobe className='text-accent' />}
+          icon={<LuGlobe className='text-brand-secondary' />}
           title='Idioma'
           value={destination.travelInfo.language}
           subtitle='Uso frecuente en turismo'
         />
         <InfoCard
-          icon={<LuMapPin className='text-accent' />}
+          icon={<LuMapPin className='text-brand-secondary' />}
           title='Mejor época'
           value={destination.climate.bestMonthsToVisit.slice(0, 2).join(' - ')}
           subtitle={destination.climate.type}
@@ -104,8 +104,7 @@ export default async function DestinationDetailPage({ params }) {
           />
         </div>
         <article className='space-y-4'>
-          <p className='text-xs uppercase tracking-[0.2em] text-accent font-semibold'>Sobre la región</p>
-          <h2 className='text-4xl font-bold leading-tight'>
+          <h2 className='text-3xl md:text-4xl font-extrabold leading-tight tracking-tight'>
             {destination.name}, una experiencia pensada para descubrir {destination.country}
           </h2>
           <p className='text-muted leading-relaxed'>{destination.description}</p>
@@ -115,7 +114,7 @@ export default async function DestinationDetailPage({ params }) {
           </p>
           <Link
             href='/ofertas'
-            className='inline-flex items-center justify-center h-10 px-4 rounded-md bg-accent text-white font-semibold cursor-pointer'
+            className='inline-flex items-center justify-center h-11 px-5 rounded-xl bg-brand-secondary text-brand-secondary-foreground font-semibold cursor-pointer hover:opacity-90 transition-opacity'
           >
             Ver experiencias
           </Link>
@@ -125,14 +124,14 @@ export default async function DestinationDetailPage({ params }) {
       {relatedCities.length > 0 && (
         <section className='space-y-4'>
           <div>
-            <h2 className='text-4xl font-bold'>Ciudades populares</h2>
-            <p className='text-muted'>Destinos relacionados dentro de {destination.continent}.</p>
+            <h2 className='text-3xl md:text-4xl font-extrabold tracking-tight'>Ciudades populares</h2>
+            <p className='text-muted mt-2'>Destinos relacionados dentro de {destination.continent}.</p>
           </div>
 
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5'>
             {relatedCities.map((city) => (
               <Link key={city.id} href={`/destinos/${city.slug}`} className='group cursor-pointer'>
-                <article className='relative h-64 rounded-2xl overflow-hidden border border-default'>
+                <article className='relative h-64 rounded-2xl overflow-hidden border border-border'>
                   <Image src={city.featuredImage} alt={city.name} fill className='object-cover group-hover:scale-105 transition-transform duration-300' />
                   <div className='absolute inset-0 bg-gradient-to-t from-black/80 to-transparent' />
                   <div className='absolute bottom-4 left-4 right-4 text-white'>
@@ -147,10 +146,9 @@ export default async function DestinationDetailPage({ params }) {
       )}
 
       <section className='space-y-6'>
-        <div className='text-center space-y-2'>
-          <p className='text-xs uppercase tracking-[0.2em] text-accent font-semibold'>Experiencias curadas</p>
-          <h2 className='text-5xl font-bold'>Aventuras disponibles</h2>
-          <p className='text-muted'>Paquetes seleccionados para viajar a {destination.country}.</p>
+        <div>
+          <h2 className='text-3xl md:text-4xl font-extrabold tracking-tight'>Aventuras disponibles</h2>
+          <p className='text-muted mt-2'>Paquetes seleccionados para viajar a {destination.country}.</p>
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
@@ -159,24 +157,24 @@ export default async function DestinationDetailPage({ params }) {
             const price = getOfferPrice(offer);
 
             return (
-              <article key={offer.id} className='bg-surface rounded-2xl border border-default overflow-hidden flex flex-col h-full'>
+              <article key={offer.id} className='bg-surface rounded-2xl border border-border overflow-hidden flex flex-col h-full'>
                 <div className='relative h-52'>
                   <Image src={cover.url} alt={offer.title} fill className='object-cover' />
-                  <span className='absolute top-3 right-3 bg-white/90 text-slate-900 text-xs px-2 py-1 rounded-md'>
+                  <span className='absolute top-3 right-3 bg-white/90 text-slate-900 text-xs px-2 py-1 rounded-full font-semibold'>
                     {offer.duration.days} días
                   </span>
                 </div>
 
                 <div className='p-4 space-y-3 flex flex-col grow'>
-                  <h3 className='text-2xl font-bold'>{offer.title}</h3>
-                  <p className='text-muted line-clamp-2'>{offer.subtitle}</p>
+                  <h3 className='text-xl font-bold'>{offer.title}</h3>
+                  <p className='text-muted line-clamp-2 text-sm'>{offer.subtitle}</p>
 
-                  <div className='mt-auto pt-3 border-t border-default flex items-end justify-between gap-3'>
+                  <div className='mt-auto pt-3 border-t border-border flex items-end justify-between gap-3'>
                     <div>
                       {price ? (
                         <>
                           <p className='text-sm text-muted'>Desde</p>
-                          <p className='text-3xl font-bold text-accent'>
+                          <p className='text-2xl font-bold text-brand-primary'>
                             {formatCurrency({ amount: price, currency: offer.pricing.currency })}
                           </p>
                         </>
@@ -186,7 +184,7 @@ export default async function DestinationDetailPage({ params }) {
                     </div>
                     <Link
                       href={`/ofertas/${offer.slug}`}
-                      className='inline-flex items-center justify-center h-10 px-4 rounded-md bg-accent text-white font-semibold text-sm transition-colors hover:bg-orange-600 cursor-pointer'
+                      className='inline-flex items-center justify-center h-10 px-4 rounded-full bg-brand-primary text-brand-primary-foreground font-semibold text-sm transition-opacity hover:opacity-90 cursor-pointer'
                     >
                       Ver oferta
                     </Link>
@@ -204,7 +202,7 @@ export default async function DestinationDetailPage({ params }) {
 
 function InfoCard({ icon, title, value, subtitle }) {
   return (
-    <article className='rounded-2xl border border-default bg-surface p-5'>
+    <article className='rounded-2xl border border-border bg-surface p-5'>
       <div className='flex items-start gap-3'>
         <span className='mt-1'>{icon}</span>
         <div>

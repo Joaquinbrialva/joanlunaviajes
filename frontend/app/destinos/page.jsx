@@ -4,12 +4,9 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button, Chip, Spinner } from '@heroui/react';
-import { LuGlobe, LuMapPin, LuSearch, LuSlidersHorizontal, LuX } from 'react-icons/lu';
+import { Button, Chip, Spinner, TextField, Input } from '@heroui/react';
+import { LuCompass, LuGlobe, LuListFilter, LuMapPin, LuSearch, LuSlidersHorizontal, LuX } from 'react-icons/lu';
 import HeroSelect from '@/components/ui/hero-select';
-
-const syne = { fontFamily: 'var(--font-syne)' };
-const cormorant = { fontFamily: 'var(--font-cormorant)' };
 
 const ITEMS_PER_PAGE = 9;
 
@@ -149,19 +146,21 @@ function DestinationsPage() {
   const PillBtn = ({ active, onClick, children }) => (
     <button
       onClick={onClick}
-      className={`h-7 px-3 rounded-full text-xs font-semibold border transition-all ${active ? 'bg-accent text-white border-accent' : 'bg-surface-secondary border-default text-muted hover:border-accent/40 hover:text-foreground'}`}
-      style={syne}
+      className={`h-8 px-3.5 rounded-full text-[13px] font-semibold border transition-all ${active ? 'bg-brand-secondary text-brand-secondary-foreground border-brand-secondary' : 'bg-surface-secondary border-border text-muted hover:border-brand-secondary/40 hover:text-foreground'}`}
     >
       {children}
     </button>
   );
 
   const FilterPanel = () => (
-    <div className="space-y-5 pb-4 md:pb-6">
+    <div className="space-y-6 pb-4 md:pb-6">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted" style={syne}>Filtros</span>
+        <span className="flex items-center gap-2 font-bold text-foreground text-[15px]">
+          <LuListFilter size={16} className="text-brand-secondary" />
+          Filtros
+        </span>
         {hasActiveFilters && (
-          <button onClick={resetFilters} className="text-xs text-accent font-medium flex items-center gap-1 hover:underline" style={syne}>
+          <button onClick={resetFilters} className="text-xs text-brand-secondary font-semibold flex items-center gap-1 hover:underline">
             <LuX size={11} /> Limpiar
           </button>
         )}
@@ -169,7 +168,7 @@ function DestinationsPage() {
 
       {continents.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted" style={syne}>Continente</p>
+          <p className="text-[13px] font-semibold text-foreground">Continente</p>
           <div className="flex flex-wrap gap-1.5">
             <PillBtn active={continent === 'all'} onClick={() => { setContinent('all'); setPage(1); }}>Todos</PillBtn>
             {continents.map((c) => (
@@ -181,7 +180,7 @@ function DestinationsPage() {
 
       {allStyles.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted" style={syne}>Estilo de viaje</p>
+          <p className="text-[13px] font-semibold text-foreground">Estilo de viaje</p>
           <div className="flex flex-wrap gap-1.5">
             {allStyles.map((s) => (
               <PillBtn key={s} active={selectedStyles.includes(s)} onClick={() => toggleStyle(s)}>{s}</PillBtn>
@@ -192,7 +191,7 @@ function DestinationsPage() {
 
       {allClimates.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted" style={syne}>Clima</p>
+          <p className="text-[13px] font-semibold text-foreground">Clima</p>
           <div className="flex flex-wrap gap-1.5">
             {allClimates.map((c) => (
               <PillBtn key={c} active={selectedClimates.includes(c)} onClick={() => toggleClimate(c)}>{c}</PillBtn>
@@ -202,18 +201,20 @@ function DestinationsPage() {
       )}
 
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted" style={syne}>Presupuesto diario (USD)</p>
-        <div className="flex items-center gap-1.5">
-          <input type="number" placeholder="Desde" value={minBudget} onChange={(e) => { setMinBudget(e.target.value); setPage(1); }}
-            className="w-0 flex-1 h-8 px-2 rounded-lg border border-default bg-surface-secondary text-xs focus:outline-none focus:ring-1 focus:ring-accent" style={syne} />
+        <p className="text-[13px] font-semibold text-foreground">Presupuesto diario (USD)</p>
+        <div className="flex items-center gap-2">
+          <TextField value={minBudget} onChange={(v) => { setMinBudget(v); setPage(1); }} aria-label="Presupuesto desde" fullWidth>
+            <Input type="number" placeholder="Desde" className="h-9 rounded-lg text-[13px] px-3" />
+          </TextField>
           <span className="text-muted text-xs shrink-0">–</span>
-          <input type="number" placeholder="Hasta" value={maxBudget} onChange={(e) => { setMaxBudget(e.target.value); setPage(1); }}
-            className="w-0 flex-1 h-8 px-2 rounded-lg border border-default bg-surface-secondary text-xs focus:outline-none focus:ring-1 focus:ring-accent" style={syne} />
+          <TextField value={maxBudget} onChange={(v) => { setMaxBudget(v); setPage(1); }} aria-label="Presupuesto hasta" fullWidth>
+            <Input type="number" placeholder="Hasta" className="h-9 rounded-lg text-[13px] px-3" />
+          </TextField>
         </div>
       </div>
 
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted" style={syne}>Opciones</p>
+        <p className="text-[13px] font-semibold text-foreground">Opciones</p>
         <div className="flex flex-wrap gap-1.5">
           <PillBtn active={onlyPopular} onClick={() => { setOnlyPopular((v) => !v); setPage(1); }}>Populares</PillBtn>
           <PillBtn active={onlySafe} onClick={() => { setOnlySafe((v) => !v); setPage(1); }}>Alta seguridad</PillBtn>
@@ -222,13 +223,13 @@ function DestinationsPage() {
 
       {featuredDestination && (
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted" style={syne}>Recomendado</p>
+          <p className="text-[13px] font-semibold text-foreground">Recomendado</p>
           <Link href={`/destinos/${featuredDestination.slug}`} className="group block">
             <div className="relative rounded-xl overflow-hidden h-36">
               <Image src={featuredDestination.featuredImage || `https://picsum.photos/seed/${featuredDestination.slug}/500/300`}
                 alt={featuredDestination.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-black/10 p-3 flex flex-col justify-end">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-orange-200 mb-1">Recomendado</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/70 mb-1">Recomendado</span>
                 <p className="text-white font-bold text-sm leading-tight">{featuredDestination.name}, {featuredDestination.country}</p>
               </div>
             </div>
@@ -241,27 +242,30 @@ function DestinationsPage() {
   return (
     <div className="pb-16 md:pb-24">
       {/* Header de página */}
-      <div className="mb-8">
-        <p className="text-[10px] uppercase tracking-[0.25em] font-semibold text-accent mb-2" style={syne}>
-          Explora el mundo
-        </p>
-        <h1 className="text-4xl md:text-5xl font-light text-foreground leading-none" style={cormorant}>
-          Todos los <em className="font-semibold">destinos</em>
-        </h1>
+      <div className="mb-8 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-brand-secondary/12 flex items-center justify-center shrink-0">
+          <LuCompass size={22} className="text-brand-secondary" />
+        </div>
+        <div>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-foreground leading-tight tracking-tight">
+            Todos los destinos
+          </h1>
+          <p className="text-sm text-muted mt-2">Los rincones del mundo que más eligen nuestros viajeros.</p>
+        </div>
       </div>
 
       <section className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-8 items-start">
 
         {/* Sidebar desktop */}
         <aside className="hidden lg:block sticky top-24 pt-1">
-          <div className="rounded-2xl border border-default bg-surface p-4">
+          <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
             <FilterPanel />
           </div>
         </aside>
 
         <main className="space-y-5 pt-1">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <p className="text-sm text-muted font-medium" style={syne}>
+            <p className="text-sm text-muted font-medium">
               {loading ? 'Cargando...' : `${filteredDestinations.length} destino${filteredDestinations.length !== 1 ? 's' : ''} disponible${filteredDestinations.length !== 1 ? 's' : ''}`}
             </p>
             <div className="shrink-0">
@@ -275,61 +279,59 @@ function DestinationsPage() {
                   { value: 'safety-desc', label: 'Más seguros' },
                   { value: 'stay-desc', label: 'Mayor estadía' },
                 ]}
-                triggerClassName="h-10 rounded-xl border border-default bg-surface px-4 text-sm w-44 shadow-sm"
+                triggerClassName="h-10 rounded-xl border border-border bg-surface px-4 text-sm w-44 shadow-sm"
               />
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
-              <LuSearch size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+              <LuSearch size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
               <input
                 type="text"
                 placeholder="Buscar por nombre, país, estilo..."
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="w-full h-10 pl-9 pr-3 rounded-xl border border-default bg-surface text-sm focus:outline-none focus:ring-1 focus:ring-accent"
-                style={syne}
+                className="w-full h-11 pl-11 pr-4 rounded-xl border border-border bg-surface text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-secondary/40 focus:border-brand-secondary/50"
               />
             </div>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden h-10 px-3 rounded-xl border border-default bg-surface text-sm flex items-center gap-1.5 shrink-0"
-              style={syne}
+              className="lg:hidden h-11 px-4 rounded-xl border border-border bg-surface text-sm flex items-center gap-1.5 shrink-0 shadow-sm"
             >
               <LuSlidersHorizontal size={14} />
               Filtros
               {activeFilterCount > 0 && (
-                <span className="bg-accent text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{activeFilterCount}</span>
+                <span className="bg-brand-secondary text-brand-secondary-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{activeFilterCount}</span>
               )}
             </button>
           </div>
 
           {sidebarOpen && (
-            <div className="lg:hidden rounded-2xl border border-default bg-surface p-4">
+            <div className="lg:hidden rounded-2xl border border-border bg-surface p-5">
               <FilterPanel />
             </div>
           )}
 
           {hasActiveFilters && (
             <div className="flex flex-wrap gap-1.5">
-              {search && <Chip className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => setSearch('')}>"{search}" ✕</Chip>}
-              {continent !== 'all' && <Chip className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => setContinent('all')}>{continent} ✕</Chip>}
-              {selectedStyles.map((s) => <Chip key={s} className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => toggleStyle(s)}>{s} ✕</Chip>)}
-              {selectedClimates.map((c) => <Chip key={c} className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => toggleClimate(c)}>{c} ✕</Chip>)}
-              {(minBudget || maxBudget) && <Chip className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => { setMinBudget(''); setMaxBudget(''); }}>Presupuesto ✕</Chip>}
-              {onlyPopular && <Chip className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => setOnlyPopular(false)}>Populares ✕</Chip>}
-              {onlySafe && <Chip className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => setOnlySafe(false)}>Alta seguridad ✕</Chip>}
+              {search && <Chip className="bg-brand-secondary/10 text-brand-secondary border border-brand-secondary/20 text-xs cursor-pointer h-6" onClick={() => setSearch('')}>"{search}" ✕</Chip>}
+              {continent !== 'all' && <Chip className="bg-brand-secondary/10 text-brand-secondary border border-brand-secondary/20 text-xs cursor-pointer h-6" onClick={() => setContinent('all')}>{continent} ✕</Chip>}
+              {selectedStyles.map((s) => <Chip key={s} className="bg-brand-secondary/10 text-brand-secondary border border-brand-secondary/20 text-xs cursor-pointer h-6" onClick={() => toggleStyle(s)}>{s} ✕</Chip>)}
+              {selectedClimates.map((c) => <Chip key={c} className="bg-brand-secondary/10 text-brand-secondary border border-brand-secondary/20 text-xs cursor-pointer h-6" onClick={() => toggleClimate(c)}>{c} ✕</Chip>)}
+              {(minBudget || maxBudget) && <Chip className="bg-brand-secondary/10 text-brand-secondary border border-brand-secondary/20 text-xs cursor-pointer h-6" onClick={() => { setMinBudget(''); setMaxBudget(''); }}>Presupuesto ✕</Chip>}
+              {onlyPopular && <Chip className="bg-brand-secondary/10 text-brand-secondary border border-brand-secondary/20 text-xs cursor-pointer h-6" onClick={() => setOnlyPopular(false)}>Populares ✕</Chip>}
+              {onlySafe && <Chip className="bg-brand-secondary/10 text-brand-secondary border border-brand-secondary/20 text-xs cursor-pointer h-6" onClick={() => setOnlySafe(false)}>Alta seguridad ✕</Chip>}
             </div>
           )}
 
           {loading ? (
             <div className="flex justify-center py-24"><Spinner size="lg" /></div>
           ) : visibleDestinations.length === 0 ? (
-            <div className="flex flex-col items-center py-24 gap-3 text-center">
-              <p className="text-lg font-semibold" style={syne}>Sin resultados</p>
+            <div className="flex flex-col items-center py-24 gap-3 text-center rounded-2xl border border-dashed border-border">
+              <p className="text-lg font-bold text-foreground">Sin resultados</p>
               <p className="text-sm text-muted">Prueba con otros filtros o amplía la búsqueda.</p>
-              <Button className="bg-accent text-white px-6 mt-1" onClick={resetFilters}>Limpiar filtros</Button>
+              <Button className="bg-brand-secondary text-brand-secondary-foreground px-6 mt-1" onClick={resetFilters}>Limpiar filtros</Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -340,20 +342,19 @@ function DestinationsPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-1 pt-2">
               <button onClick={() => { if (safePage > 1) setPage((p) => p - 1); }} disabled={safePage === 1}
-                className="h-9 w-9 rounded-lg border border-default text-sm flex items-center justify-center disabled:opacity-40 hover:bg-surface-secondary transition-colors">‹</button>
+                className="h-9 w-9 rounded-lg border border-border text-sm flex items-center justify-center disabled:opacity-40 hover:bg-surface-secondary transition-colors">‹</button>
               {getVisiblePages(safePage, totalPages).map((entry, idx) =>
                 entry === '…' ? (
                   <span key={`e-${idx}`} className="h-9 w-9 flex items-center justify-center text-muted text-sm">…</span>
                 ) : (
                   <button key={entry} onClick={() => setPage(entry)}
-                    className={`h-9 w-9 rounded-lg text-sm font-medium transition-colors ${entry === safePage ? 'bg-accent text-white' : 'border border-default hover:bg-surface-secondary'}`}
-                    style={syne}>
+                    className={`h-9 w-9 rounded-lg text-sm font-semibold transition-colors ${entry === safePage ? 'bg-brand-secondary text-brand-secondary-foreground' : 'border border-border hover:bg-surface-secondary'}`}>
                     {entry}
                   </button>
                 )
               )}
               <button onClick={() => { if (safePage < totalPages) setPage((p) => p + 1); }} disabled={safePage === totalPages}
-                className="h-9 w-9 rounded-lg border border-default text-sm flex items-center justify-center disabled:opacity-40 hover:bg-surface-secondary transition-colors">›</button>
+                className="h-9 w-9 rounded-lg border border-border text-sm flex items-center justify-center disabled:opacity-40 hover:bg-surface-secondary transition-colors">›</button>
             </div>
           )}
         </main>
@@ -369,7 +370,7 @@ function DestinationCard({ destination: dest }) {
   return (
     <Link
       href={`/destinos/${dest.slug}`}
-      className="group block rounded-2xl overflow-hidden border border-default bg-surface hover:shadow-xl hover:shadow-black/8 hover:-translate-y-0.5 transition-all duration-300"
+      className="group block rounded-2xl overflow-hidden border border-border bg-surface hover:shadow-xl hover:shadow-black/8 hover:-translate-y-0.5 transition-all duration-300"
     >
       {/* Imagen */}
       <div className="relative h-52 overflow-hidden">
@@ -388,18 +389,18 @@ function DestinationCard({ destination: dest }) {
 
         {/* Badges */}
         {dest.isPopular && (
-          <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-slate-800 text-[10px] font-bold px-2.5 py-1 rounded-full" style={syne}>
+          <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-slate-800 text-[10px] font-bold px-2.5 py-1 rounded-full">
             Popular
           </span>
         )}
         {dest.isFeatured && !dest.isPopular && (
-          <span className="absolute top-3 left-3 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full" style={syne}>
+          <span className="absolute top-3 left-3 bg-brand-secondary text-brand-secondary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">
             Destacado
           </span>
         )}
 
         {/* Localización */}
-        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-white/80 text-xs" style={syne}>
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-white/80 text-xs">
           <LuMapPin size={10} className="shrink-0" />
           <span className="truncate max-w-[120px]">{dest.country}</span>
           <span className="text-white/40">·</span>
@@ -414,26 +415,26 @@ function DestinationCard({ destination: dest }) {
         {styles.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-2.5">
             {styles.map((s) => (
-              <span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-surface-secondary text-muted" style={syne}>{s}</span>
+              <span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-surface-secondary text-muted">{s}</span>
             ))}
           </div>
         )}
 
         {/* Nombre */}
-        <h3 className="font-semibold text-[15px] text-foreground mb-3 group-hover:text-accent transition-colors line-clamp-2 leading-snug">
+        <h3 className="font-semibold text-[15px] text-foreground mb-3 group-hover:text-brand-secondary transition-colors line-clamp-2 leading-snug">
           {dest.name}
         </h3>
         <p className="text-xs text-muted line-clamp-1 mb-4">{dest.shortDescription}</p>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-default">
+        <div className="flex items-center justify-between pt-3 border-t border-border">
           {budget != null ? (
             <div>
-              <span className="text-lg font-bold text-accent leading-none">USD {budget}</span>
-              <span className="text-xs text-muted ml-1" style={syne}>/día</span>
+              <span className="text-lg font-bold text-brand-secondary leading-none">USD {budget}</span>
+              <span className="text-xs text-muted ml-1">/día</span>
             </div>
           ) : <div />}
-          <span className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-accent px-4 text-[11px] font-semibold text-white shadow-md shadow-orange-500/20 transition-all duration-300 group-hover:bg-orange-500 group-hover:shadow-lg group-hover:shadow-orange-500/30" style={syne}>
+          <span className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-brand-secondary px-4 text-[11px] font-semibold text-brand-secondary-foreground shadow-md shadow-brand-secondary/20 transition-all duration-300 group-hover:opacity-90 group-hover:shadow-lg group-hover:shadow-brand-secondary/30">
             Ver destino →
           </span>
         </div>

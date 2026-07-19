@@ -4,14 +4,12 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button, Chip, Spinner } from '@heroui/react';
-import { LuArrowRight, LuClock3, LuMapPin, LuSearch, LuSlidersHorizontal, LuX, LuPlane, LuBedDouble, LuTag } from 'react-icons/lu';
+import { Button, Chip, Spinner, TextField, Input } from '@heroui/react';
+import { LuArrowRight, LuClock3, LuMapPin, LuSearch, LuSlidersHorizontal, LuX, LuPlane, LuBedDouble, LuTag, LuListFilter } from 'react-icons/lu';
 import HeroSelect from '@/components/ui/hero-select';
 import DatePickerField from '@/components/ui/date-picker-field';
 import { getLogoUrl } from '@/lib/airlines';
 
-const syne = { fontFamily: 'var(--font-syne)' };
-const cormorant = { fontFamily: 'var(--font-cormorant)' };
 
 const ITEMS_PER_PAGE = 9;
 
@@ -168,31 +166,33 @@ if (sortBy === 'duration-asc') return a.duration.days - b.duration.days;
   const PillBtn = ({ active, onClick, children }) => (
     <button
       onClick={onClick}
-      className={`h-7 px-3 rounded-full text-xs font-semibold border transition-all ${active ? 'bg-accent text-white border-accent' : 'bg-surface-secondary border-default text-muted hover:border-accent/40 hover:text-foreground'}`}
-      style={syne}
+      className={`h-8 px-3.5 rounded-full text-[13px] font-semibold border transition-all ${active ? 'bg-brand-primary text-brand-primary-foreground border-brand-primary' : 'bg-surface-secondary border-border text-muted hover:border-brand-primary/40 hover:text-foreground'}`}
     >
       {children}
     </button>
   );
 
   const FilterPanel = () => (
-    <div className="space-y-5 pb-4 md:pb-6">
+    <div className="space-y-6 pb-4 md:pb-6">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted" style={syne}>Filtros</span>
+        <span className="flex items-center gap-2 font-bold text-foreground text-[15px]">
+          <LuListFilter size={16} className="text-brand-primary" />
+          Filtros
+        </span>
         {hasActiveFilters && (
-          <button onClick={resetFilters} className="text-xs text-accent font-medium flex items-center gap-1 hover:underline" style={syne}>
+          <button onClick={resetFilters} className="text-xs text-brand-primary font-semibold flex items-center gap-1 hover:underline">
             <LuX size={11} /> Limpiar
           </button>
         )}
       </div>
 
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted" style={syne}>Fecha de viaje</p>
+        <p className="text-[13px] font-semibold text-foreground">Fecha de viaje</p>
         <DatePickerField value={dateFilter} onChange={(v) => { setDateFilter(v); setPage(1); }} placeholder="Cualquier fecha" />
       </div>
 
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted" style={syne}>Duración</p>
+        <p className="text-[13px] font-semibold text-foreground">Duración</p>
         <div className="flex flex-wrap gap-1.5">
           {DURATION_OPTIONS.map((opt) => (
             <PillBtn key={opt.value} active={durationFilter === opt.value} onClick={() => { setDurationFilter(opt.value); setPage(1); }}>
@@ -204,17 +204,16 @@ if (sortBy === 'duration-asc') return a.duration.days - b.duration.days;
 
       {destinationStats.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted" style={syne}>Destinos</p>
+          <p className="text-[13px] font-semibold text-foreground">Destinos</p>
           <div className="flex flex-wrap gap-1.5">
             {destinationStats.map((item) => (
               <button
                 key={item.country}
                 onClick={() => toggleDestination(item.country)}
-                className={`h-7 px-2.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1 ${selectedDestinations.includes(item.country) ? 'bg-accent text-white border-accent' : 'bg-surface-secondary border-default text-muted hover:border-accent/40 hover:text-foreground'}`}
-                style={syne}
+                className={`h-8 px-3 rounded-full text-[13px] font-semibold border transition-all flex items-center gap-1.5 ${selectedDestinations.includes(item.country) ? 'bg-brand-primary text-brand-primary-foreground border-brand-primary' : 'bg-surface-secondary border-border text-muted hover:border-brand-primary/40 hover:text-foreground'}`}
               >
                 {item.country}
-                <span className={`rounded-full px-1 text-[10px] font-bold ${selectedDestinations.includes(item.country) ? 'bg-white/25' : 'bg-default'}`}>{item.count}</span>
+                <span className={`rounded-full px-1.5 text-[10px] font-bold ${selectedDestinations.includes(item.country) ? 'bg-white/25' : 'bg-default'}`}>{item.count}</span>
               </button>
             ))}
           </div>
@@ -222,18 +221,20 @@ if (sortBy === 'duration-asc') return a.duration.days - b.duration.days;
       )}
 
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted" style={syne}>Precio</p>
-        <div className="flex items-center gap-1.5">
-          <input type="number" placeholder="Desde" value={minPrice} onChange={(e) => { setMinPrice(e.target.value); setPage(1); }}
-            className="w-0 flex-1 h-8 px-2 rounded-lg border border-default bg-surface-secondary text-xs focus:outline-none focus:ring-1 focus:ring-accent" style={syne} />
+        <p className="text-[13px] font-semibold text-foreground">Precio</p>
+        <div className="flex items-center gap-2">
+          <TextField value={minPrice} onChange={(v) => { setMinPrice(v); setPage(1); }} aria-label="Precio desde" fullWidth>
+            <Input type="number" placeholder="Desde" className="h-9 rounded-lg text-[13px] px-3" />
+          </TextField>
           <span className="text-muted text-xs shrink-0">–</span>
-          <input type="number" placeholder="Hasta" value={maxPrice} onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}
-            className="w-0 flex-1 h-8 px-2 rounded-lg border border-default bg-surface-secondary text-xs focus:outline-none focus:ring-1 focus:ring-accent" style={syne} />
+          <TextField value={maxPrice} onChange={(v) => { setMaxPrice(v); setPage(1); }} aria-label="Precio hasta" fullWidth>
+            <Input type="number" placeholder="Hasta" className="h-9 rounded-lg text-[13px] px-3" />
+          </TextField>
         </div>
       </div>
 
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted" style={syne}>Opciones</p>
+        <p className="text-[13px] font-semibold text-foreground">Opciones</p>
         <div className="flex flex-wrap gap-1.5">
           {[
             { label: 'Vuelo directo', state: onlyDirect, toggle: () => { setOnlyDirect((v) => !v); setPage(1); } },
@@ -247,13 +248,13 @@ if (sortBy === 'duration-asc') return a.duration.days - b.duration.days;
 
       {specialOffer && (
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted" style={syne}>Oferta especial</p>
+          <p className="text-[13px] font-semibold text-foreground">Oferta especial</p>
           <Link href={`/ofertas/${specialOffer.slug}`} className="group block">
             <div className="relative rounded-xl overflow-hidden h-36">
               <Image src={specialOffer.images?.[0]?.url || `https://picsum.photos/seed/${specialOffer.slug}/500/300`}
                 alt={specialOffer.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-black/10 p-3 flex flex-col justify-end">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-orange-200 mb-1">Destacada</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-brand-primary-foreground/70 mb-1">Destacada</span>
                 <p className="text-white font-bold text-sm leading-tight line-clamp-2">{specialOffer.title}</p>
               </div>
             </div>
@@ -267,26 +268,24 @@ if (sortBy === 'duration-asc') return a.duration.days - b.duration.days;
     <div className="pb-16 md:pb-24">
       {/* Header de página */}
       <div className="mb-8">
-        <p className="text-[10px] uppercase tracking-[0.25em] font-semibold text-accent mb-2" style={syne}>
-          Paquetes exclusivos
-        </p>
-        <h1 className="text-4xl md:text-5xl font-light text-foreground leading-none" style={cormorant}>
-          Todas las <em className="font-semibold">ofertas</em>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-foreground leading-tight tracking-tight">
+          Todas las ofertas
         </h1>
+        <p className="text-sm text-muted mt-2">Paquetes armados a medida, listos para reservar.</p>
       </div>
 
       <section className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-8 items-start">
 
         {/* Sidebar desktop */}
         <aside className="hidden lg:block sticky top-24 pt-1">
-          <div className="rounded-2xl border border-default bg-surface p-4">
+          <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
             <FilterPanel />
           </div>
         </aside>
 
         <main className="space-y-5 pt-1">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <p className="text-sm text-muted" style={syne}>
+            <p className="text-sm text-muted">
               {loading ? 'Cargando...' : `${filteredOffers.length} paquete${filteredOffers.length !== 1 ? 's' : ''} disponible${filteredOffers.length !== 1 ? 's' : ''}`}
             </p>
             <div className="shrink-0">
@@ -299,62 +298,60 @@ if (sortBy === 'duration-asc') return a.duration.days - b.duration.days;
                   { value: 'duration-asc', label: 'Duración ↑' },
                   { value: 'duration-desc', label: 'Duración ↓' },
                 ]}
-                triggerClassName="h-10 rounded-xl border border-default bg-surface px-4 text-sm w-44 shadow-sm"
+                triggerClassName="h-10 rounded-xl border border-border bg-surface px-4 text-sm w-44 shadow-sm"
               />
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
-              <LuSearch size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+              <LuSearch size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
               <input
                 type="text"
                 placeholder="Buscar por destino, aerolínea, incluye..."
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="w-full h-10 pl-9 pr-3 rounded-xl border border-default bg-surface text-sm focus:outline-none focus:ring-1 focus:ring-accent"
-                style={syne}
+                className="w-full h-11 pl-11 pr-4 rounded-xl border border-border bg-surface text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:border-brand-primary/50"
               />
             </div>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden h-10 px-3 rounded-xl border border-default bg-surface text-sm flex items-center gap-1.5 shrink-0"
-              style={syne}
+              className="lg:hidden h-11 px-4 rounded-xl border border-border bg-surface text-sm flex items-center gap-1.5 shrink-0 shadow-sm"
             >
               <LuSlidersHorizontal size={14} />
               Filtros
               {activeFilterCount > 0 && (
-                <span className="bg-accent text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{activeFilterCount}</span>
+                <span className="bg-brand-primary text-brand-primary-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{activeFilterCount}</span>
               )}
             </button>
           </div>
 
           {sidebarOpen && (
-            <div className="lg:hidden rounded-2xl border border-default bg-surface p-4">
+            <div className="lg:hidden rounded-2xl border border-border bg-surface p-5">
               <FilterPanel />
             </div>
           )}
 
           {hasActiveFilters && (
             <div className="flex flex-wrap gap-1.5">
-              {search && <Chip className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => setSearch('')}>"{search}" ✕</Chip>}
-              {durationFilter !== 'all' && <Chip className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => setDurationFilter('all')}>{DURATION_OPTIONS.find((o) => o.value === durationFilter)?.label} ✕</Chip>}
-              {selectedDestinations.map((d) => <Chip key={d} className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => toggleDestination(d)}>{d} ✕</Chip>)}
-              {(minPrice || maxPrice) && <Chip className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => { setMinPrice(''); setMaxPrice(''); }}>Precio ✕</Chip>}
-              {dateFilter && <Chip className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => setDateFilter('')}>{new Date(dateFilter + 'T00:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })} ✕</Chip>}
-              {onlyDirect && <Chip className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => setOnlyDirect(false)}>Vuelo directo ✕</Chip>}
-              {onlyDiscount && <Chip className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => setOnlyDiscount(false)}>Con descuento ✕</Chip>}
-              {onlyFeatured && <Chip className="bg-accent/10 text-accent border border-accent/20 text-xs cursor-pointer h-6" onClick={() => setOnlyFeatured(false)}>Destacadas ✕</Chip>}
+              {search && <Chip className="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 text-xs cursor-pointer h-6" onClick={() => setSearch('')}>"{search}" ✕</Chip>}
+              {durationFilter !== 'all' && <Chip className="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 text-xs cursor-pointer h-6" onClick={() => setDurationFilter('all')}>{DURATION_OPTIONS.find((o) => o.value === durationFilter)?.label} ✕</Chip>}
+              {selectedDestinations.map((d) => <Chip key={d} className="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 text-xs cursor-pointer h-6" onClick={() => toggleDestination(d)}>{d} ✕</Chip>)}
+              {(minPrice || maxPrice) && <Chip className="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 text-xs cursor-pointer h-6" onClick={() => { setMinPrice(''); setMaxPrice(''); }}>Precio ✕</Chip>}
+              {dateFilter && <Chip className="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 text-xs cursor-pointer h-6" onClick={() => setDateFilter('')}>{new Date(dateFilter + 'T00:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })} ✕</Chip>}
+              {onlyDirect && <Chip className="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 text-xs cursor-pointer h-6" onClick={() => setOnlyDirect(false)}>Vuelo directo ✕</Chip>}
+              {onlyDiscount && <Chip className="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 text-xs cursor-pointer h-6" onClick={() => setOnlyDiscount(false)}>Con descuento ✕</Chip>}
+              {onlyFeatured && <Chip className="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 text-xs cursor-pointer h-6" onClick={() => setOnlyFeatured(false)}>Destacadas ✕</Chip>}
             </div>
           )}
 
           {loading ? (
             <div className="flex justify-center py-24"><Spinner size="lg" /></div>
           ) : visibleOffers.length === 0 ? (
-            <div className="flex flex-col items-center py-24 gap-3 text-center">
-              <p className="text-lg font-semibold" style={syne}>Sin resultados</p>
+            <div className="flex flex-col items-center py-24 gap-3 text-center rounded-2xl border border-dashed border-border">
+              <p className="text-lg font-bold text-foreground">Sin resultados</p>
               <p className="text-sm text-muted">Prueba con otros filtros o busca otro destino.</p>
-              <Button className="bg-accent text-white px-6 mt-1" onClick={resetFilters}>Limpiar filtros</Button>
+              <Button color="primary" className="px-6 mt-1" onClick={resetFilters}>Limpiar filtros</Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -365,30 +362,29 @@ if (sortBy === 'duration-asc') return a.duration.days - b.duration.days;
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-1 pt-2">
               <button onClick={() => { if (safePage > 1) setPage((p) => p - 1); }} disabled={safePage === 1}
-                className="h-9 w-9 rounded-lg border border-default text-sm flex items-center justify-center disabled:opacity-40 hover:bg-surface-secondary transition-colors">‹</button>
+                className="h-9 w-9 rounded-lg border border-border text-sm flex items-center justify-center disabled:opacity-40 hover:bg-surface-secondary transition-colors">‹</button>
               {getVisiblePages(safePage, totalPages).map((entry, idx) =>
                 entry === '…' ? (
                   <span key={`e-${idx}`} className="h-9 w-9 flex items-center justify-center text-muted text-sm">…</span>
                 ) : (
                   <button key={entry} onClick={() => setPage(entry)}
-                    className={`h-9 w-9 rounded-lg text-sm font-medium transition-colors ${entry === safePage ? 'bg-accent text-white' : 'border border-default hover:bg-surface-secondary'}`}
-                    style={syne}>
+                    className={`h-9 w-9 rounded-lg text-sm font-semibold transition-colors ${entry === safePage ? 'bg-brand-primary text-brand-primary-foreground' : 'border border-border hover:bg-surface-secondary'}`}>
                     {entry}
                   </button>
                 )
               )}
               <button onClick={() => { if (safePage < totalPages) setPage((p) => p + 1); }} disabled={safePage === totalPages}
-                className="h-9 w-9 rounded-lg border border-default text-sm flex items-center justify-center disabled:opacity-40 hover:bg-surface-secondary transition-colors">›</button>
+                className="h-9 w-9 rounded-lg border border-border text-sm flex items-center justify-center disabled:opacity-40 hover:bg-surface-secondary transition-colors">›</button>
             </div>
           )}
 
           {/* Banner cotización a medida */}
-          <div className="mt-12 rounded-2xl border border-accent/20 bg-accent/5 px-6 py-8 text-center">
-            <p className="text-base font-semibold text-foreground mb-1">¿No encontraste lo que buscas?</p>
-            <p className="text-sm text-muted mb-4">Armamos tu viaje a medida con el destino, fechas y presupuesto que necesitas.</p>
+          <div className="mt-12 rounded-2xl border border-brand-primary/15 bg-gradient-to-br from-brand-primary/8 to-brand-secondary/5 px-6 py-9 text-center">
+            <p className="text-lg font-bold text-foreground mb-1">¿No encontraste lo que buscas?</p>
+            <p className="text-sm text-muted mb-5 max-w-sm mx-auto">Armamos tu viaje a medida con el destino, fechas y presupuesto que necesitas.</p>
             <Link
               href="/cotizar"
-              className="inline-flex items-center gap-2 h-10 px-6 rounded-full bg-accent text-white text-sm font-semibold hover:bg-orange-500 transition-colors"
+              className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-brand-primary text-brand-primary-foreground text-sm font-semibold hover:opacity-90 transition-colors shadow-md shadow-brand-primary/25"
             >
               Arma tu viaje a medida <LuArrowRight size={14} />
             </Link>
@@ -414,7 +410,7 @@ function OfferCard({ offer }) {
       href={`/ofertas/${offer.slug}`}
       className="group block h-full"
     >
-      <article className="h-full bg-surface rounded-2xl overflow-hidden flex flex-col border border-default transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/10 hover:border-accent/25">
+      <article className="h-full bg-surface rounded-2xl overflow-hidden flex flex-col border border-border transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/10 hover:border-brand-primary/25">
 
         {/* Imagen */}
         <div className="relative h-52 overflow-hidden shrink-0">
@@ -441,26 +437,26 @@ function OfferCard({ offer }) {
 
           {/* Badge */}
           {hasDiscount ? (
-            <span className="absolute top-3 right-3 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-orange-500/30" style={syne}>
+            <span className="absolute top-3 right-3 bg-brand-primary text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-brand-primary/30">
               -{discount}% OFF
             </span>
           ) : offer.isFeatured ? (
-            <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-slate-900 text-[10px] font-bold px-2.5 py-1 rounded-full" style={syne}>
+            <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-slate-900 text-[10px] font-bold px-2.5 py-1 rounded-full">
               Más vendida
             </span>
           ) : null}
         </div>
 
         {/* Stats strip */}
-        <div className="flex items-center gap-3 px-4 py-2 bg-surface-secondary border-b border-default">
+        <div className="flex items-center gap-3 px-4 py-2 bg-surface-secondary border-b border-border">
           {offer.duration?.days > 0 && offer.availability?.startDate && offer.availability?.endDate && (
-            <span className="flex items-center gap-1 text-[11px] text-muted shrink-0" style={syne}>
+            <span className="flex items-center gap-1 text-[11px] text-muted shrink-0">
               <LuClock3 size={10} />
               {offer.duration.days} días
             </span>
           )}
           {offer.airline?.name && (
-            <span className="flex items-center gap-1.5 text-[11px] text-muted truncate" style={syne}>
+            <span className="flex items-center gap-1.5 text-[11px] text-muted truncate">
               {offer.airline.iata ? (
                 <img
                   src={getLogoUrl(offer.airline.iata)}
@@ -475,7 +471,7 @@ function OfferCard({ offer }) {
             </span>
           )}
           {offer.hotel?.stars > 0 && !offer.airline?.name && (
-            <span className="flex items-center gap-1 text-[11px] text-muted shrink-0" style={syne}>
+            <span className="flex items-center gap-1 text-[11px] text-muted shrink-0">
               <LuBedDouble size={10} />
               {'★'.repeat(offer.hotel.stars)}
             </span>
@@ -485,7 +481,7 @@ function OfferCard({ offer }) {
         {/* Contenido */}
         <div className="p-4 flex flex-col grow">
           <h3
-            className="leading-snug line-clamp-2 font-bold group-hover:text-accent transition-colors duration-300 mb-2"
+            className="leading-snug line-clamp-2 font-bold group-hover:text-brand-primary transition-colors duration-300 mb-2"
             style={{ fontSize: '1rem' }}
           >
             {offer.title}
@@ -498,9 +494,9 @@ function OfferCard({ offer }) {
                 <span
                   key={i}
                   className="inline-flex items-center gap-1 text-[10px] font-medium text-muted bg-surface-tertiary rounded-full px-2 py-0.5 leading-none"
-                  style={syne}
+                 
                 >
-                  <LuTag size={8} className="text-accent/70 shrink-0" />
+                  <LuTag size={8} className="text-brand-primary/70 shrink-0" />
                   {item}
                 </span>
               ))}
@@ -508,7 +504,7 @@ function OfferCard({ offer }) {
           )}
 
           {/* Price row */}
-          <div className="flex items-end justify-between gap-2 mt-4 pt-3 border-t border-default">
+          <div className="flex items-end justify-between gap-2 mt-4 pt-3 border-t border-border">
             <div>
               {hasPrice && hasDiscount && originalPrice && (
                 <p className="text-xs text-muted line-through leading-none mb-0.5">
@@ -517,10 +513,10 @@ function OfferCard({ offer }) {
               )}
               {hasPrice ? (
                 <>
-                  <p className="text-xl font-bold text-accent leading-none">
+                  <p className="text-xl font-bold text-brand-primary leading-none">
                     {formatCardPrice(price, currency)}
                   </p>
-                  <p className="text-[11px] text-muted mt-0.5" style={syne}>
+                  <p className="text-[11px] text-muted mt-0.5">
                     /{offer.pricing?.pricePer || 'persona'}
                   </p>
                 </>
@@ -529,8 +525,8 @@ function OfferCard({ offer }) {
               )}
             </div>
             <span
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-accent px-4 text-[11px] font-semibold text-white shadow-md shadow-orange-500/20 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-orange-500/30 group-hover:bg-orange-500 shrink-0"
-              style={syne}
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-brand-primary px-4 text-[11px] font-semibold text-white shadow-md shadow-brand-primary/20 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-brand-primary/30 group-hover:opacity-90 shrink-0"
+             
             >
               {hasPrice ? 'Ver oferta' : 'Consultar'} <LuArrowRight size={12} />
             </span>

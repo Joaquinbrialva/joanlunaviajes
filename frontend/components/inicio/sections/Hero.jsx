@@ -1,170 +1,154 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowRight } from 'lucide-react';
+import { Button } from '@heroui/react';
+import { LuArrowRight, LuMapPin, LuSearch } from 'react-icons/lu';
 
 const DEFAULT_MEDIA = { type: 'image', url: '/assets/images/hero-img.jpg', poster: null };
 
-const syne      = { fontFamily: 'var(--font-syne)' };
-const cormorant = { fontFamily: 'var(--font-cormorant)' };
-
-const grain = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")`;
-
-function scrollToCotizar() {
-  document.getElementById('cotizar')?.scrollIntoView({ behavior: 'smooth' });
-}
-
 export default function Hero() {
-  const [media, setMedia]           = useState(null);
-  const [mediaReady, setMediaReady] = useState(false);
-  const [textIn, setTextIn]         = useState(false);
-  const videoRef                    = useRef(null);
+	const [media, setMedia] = useState(null);
+	const [mediaReady, setMediaReady] = useState(false);
+	const [textIn, setTextIn] = useState(false);
+	const [query, setQuery] = useState('');
+	const videoRef = useRef(null);
+	const router = useRouter();
 
-  useEffect(() => {
-    fetch('/api/settings/hero')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => { setMedia(data?.url ? data : DEFAULT_MEDIA); })
-      .catch(() => { setMedia(DEFAULT_MEDIA); });
-  }, []);
+	useEffect(() => {
+		fetch('/api/settings/hero')
+			.then((r) => (r.ok ? r.json() : null))
+			.then((data) => setMedia(data?.url ? data : DEFAULT_MEDIA))
+			.catch(() => setMedia(DEFAULT_MEDIA));
+	}, []);
 
-  useEffect(() => {
-    if (mediaReady) {
-      const t = setTimeout(() => setTextIn(true), 200);
-      return () => clearTimeout(t);
-    }
-  }, [mediaReady]);
+	useEffect(() => {
+		if (mediaReady) {
+			const t = setTimeout(() => setTextIn(true), 150);
+			return () => clearTimeout(t);
+		}
+	}, [mediaReady]);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) video.play().catch(() => {});
-        else video.pause();
-      },
-      { threshold: 0.25 }
-    );
-    observer.observe(video);
-    return () => observer.disconnect();
-  }, [media?.type, media?.url]);
+	useEffect(() => {
+		const video = videoRef.current;
+		if (!video) return;
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting) video.play().catch(() => {});
+				else video.pause();
+			},
+			{ threshold: 0.25 }
+		);
+		observer.observe(video);
+		return () => observer.disconnect();
+	}, [media?.type, media?.url]);
 
-  if (!media) {
-    return (
-      <section
-        className="w-screen -mx-[calc((100vw-100%)/2)] -mt-[68px] bg-[#080f16]"
-        style={{ height: 'calc(100vh + 68px)', minHeight: '640px' }}
-      />
-    );
-  }
+	function handleSearch(e) {
+		e.preventDefault();
+		const trimmed = query.trim();
+		router.push(trimmed ? `/ofertas?q=${encodeURIComponent(trimmed)}` : '/ofertas');
+	}
 
-  return (
-    <section
-      className="w-screen -mx-[calc((100vw-100%)/2)] -mt-[68px] relative overflow-hidden"
-      style={{ height: 'calc(100vh + 68px)', minHeight: '640px' }}
-    >
-      {/* ── Media background ──────────────────────────────── */}
-      {media.type === 'video' ? (
-        <video
-          ref={videoRef}
-          key={media.url}
-          autoPlay muted loop playsInline
-          preload="metadata"
-          poster={media.poster || undefined}
-          onLoadedData={() => setMediaReady(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${mediaReady ? 'opacity-100' : 'opacity-0'}`}
-        >
-          <source src={media.url} />
-        </video>
-      ) : (
-        <Image
-          src={media.url}
-          alt="Destino de viaje"
-          fill priority quality={85} sizes="100vw"
-          onLoad={() => setMediaReady(true)}
-          className={`object-cover transition-opacity duration-700 ${mediaReady ? 'opacity-100' : 'opacity-0'}`}
-          style={media.focalPoint ? { objectPosition: `${media.focalPoint.x}% ${media.focalPoint.y}%` } : undefined}
-        />
-      )}
-      {!mediaReady && <div className="absolute inset-0 bg-[#080f16]" />}
+	if (!media) {
+		return (
+			<section
+				className="w-screen -mx-[calc((100vw-100%)/2)] -mt-[68px] bg-brand-primary"
+				style={{ height: 'calc(100vh + 68px)', minHeight: '640px' }}
+			/>
+		);
+	}
 
-      {/* ── Grain ─────────────────────────────────────────── */}
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay"
-        style={{ backgroundImage: grain }}
-      />
+	return (
+		<section
+			className="w-screen -mx-[calc((100vw-100%)/2)] -mt-[68px] relative overflow-hidden bg-brand-primary"
+			style={{ height: 'calc(100vh + 68px)', minHeight: '640px' }}
+		>
+			{/* Media layer — desaturated toward brand orange so the naranja de marca carries ~40% of this section */}
+			{media.type === 'video' ? (
+				<video
+					ref={videoRef}
+					key={media.url}
+					autoPlay
+					muted
+					loop
+					playsInline
+					preload="metadata"
+					poster={media.poster || undefined}
+					onLoadedData={() => setMediaReady(true)}
+					className={`absolute inset-0 w-full h-full object-cover mix-blend-luminosity opacity-70 transition-opacity duration-700 ${mediaReady ? 'opacity-70' : 'opacity-0'}`}
+				>
+					<source src={media.url} />
+				</video>
+			) : (
+				<Image
+					src={media.url}
+					alt="Destino de viaje"
+					fill
+					priority
+					quality={85}
+					sizes="100vw"
+					onLoad={() => setMediaReady(true)}
+					className={`object-cover mix-blend-luminosity transition-opacity duration-700 ${mediaReady ? 'opacity-70' : 'opacity-0'}`}
+					style={media.focalPoint ? { objectPosition: `${media.focalPoint.x}% ${media.focalPoint.y}%` } : undefined}
+				/>
+			)}
 
-      {/* ── Gradient overlay (bottom-heavy) ───────────────── */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/10 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent pointer-events-none" />
+			{/* Brand wash — naranja de marca protagonista, no decorativo */}
+			<div className="absolute inset-0 bg-gradient-to-t from-[#7a2d0e] via-brand-primary/60 to-brand-primary/85 mix-blend-multiply pointer-events-none" />
+			<div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10 pointer-events-none" />
 
-      {/* ── Text content ──────────────────────────────────── */}
-      <div
-        className="absolute inset-0 flex flex-col items-center justify-end pb-[min(12vh,90px)] px-6"
-        style={{
-          opacity:    textIn ? 1 : 0,
-          transform:  textIn ? 'translateY(0)' : 'translateY(16px)',
-          transition: 'opacity 0.9s ease, transform 0.9s ease',
-        }}
-      >
-        {/* Eyebrow */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="h-px w-8 bg-white/30" />
-          <span
-            className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/45"
-            style={syne}
-          >
-            Agencia de viajes · Buenos Aires
-          </span>
-          <div className="h-px w-8 bg-white/30" />
-        </div>
+			{/* Content */}
+			<div
+				className="relative h-full flex flex-col items-center justify-center px-6 pt-[68px]"
+				style={{
+					opacity: textIn ? 1 : 0,
+					transform: textIn ? 'translateY(0)' : 'translateY(20px)',
+					transition: 'opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)',
+				}}
+			>
+				<h1
+					className="text-center text-white leading-[1.05] mb-4 font-extrabold tracking-tight"
+					style={{ fontSize: 'clamp(2.75rem, 6.5vw, 5.5rem)' }}
+				>
+					A cada destino,
+					<br />
+					<span className="text-[#12243b]">le sobra un motivo.</span>
+				</h1>
 
-        {/* Heading */}
-        <h1
-          className="text-center font-light text-white leading-[1.05] mb-5"
-          style={{ ...cormorant, fontSize: 'clamp(44px, 8vw, 90px)' }}
-        >
-          Descubrí tu próximo{' '}
-          <em className="font-semibold" style={{ color: '#ff9a5c' }}>
-            destino.
-          </em>
-        </h1>
+				<p className="text-center text-white/85 mb-10 max-w-md text-[15px] leading-relaxed">
+					Busca tu próximo viaje entre paquetes armados a medida, con asesoría experta y precios que no encontrarás en ningún portal.
+				</p>
 
-        {/* Subline */}
-        <p
-          className="text-center mb-9 max-w-md"
-          style={{ ...syne, fontSize: 13.5, color: 'rgba(255,255,255,0.52)', lineHeight: 1.7 }}
-        >
-          Itinerarios curados, atención 100% personalizada y precios exclusivos.
-        </p>
+				{/* Buscador — acción primaria */}
+				<form
+					onSubmit={handleSearch}
+					className="w-full max-w-xl flex items-center gap-2 p-2 rounded-2xl bg-white shadow-2xl shadow-black/30"
+				>
+					<LuSearch size={18} className="text-muted shrink-0 ml-2" />
+					<input
+						type="text"
+						value={query}
+						onChange={(e) => setQuery(e.target.value)}
+						placeholder="¿A dónde quieres viajar? Roma, Cancún, Bariloche…"
+						className="flex-1 h-11 min-w-0 outline-none text-sm text-foreground placeholder:text-muted bg-transparent"
+						aria-label="Buscar destino u oferta"
+					/>
+					<Button type="submit" color="primary" className="shrink-0 rounded-xl px-5 h-11 font-semibold">
+						{({ isPending }) => (isPending ? 'Buscando…' : 'Buscar')}
+					</Button>
+				</form>
 
-        {/* CTA */}
-        <button
-          type="button"
-          onClick={scrollToCotizar}
-          className="flex items-center gap-2.5 transition-transform hover:scale-[1.03] active:scale-[0.98]"
-          style={{
-            ...syne,
-            height: 52,
-            padding: '0 32px',
-            borderRadius: 9999,
-            background: 'linear-gradient(135deg, #ff7e2d, #ff5500)',
-            color: '#fff',
-            fontWeight: 700,
-            fontSize: 14,
-            boxShadow: '0 10px 36px rgba(255,126,45,0.45)',
-            letterSpacing: '0.01em',
-          }}
-        >
-          Cotizá tu viaje
-          <ArrowRight size={16} strokeWidth={2.5} />
-        </button>
-
-        {/* Scroll indicator */}
-        <div className="mt-10 flex flex-col items-center gap-2 opacity-30">
-          <div className="w-px h-10 bg-white/50 animate-pulse" />
-        </div>
-      </div>
-    </section>
-  );
+				<button
+					type="button"
+					onClick={() => router.push('/destinos')}
+					className="mt-6 inline-flex items-center gap-1.5 text-white/75 hover:text-white transition-colors text-[13px] font-medium"
+				>
+					<LuMapPin size={13} />
+					o explora destinos por continente
+					<LuArrowRight size={13} />
+				</button>
+			</div>
+		</section>
+	);
 }

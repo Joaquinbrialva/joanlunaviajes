@@ -1,8 +1,8 @@
 'use client';
-import Destinies from '@/components/inicio/sections/Destinations';
+import Destinations from '@/components/inicio/sections/Destinations';
 import Hero from '@/components/inicio/sections/Hero';
 import Offers from '@/components/inicio/sections/Offers';
-import WhyChoose from '@/components/inicio/sections/WhyChoose';
+import HowItWorks from '@/components/inicio/sections/HowItWorks';
 import QuoteCTA from '@/components/inicio/sections/QuoteCTA';
 
 export default function Home() {
@@ -11,11 +11,9 @@ export default function Home() {
 			<Hero />
 			<div className="pt-20 sm:pt-28 space-y-24">
 				<Offers />
-				<Destinies />
-				<div>
-					<WhyChoose />
-					<QuoteCTA />
-				</div>
+				<HowItWorks />
+				<Destinations />
+				<QuoteCTA />
 			</div>
 		</>
 	);
