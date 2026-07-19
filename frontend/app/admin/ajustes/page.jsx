@@ -95,7 +95,7 @@ export default function AjustesPage() {
       <div className='rounded-2xl border border-default bg-surface p-5 space-y-3'>
         <h3 className='text-lg font-semibold'>Información del sistema</h3>
         <dl className='space-y-2 text-sm'>
-          <Row label='Aplicación' value='Joan Luna Viajes — Panel Admin' />
+          <Row label='Aplicación' value='Joanluna Viajes — Panel Admin' />
           <Row label='Versión' value='1.0.0' />
           <Row label='Frontend' value='Next.js 15' />
           <Row label='Backend' value='Express 4' />

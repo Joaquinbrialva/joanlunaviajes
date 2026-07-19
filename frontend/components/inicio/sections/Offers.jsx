@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { LuArrowRight, LuClock3, LuMapPin, LuPlane } from 'react-icons/lu';
+import { LuArrowRight, LuClock3, LuMapPin, LuPlane, LuTicket } from 'react-icons/lu';
 import { getLogoUrl } from '@/lib/airlines';
 
 function getPrice(offer) {
@@ -142,27 +142,23 @@ export default function Offers() {
   return (
     <div className='space-y-8'>
       <div className='flex flex-col sm:flex-row sm:items-end justify-between gap-4'>
-        <div>
-          <div className='flex items-center gap-3 mb-3'>
-            <div className='h-px w-8 bg-accent' />
-            <p className='text-[9px] uppercase tracking-[0.3em] font-bold text-accent'>
-              Paquetes exclusivos
+        <div className='flex items-center gap-4'>
+          <div className='w-12 h-12 rounded-2xl bg-brand-primary/12 flex items-center justify-center shrink-0'>
+            <LuTicket size={22} className='text-brand-primary' />
+          </div>
+          <div>
+            <h2 className='font-extrabold text-foreground leading-tight tracking-tight' style={{ fontSize: 'clamp(1.9rem, 4vw, 2.75rem)' }}>
+              Ofertas imperdibles
+            </h2>
+            <p className='text-[13px] text-muted mt-2 max-w-xs leading-relaxed'>
+              Los paquetes más solicitados, listos para reservar hoy.
             </p>
           </div>
-          <h2
-            className='font-light text-foreground leading-none'
-            style={{ fontFamily: 'var(--font-cormorant)', fontSize: 'clamp(2.4rem, 5vw, 3.5rem)' }}
-          >
-            Ofertas <em className='font-semibold'>Imperdibles</em>
-          </h2>
-          <p className='text-[13px] text-muted mt-3 max-w-xs leading-relaxed'>
-            Los paquetes mas solicitados, disenados para cada tipo de viajero.
-          </p>
         </div>
 
         <Link
           href='/ofertas'
-          className='hidden sm:flex items-center gap-2 text-sm font-medium text-muted hover:text-accent transition-colors group shrink-0'
+          className='hidden sm:flex items-center gap-2 text-sm font-medium text-muted hover:text-brand-primary transition-colors group shrink-0'
         >
           Ver todas
           <LuArrowRight size={14} className='group-hover:translate-x-0.5 transition-transform' />

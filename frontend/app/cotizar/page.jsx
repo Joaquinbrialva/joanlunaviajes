@@ -8,9 +8,6 @@ import { today, getLocalTimeZone, parseDate } from '@internationalized/date';
 import DatePickerField from '@/components/ui/date-picker-field';
 import { toastError } from '@/lib/toast';
 
-const syne = { fontFamily: 'var(--font-syne)' };
-const cormorant = { fontFamily: 'var(--font-cormorant)' };
-
 const INITIAL = {
   // Paso 1
   destination: '',
@@ -64,7 +61,7 @@ function formatDate(iso) {
 function Stepper({ paso }) {
   const steps = ['Destino', 'Fechas', 'Preferencias', 'Contacto'];
   return (
-    <div className="flex items-center gap-0 mb-8" style={syne}>
+    <div className="flex items-center gap-0 mb-8">
       {steps.map((label, i) => {
         const n = i + 1;
         const done = n < paso;
@@ -122,13 +119,9 @@ function ChipGroup({ options, value, onChange, multi = false }) {
             key={val}
             type="button"
             onClick={() => toggle(val)}
-            className="px-4 py-1.5 rounded-full text-sm font-medium transition-all border"
-            style={{
-              borderColor: selected ? 'var(--accent)' : 'var(--border)',
-              background: selected ? 'rgba(255,126,45,0.08)' : 'transparent',
-              color: selected ? 'var(--accent)' : 'var(--muted)',
-              fontFamily: 'var(--font-syne)',
-            }}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
+              selected ? 'border-brand-primary bg-brand-primary/8 text-brand-primary' : 'border-border bg-transparent text-muted'
+            }`}
           >
             {label}
           </button>
@@ -142,20 +135,20 @@ function ChipGroup({ options, value, onChange, multi = false }) {
 function Counter({ label, value, onChange, min = 0, max = 20 }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-2" style={syne}>{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-2">{label}</p>
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={() => onChange(Math.max(min, value - 1))}
-          className="w-8 h-8 rounded-lg border border-default flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-secondary transition-colors text-lg"
+          className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-secondary transition-colors text-lg"
         >
           −
         </button>
-        <span className="text-xl font-bold w-6 text-center" style={syne}>{value}</span>
+        <span className="text-xl font-bold w-6 text-center">{value}</span>
         <button
           type="button"
           onClick={() => onChange(Math.min(max, value + 1))}
-          className="w-8 h-8 rounded-lg border border-default flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-secondary transition-colors text-lg"
+          className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-secondary transition-colors text-lg"
         >
           +
         </button>
@@ -164,7 +157,7 @@ function Counter({ label, value, onChange, min = 0, max = 20 }) {
   );
 }
 
-const inputClass = 'w-full h-11 rounded-xl border border-default bg-surface px-4 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all';
+const inputClass = 'w-full h-11 rounded-xl border border-border bg-surface px-4 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all';
 
 /* ── Main page ── */
 export default function CotizarPage() {
@@ -265,10 +258,10 @@ export default function CotizarPage() {
         <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-6">
           <LuCheck className="w-8 h-8 text-green-600 dark:text-green-400" />
         </div>
-        <h1 className="text-3xl font-light text-foreground mb-3" style={cormorant}>
-          ¡Tu consulta fue <em className="font-semibold">enviada!</em>
+        <h1 className="text-3xl font-extrabold text-foreground mb-3 tracking-tight">
+          ¡Tu consulta fue enviada!
         </h1>
-        <p className="text-sm text-muted mb-10" style={syne}>
+        <p className="text-sm text-muted mb-10">
           Te respondemos en menos de 24 horas con opciones personalizadas para tu viaje.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -276,14 +269,12 @@ export default function CotizarPage() {
             type="button"
             onClick={handleReset}
             className="h-11 px-7 rounded-full border border-border text-sm font-semibold text-foreground hover:bg-surface-secondary transition-colors"
-            style={syne}
           >
             Hacer otra consulta
           </button>
           <Link
             href="/ofertas"
-            className="h-11 px-7 rounded-full bg-accent text-white text-sm font-semibold hover:bg-orange-500 transition-colors flex items-center gap-2 justify-center"
-            style={syne}
+            className="h-11 px-7 rounded-full bg-brand-primary text-brand-primary-foreground text-sm font-semibold hover:opacity-90 transition-colors flex items-center gap-2 justify-center"
           >
             Ver ofertas disponibles <LuArrowRight size={14} />
           </Link>
@@ -297,13 +288,10 @@ export default function CotizarPage() {
 
       {/* Hero */}
       <div className="mb-10">
-        <p className="text-[10px] uppercase tracking-[0.28em] font-semibold text-accent mb-3" style={syne}>
-          Cotización a medida
-        </p>
-        <h1 className="text-4xl md:text-5xl font-light text-foreground mb-3 leading-tight" style={cormorant}>
-          Arma tu viaje <em className="font-semibold">ideal</em>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-3 leading-tight tracking-tight">
+          Arma tu viaje <span className="text-brand-primary">ideal</span>
         </h1>
-        <p className="text-sm text-muted" style={syne}>
+        <p className="text-sm text-muted">
           Cuéntanos qué tienes en mente y te preparamos una propuesta personalizada.
         </p>
       </div>
@@ -314,9 +302,9 @@ export default function CotizarPage() {
       {paso === 1 && (
         <div className="space-y-6">
           <div>
-            <p className="text-xl font-semibold text-foreground mb-5" style={syne}>¿A dónde quieres ir?</p>
+            <p className="text-xl font-semibold text-foreground mb-5">¿A dónde quieres ir?</p>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted" style={syne}>Destino *</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted">Destino *</label>
               <input
                 autoFocus
                 maxLength={120}
@@ -324,12 +312,12 @@ export default function CotizarPage() {
                 placeholder="Europa, Caribe, Tailandia... o 'Sorpréndeme'"
                 value={form.destination}
                 onChange={(e) => update('destination', e.target.value)}
-                style={syne}
+               
               />
             </div>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3" style={syne}>¿Tienes fechas en mente? *</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">¿Tienes fechas en mente? *</p>
             <ChipGroup
               options={FLEXIBILITY_OPTIONS}
               value={form.dateFlexibility}
@@ -342,12 +330,12 @@ export default function CotizarPage() {
       {/* ── Paso 2: Fechas y viajeros ── */}
       {paso === 2 && (
         <div className="space-y-6">
-          <p className="text-xl font-semibold text-foreground" style={syne}>¿Cuándo y con quién?</p>
+          <p className="text-xl font-semibold text-foreground">¿Cuándo y con quién?</p>
 
           {form.dateFlexibility === 'fixed' ? (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted" style={syne}>Fecha de salida *</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted">Fecha de salida *</label>
                 <DatePickerField
                   value={form.departureDate}
                   onChange={(v) => update('departureDate', v)}
@@ -356,7 +344,7 @@ export default function CotizarPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted" style={syne}>Fecha de regreso *</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted">Fecha de regreso *</label>
                 <DatePickerField
                   value={form.returnDate}
                   onChange={(v) => update('returnDate', v)}
@@ -366,7 +354,7 @@ export default function CotizarPage() {
               </div>
             </div>
           ) : (
-            <div className="rounded-xl border border-border bg-surface-secondary px-4 py-3 text-sm text-muted" style={syne}>
+            <div className="rounded-xl border border-border bg-surface-secondary px-4 py-3 text-sm text-muted">
               Sin fechas fijas — lo coordinamos contigo.
             </div>
           )}
@@ -381,17 +369,17 @@ export default function CotizarPage() {
       {/* ── Paso 3: Preferencias ── */}
       {paso === 3 && (
         <div className="space-y-6">
-          <p className="text-xl font-semibold text-foreground" style={syne}>¿Cómo te imaginas el viaje?</p>
+          <p className="text-xl font-semibold text-foreground">¿Cómo te imaginas el viaje?</p>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3" style={syne}>Tipo de viaje</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">Tipo de viaje</p>
             <ChipGroup options={TRIP_TYPES} value={form.tripType} onChange={(v) => update('tripType', v)} />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3" style={syne}>Presupuesto por persona (USD)</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">Presupuesto por persona (USD)</p>
             <ChipGroup options={BUDGET_OPTIONS} value={form.budget} onChange={(v) => update('budget', v)} />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3" style={syne}>¿Qué querés que incluya? (opcional)</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">¿Qué quieres que incluya? (opcional)</p>
             <ChipGroup options={INCLUDES_OPTIONS} value={form.includes} onChange={(v) => update('includes', v)} multi />
           </div>
         </div>
@@ -400,34 +388,34 @@ export default function CotizarPage() {
       {/* ── Paso 4: Contacto ── */}
       {paso === 4 && (
         <form onSubmit={(e) => { e.preventDefault(); if (canGoNext) handleSubmit(); }} className="space-y-4">
-          <p className="text-xl font-semibold text-foreground" style={syne}>Último paso: ¿cómo te contactamos?</p>
+          <p className="text-xl font-semibold text-foreground">Último paso: ¿cómo te contactamos?</p>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted" style={syne}>Nombre *</label>
-              <input className={inputClass} placeholder="Tu nombre" value={form.name} onChange={(e) => update('name', e.target.value)} style={syne} />
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted">Nombre *</label>
+              <input className={inputClass} placeholder="Tu nombre" value={form.name} onChange={(e) => update('name', e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted" style={syne}>Email *</label>
-              <input type="email" className={inputClass} placeholder="tu@email.com" value={form.email} onChange={(e) => update('email', e.target.value)} style={syne} />
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted">Email *</label>
+              <input type="email" className={inputClass} placeholder="tu@email.com" value={form.email} onChange={(e) => update('email', e.target.value)} />
             </div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-muted" style={syne}>Teléfono / WhatsApp (opcional)</label>
-            <input type="tel" className={inputClass} placeholder="+54 11 ..." value={form.phone} onChange={(e) => update('phone', e.target.value)} style={syne} />
+            <label className="text-xs font-semibold uppercase tracking-wider text-muted">Teléfono / WhatsApp (opcional)</label>
+            <input type="tel" className={inputClass} placeholder="+54 11 ..." value={form.phone} onChange={(e) => update('phone', e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-muted" style={syne}>¿Algo más que quieras contarnos? (opcional)</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-muted">¿Algo más que quieras contarnos? (opcional)</label>
             <textarea
               rows={4}
               maxLength={1000}
-              className="w-full rounded-xl border border-default bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all resize-none"
+              className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all resize-none"
               placeholder="Ej: viajamos con un bebé, queremos playa y montaña..."
               value={form.notes}
               onChange={(e) => update('notes', e.target.value)}
-              style={syne}
+             
             />
           </div>
-          <div className="rounded-xl border border-accent/20 bg-accent/5 px-4 py-3 text-sm text-muted" style={syne}>
+          <div className="rounded-xl border border-brand-primary/20 bg-brand-primary/5 px-4 py-3 text-sm text-muted">
             Te respondemos en menos de 24 horas con opciones personalizadas.
           </div>
         </form>
@@ -440,7 +428,7 @@ export default function CotizarPage() {
             type="button"
             onClick={() => setPaso((p) => p - 1)}
             className="h-11 px-6 rounded-full border border-border text-sm font-semibold text-muted hover:text-foreground hover:bg-surface-secondary transition-colors flex items-center gap-2"
-            style={syne}
+           
           >
             <LuArrowLeft size={14} /> Anterior
           </button>
@@ -451,8 +439,8 @@ export default function CotizarPage() {
             type="button"
             disabled={!canGoNext}
             onClick={() => setPaso((p) => p + 1)}
-            className="h-11 px-8 rounded-full bg-accent text-white text-sm font-semibold hover:bg-orange-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-            style={syne}
+            className="h-11 px-8 rounded-full bg-brand-primary text-brand-primary-foreground text-sm font-semibold hover:opacity-90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+           
           >
             Siguiente <LuArrowRight size={14} />
           </button>
@@ -461,8 +449,8 @@ export default function CotizarPage() {
             isPending={sending}
             isDisabled={!canGoNext}
             onClick={handleSubmit}
-            className="h-11 px-8 rounded-full bg-accent text-white text-sm font-semibold hover:bg-orange-500 transition-colors disabled:opacity-40"
-            style={syne}
+            className="h-11 px-8 rounded-full bg-brand-primary text-brand-primary-foreground text-sm font-semibold hover:opacity-90 transition-colors disabled:opacity-40"
+           
           >
             {({ isPending }) => isPending ? 'Enviando...' : 'Solicitar cotización'}
           </Button>

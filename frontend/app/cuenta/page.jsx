@@ -63,7 +63,7 @@ export default function CuentaPage() {
         </div>
 
         {/* User card skeleton */}
-        <div className='rounded-2xl border border-default bg-surface p-5 flex items-center gap-4'>
+        <div className='rounded-2xl border border-border bg-surface p-5 flex items-center gap-4'>
           <div className='h-12 w-12 rounded-full bg-muted/20 animate-pulse shrink-0' />
           <div className='space-y-2 flex-1'>
             <div className='h-5 w-36 rounded-lg bg-muted/20 animate-pulse' />
@@ -74,7 +74,7 @@ export default function CuentaPage() {
         {/* Stats skeleton */}
         <div className='grid grid-cols-3 gap-3'>
           {[0, 1, 2].map(i => (
-            <div key={i} className='rounded-2xl border border-default bg-surface p-4 text-center space-y-2'>
+            <div key={i} className='rounded-2xl border border-border bg-surface p-4 text-center space-y-2'>
               <div className='h-8 w-8 rounded-lg bg-muted/20 animate-pulse mx-auto' />
               <div className='h-3 w-20 rounded-md bg-muted/20 animate-pulse mx-auto' />
             </div>
@@ -82,12 +82,12 @@ export default function CuentaPage() {
         </div>
 
         {/* Inquiries skeleton */}
-        <div className='rounded-2xl border border-default bg-surface overflow-hidden'>
-          <div className='flex items-center justify-between px-5 py-4 border-b border-default'>
+        <div className='rounded-2xl border border-border bg-surface overflow-hidden'>
+          <div className='flex items-center justify-between px-5 py-4 border-b border-border'>
             <div className='h-6 w-32 rounded-lg bg-muted/20 animate-pulse' />
             <div className='h-4 w-28 rounded-lg bg-muted/20 animate-pulse' />
           </div>
-          <ul className='divide-y divide-default'>
+          <ul className='divide-y divide-border'>
             {[0, 1, 2].map(i => (
               <li key={i} className='px-5 py-4 space-y-2'>
                 <div className='flex items-start justify-between gap-3'>
@@ -120,8 +120,8 @@ export default function CuentaPage() {
 
       {/* Info del usuario */}
       {user && (
-        <div className='rounded-2xl border border-default bg-surface p-5 flex items-center gap-4'>
-          <div className='h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold text-lg shrink-0'>
+        <div className='rounded-2xl border border-border bg-surface p-5 flex items-center gap-4'>
+          <div className='h-12 w-12 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-lg shrink-0'>
             {user.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
           </div>
           <div className='min-w-0'>
@@ -133,27 +133,27 @@ export default function CuentaPage() {
 
       {/* Stats rápidas */}
       <div className='grid grid-cols-3 gap-3'>
-        <div className='rounded-2xl border border-default bg-surface p-4 text-center'>
+        <div className='rounded-2xl border border-border bg-surface p-4 text-center'>
           <p className='text-3xl font-bold'>{inquiries.length}</p>
           <p className='text-xs text-muted mt-1'>Consultas totales</p>
         </div>
-        <div className='rounded-2xl border border-default bg-surface p-4 text-center'>
+        <div className='rounded-2xl border border-border bg-surface p-4 text-center'>
           <p className='text-3xl font-bold text-amber-500'>{pending}</p>
           <p className='text-xs text-muted mt-1'>Pendientes</p>
         </div>
-        <div className='rounded-2xl border border-default bg-surface p-4 text-center'>
+        <div className='rounded-2xl border border-border bg-surface p-4 text-center'>
           <p className='text-3xl font-bold text-sky-500'>{inProgress}</p>
           <p className='text-xs text-muted mt-1'>En proceso</p>
         </div>
       </div>
 
       {/* Lista de consultas */}
-      <div className='rounded-2xl border border-default bg-surface overflow-hidden'>
-        <div className='flex items-center justify-between px-5 py-4 border-b border-default'>
+      <div className='rounded-2xl border border-border bg-surface overflow-hidden'>
+        <div className='flex items-center justify-between px-5 py-4 border-b border-border'>
           <h2 className='text-xl font-bold'>Mis consultas</h2>
           <Link
             href='/consulta'
-            className='text-sm font-semibold text-accent hover:underline'
+            className='text-sm font-semibold text-brand-primary hover:underline'
           >
             + Nueva consulta
           </Link>
@@ -166,13 +166,13 @@ export default function CuentaPage() {
             <p className='text-sm text-muted'>Cuando consultes sobre una oferta o destino, las verás aquí.</p>
             <Link
               href='/consulta'
-              className='mt-1 inline-flex h-9 items-center px-4 rounded-xl bg-accent text-white text-sm font-semibold'
+              className='mt-1 inline-flex h-9 items-center px-4 rounded-xl bg-brand-primary text-brand-primary-foreground text-sm font-semibold'
             >
               Hacer una consulta
             </Link>
           </div>
         ) : (
-          <ul className='divide-y divide-default'>
+          <ul className='divide-y divide-border'>
             {inquiries.map((inq) => (
               <li key={inq.id}>
                 <Link href={`/cuenta/cotizaciones/${inq.id}`} className='block px-5 py-4 space-y-2 hover:bg-surface-secondary transition-colors'>

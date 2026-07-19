@@ -108,7 +108,11 @@ export default function AparienciaPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, url: mediaUrl, poster: posterUrl || null, focalPoint }),
       });
-      if (!res.ok) throw new Error((await res.json()).error);
+      if (!res.ok) {
+        let msg = 'No se pudo guardar la configuración.';
+        try { msg = (await res.json()).error || msg; } catch { /* body no es JSON */ }
+        throw new Error(msg);
+      }
       setSaved({ type, url: mediaUrl, poster: posterUrl, focalPoint });
       toastSuccess('Cambios guardados.');
     } catch (err) {

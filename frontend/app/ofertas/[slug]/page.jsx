@@ -466,7 +466,7 @@ export default async function OfferDetailPage({ params }) {
                   : 'Reserva no reembolsable'}
               </p>
               <p className="text-xs text-muted mt-0.5">
-                Consultá las condiciones exactas al momento de la reserva.
+                Consulta las condiciones exactas al momento de la reserva.
               </p>
             </div>
           </div>

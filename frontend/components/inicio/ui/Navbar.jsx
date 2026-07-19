@@ -15,9 +15,6 @@ const NAV_LINKS = [
   { name: "Contacto", url: "/contacto" },
 ];
 
-const syneStyle = { fontFamily: 'var(--font-syne)' };
-const cormorantStyle = { fontFamily: 'var(--font-cormorant)', fontStyle: 'italic' };
-
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -112,14 +109,10 @@ export default function Navbar() {
                 className={`text-[16px] font-extrabold tracking-tight uppercase leading-none transition-colors duration-300 ${
                   active ? 'text-slate-900 dark:text-white' : 'text-white'
                 }`}
-                style={syneStyle}
               >
                 JOANLUNA
               </span>
-              <span
-                className="text-accent leading-none ml-0.5"
-                style={{ ...cormorantStyle, fontSize: '19px', textShadow: '0 0 18px rgba(255,126,45,0.4)' }}
-              >
+              <span className="text-brand-primary leading-none ml-1 text-[15px] font-medium lowercase">
                 viajes
               </span>
             </Link>
@@ -131,13 +124,12 @@ export default function Navbar() {
               <Link
                 key={item.name}
                 href={item.url}
-                className={`relative px-3.5 py-2 text-[13px] font-medium tracking-wide rounded-xl hover:text-accent transition-colors duration-300 group ${
+                className={`relative px-3.5 py-2 text-[13px] font-medium tracking-wide rounded-xl hover:text-brand-primary transition-colors duration-300 group ${
                   active ? 'text-slate-600 dark:text-slate-300' : 'text-white/85 hover:text-white'
                 }`}
-                style={syneStyle}
               >
                 {item.name}
-                <span className="absolute bottom-[5px] left-3.5 right-3.5 h-px bg-accent rounded-full scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <span className="absolute bottom-[5px] left-3.5 right-3.5 h-px bg-brand-primary rounded-full scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
               </Link>
             ))}
           </nav>
@@ -147,8 +139,7 @@ export default function Navbar() {
             {!authLoading && !isStaff && (
               <Link
                 href="/cotizar"
-                className="h-8 px-4 rounded-full bg-accent text-white text-[13px] font-semibold hover:bg-orange-600 transition-all shadow-md shadow-orange-500/25 flex items-center"
-                style={syneStyle}
+                className="h-8 px-4 rounded-full bg-brand-primary text-brand-primary-foreground text-[13px] font-semibold hover:opacity-90 transition-all shadow-md shadow-brand-primary/25 flex items-center"
               >
                 Cotizar a medida
               </Link>
@@ -165,7 +156,7 @@ export default function Navbar() {
                         : 'border-white/25 bg-white/10 hover:bg-white/20'
                     }`}
                   >
-                    <span className="h-6 w-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center text-[10px] font-bold">
+                    <span className="h-6 w-6 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary text-white flex items-center justify-center text-[10px] font-bold">
                       {initials}
                     </span>
                     <span className={`text-[13px] font-medium transition-colors duration-300 ${active ? 'text-slate-700 dark:text-slate-200' : 'text-white'}`}>
@@ -185,7 +176,7 @@ export default function Navbar() {
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                         >
-                          <LuLayoutDashboard className="w-4 h-4 text-orange-500" />
+                          <LuLayoutDashboard className="w-4 h-4 text-brand-primary" />
                           {isStaff ? 'Panel de administración' : 'Mi cuenta'}
                         </Link>
                         <button
@@ -253,7 +244,7 @@ export default function Navbar() {
                 user ? (
                   <>
                     <div className="px-3 py-2 flex items-center gap-2">
-                      <span className="h-7 w-7 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                      <span className="h-7 w-7 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary text-white flex items-center justify-center text-xs font-bold shrink-0">
                         {initials}
                       </span>
                       <div>
@@ -266,7 +257,7 @@ export default function Navbar() {
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                     >
-                      <LuLayoutDashboard className="w-4 h-4 text-orange-500" />
+                      <LuLayoutDashboard className="w-4 h-4 text-brand-primary" />
                       {isStaff ? 'Panel de administración' : 'Mi cuenta'}
                     </Link>
                     <button

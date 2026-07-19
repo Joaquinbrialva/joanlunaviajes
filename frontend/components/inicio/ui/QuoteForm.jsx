@@ -68,7 +68,7 @@ function FloatTextarea({ label, value, onChange }) {
         onChange={onChange}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        placeholder={floated ? 'Contanos qué necesitás...' : ''}
+        placeholder={floated ? 'Cuéntanos qué necesitas...' : ''}
         rows={3}
         className="w-full pt-7 pb-2 px-3.5 rounded-xl border border-border bg-surface text-sm text-foreground outline-none transition-colors focus:border-accent resize-none placeholder:text-muted/50"
       />
@@ -100,7 +100,7 @@ export default function QuoteForm({ offer }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) {
-      toastError('Completá nombre y teléfono.');
+      toastError('Completa nombre y teléfono.');
       return;
     }
     setStatus('loading');
@@ -199,7 +199,7 @@ export default function QuoteForm({ offer }) {
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted font-medium mb-1">Precio</p>
               <p className="text-2xl font-bold text-accent">A consultar</p>
-              <p className="text-xs text-muted mt-1">Completá el formulario y te cotizamos.</p>
+              <p className="text-xs text-muted mt-1">Completa el formulario y te cotizamos.</p>
             </div>
           )}
         </div>
@@ -319,8 +319,7 @@ export default function QuoteForm({ offer }) {
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="group relative w-full h-12 rounded-xl text-white font-semibold text-sm overflow-hidden transition-all duration-300 hover:-translate-y-px active:translate-y-0 disabled:opacity-70 disabled:translate-y-0 shadow-md shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/35"
-            style={{ background: 'linear-gradient(135deg, #ff7e2d 0%, #ff9a5a 100%)' }}
+            className="group relative w-full h-12 rounded-xl bg-brand-primary text-brand-primary-foreground font-semibold text-sm overflow-hidden transition-all duration-300 hover:-translate-y-px active:translate-y-0 disabled:opacity-70 disabled:translate-y-0 shadow-md shadow-brand-primary/25 hover:shadow-xl hover:shadow-brand-primary/35"
           >
             {/* Shimmer on hover */}
             <span
