@@ -16,7 +16,7 @@ function Row({ label, children }) {
 
 function Section({ title, children }) {
   return (
-    <div className='px-5 py-4 border-b border-default'>
+    <div className='rounded-2xl border border-default bg-surface-secondary/20 p-4'>
       <p className='text-xs font-semibold text-muted uppercase tracking-wider mb-3'>{title}</p>
       {children}
     </div>
@@ -89,62 +89,58 @@ export default function DestinationPreviewDrawer({ destination, isOpen, onClose 
       />
 
       <div className='flex-1 overflow-y-auto min-h-0'>
-        {/* Identificación */}
-        <Section title='Identificación'>
-          <Row label='ID'><code className='text-xs font-mono bg-surface-secondary px-1.5 py-0.5 rounded'>{destination.id}</code></Row>
-          <Row label='Slug'><code className='text-xs font-mono bg-surface-secondary px-1.5 py-0.5 rounded'>{destination.slug}</code></Row>
-          <Row label='Descripción corta'><span className='text-muted'>{destination.shortDescription || '—'}</span></Row>
-          <Row label='Creado'>{destination.createdAt ? new Date(destination.createdAt).toLocaleDateString('es-AR') : '—'}</Row>
-          <Row label='Actualizado'>{destination.updatedAt ? new Date(destination.updatedAt).toLocaleDateString('es-AR') : '—'}</Row>
-        </Section>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-5'>
+          <Section title='Identificación'>
+            <Row label='ID'><code className='text-xs font-mono bg-surface-secondary px-1.5 py-0.5 rounded'>{destination.id}</code></Row>
+            <Row label='Slug'><code className='text-xs font-mono bg-surface-secondary px-1.5 py-0.5 rounded'>{destination.slug}</code></Row>
+            <Row label='Descripción corta'><span className='text-muted'>{destination.shortDescription || '—'}</span></Row>
+            <Row label='Creado'>{destination.createdAt ? new Date(destination.createdAt).toLocaleDateString('es-AR') : '—'}</Row>
+            <Row label='Actualizado'>{destination.updatedAt ? new Date(destination.updatedAt).toLocaleDateString('es-AR') : '—'}</Row>
+          </Section>
 
-        {/* Info de viaje */}
-        <Section title='Información de viaje'>
-          <Row label='Aeropuerto (IATA)'><code className='text-xs font-mono bg-surface-secondary px-1.5 py-0.5 rounded'>{ti.airport || '—'}</code></Row>
-          <Row label='Moneda'>{ti.currency || '—'}</Row>
-          <Row label='Idioma'>{ti.language || '—'}</Row>
-          <Row label='Zona horaria'><span className='text-xs text-muted'>{ti.timezone || '—'}</span></Row>
-          <Row label='Visa requerida'>{ti.visaRequired ? <span className='text-rose-600 font-medium'>Sí</span> : 'No'}</Row>
-          <Row label='Estadía recomendada'>{ti.recommendedStayDays ? `${ti.recommendedStayDays} días` : '—'}</Row>
-        </Section>
+          <Section title='Información de viaje'>
+            <Row label='Aeropuerto (IATA)'><code className='text-xs font-mono bg-surface-secondary px-1.5 py-0.5 rounded'>{ti.airport || '—'}</code></Row>
+            <Row label='Moneda'>{ti.currency || '—'}</Row>
+            <Row label='Idioma'>{ti.language || '—'}</Row>
+            <Row label='Zona horaria'><span className='text-xs text-muted'>{ti.timezone || '—'}</span></Row>
+            <Row label='Visa requerida'>{ti.visaRequired ? <span className='text-rose-600 font-medium'>Sí</span> : 'No'}</Row>
+            <Row label='Estadía recomendada'>{ti.recommendedStayDays ? `${ti.recommendedStayDays} días` : '—'}</Row>
+          </Section>
 
-        {/* Clima */}
-        <Section title='Clima'>
-          <Row label='Tipo'>{climate.type || '—'}</Row>
-          <Row label='Temperatura'>{climate.averageTemperatureC != null ? `${climate.averageTemperatureC}°C` : '—'}</Row>
-          <Row label='Mejores meses'><TagList items={climate.bestMonthsToVisit} color='blue' /></Row>
-        </Section>
+          <Section title='Clima'>
+            <Row label='Tipo'>{climate.type || '—'}</Row>
+            <Row label='Temperatura'>{climate.averageTemperatureC != null ? `${climate.averageTemperatureC}°C` : '—'}</Row>
+            <Row label='Mejores meses'><TagList items={climate.bestMonthsToVisit} color='blue' /></Row>
+          </Section>
 
-        {/* Stats */}
-        <Section title='Estadísticas'>
-          <div className='space-y-3'>
-            <StatBar label='Índice de seguridad' value={statsData.safetyIndex ?? 0} max={100} />
-          </div>
-          <div className='mt-3'>
-            <Row label='Visitantes anuales'>{statsData.annualVisitorsMillions != null ? `${statsData.annualVisitorsMillions}M` : '—'}</Row>
-            <Row label='Budget diario'>USD {statsData.averageDailyBudgetUSD ?? '—'}</Row>
-          </div>
-        </Section>
-
-        {/* Contenido */}
-        <Section title='Contenido editorial'>
-          <div className='space-y-3'>
-            <div>
-              <p className='text-xs text-muted mb-1.5'>Highlights</p>
-              <TagList items={destination.highlights} color='orange' />
+          <Section title='Estadísticas'>
+            <div className='space-y-3'>
+              <StatBar label='Índice de seguridad' value={statsData.safetyIndex ?? 0} max={100} />
             </div>
-            <div>
-              <p className='text-xs text-muted mb-1.5'>Estilos de viaje</p>
-              <TagList items={destination.travelStyles} color='blue' />
+            <div className='mt-3'>
+              <Row label='Visitantes anuales'>{statsData.annualVisitorsMillions != null ? `${statsData.annualVisitorsMillions}M` : '—'}</Row>
+              <Row label='Budget diario'>USD {statsData.averageDailyBudgetUSD ?? '—'}</Row>
             </div>
-          </div>
-        </Section>
+          </Section>
 
-        {/* SEO */}
-        <Section title='SEO'>
-          <Row label='Meta title'><span className='text-xs'>{seo.metaTitle || '—'}</span></Row>
-          <Row label='Meta description'><span className='text-xs text-muted'>{seo.metaDescription || '—'}</span></Row>
-        </Section>
+          <Section title='Contenido editorial'>
+            <div className='space-y-3'>
+              <div>
+                <p className='text-xs text-muted mb-1.5'>Highlights</p>
+                <TagList items={destination.highlights} color='orange' />
+              </div>
+              <div>
+                <p className='text-xs text-muted mb-1.5'>Estilos de viaje</p>
+                <TagList items={destination.travelStyles} color='blue' />
+              </div>
+            </div>
+          </Section>
+
+          <Section title='SEO'>
+            <Row label='Meta title'><span className='text-xs'>{seo.metaTitle || '—'}</span></Row>
+            <Row label='Meta description'><span className='text-xs text-muted'>{seo.metaDescription || '—'}</span></Row>
+          </Section>
+        </div>
       </div>
 
       {/* Acciones */}
