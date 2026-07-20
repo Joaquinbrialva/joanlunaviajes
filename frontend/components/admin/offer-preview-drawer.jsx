@@ -136,7 +136,7 @@ export default function OfferPreviewDrawer({ offer, isOpen, onClose }) {
 
       {/* Scrollable sections */}
       <div className="flex-1 overflow-y-auto min-h-0">
-        <div className="p-5 space-y-6">
+        <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
           {/* ── Vuelo ── */}
           <div>
@@ -288,7 +288,7 @@ export default function OfferPreviewDrawer({ offer, isOpen, onClose }) {
 
           {/* ── Incluye / No incluye ── */}
           {(offer.includes?.length > 0 || offer.notIncludes?.length > 0) && (
-            <div>
+            <div className="md:col-span-2">
               <SectionHeader icon={LuPackage}>Contenido</SectionHeader>
               <div className="grid grid-cols-2 gap-2.5">
                 {offer.includes?.length > 0 && (
