@@ -33,6 +33,7 @@ export default function AdminOffersPage() {
   const [status, setStatus] = useState('all');
   const [selected, setSelected] = useState(new Set());
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [pendingUnspecial, setPendingUnspecial] = useState(null);
   const [previewOffer, setPreviewOffer] = useState(null);
   const [role, setRole] = useState(null);
   const router = useRouter();
@@ -67,8 +68,8 @@ export default function AdminOffersPage() {
 
   const specialOffer = useMemo(() => offers.find((o) => o.isSpecialOffer) || null, [offers]);
 
-  async function removeSpecialOffer(offer) {
-    try {
+  function removeSpecialOffer(offer) {
+    const run = async () => {
       const res = await fetch(`/api/ofertas/${offer.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -80,12 +81,15 @@ export default function AdminOffersPage() {
           isSpecialOffer: false,
         }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error('No se pudo actualizar la oferta.');
       const updated = await res.json();
       setOffers((prev) => prev.map((o) => (o.id === offer.id ? updated : o)));
-    } catch {
-      toastError('No se pudo actualizar la oferta.');
-    }
+    };
+    toast.promise(run, {
+      loading: 'Actualizando...',
+      success: 'Ya no es la oferta especial',
+      error: (err) => err?.message || 'No se pudo actualizar la oferta.',
+    });
   }
 
   const rows = useMemo(() => {
@@ -143,7 +147,7 @@ export default function AdminOffersPage() {
   const tableLoading = loading || role === null;
 
   return (
-    <div className='space-y-5'>
+    <div className={`space-y-5 transition-[padding-right] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${previewOffer ? 'md:pr-[456px]' : ''}`}>
       <OfferPreviewDrawer
         offer={previewOffer}
         isOpen={previewOffer !== null}
@@ -173,6 +177,29 @@ export default function AdminOffersPage() {
         </AlertDialog.Backdrop>
       </AlertDialog>
 
+      <AlertDialog isOpen={pendingUnspecial !== null} onOpenChange={(open) => { if (!open) setPendingUnspecial(null); }}>
+        <AlertDialog.Backdrop variant='blur'>
+          <AlertDialog.Container>
+            <AlertDialog.Dialog>
+              <AlertDialog.CloseTrigger />
+              <AlertDialog.Header>
+                <AlertDialog.Icon status='warning' />
+                <AlertDialog.Heading>¿Quitar oferta especial?</AlertDialog.Heading>
+              </AlertDialog.Header>
+              <AlertDialog.Body>
+                <p className='text-sm text-muted'>
+                  <strong>{pendingUnspecial?.title}</strong> dejará de mostrarse como oferta especial en el sidebar de /ofertas.
+                </p>
+              </AlertDialog.Body>
+              <AlertDialog.Footer className='flex justify-end gap-2'>
+                <Button slot='close' variant='tertiary'>Cancelar</Button>
+                <Button onClick={() => removeSpecialOffer(pendingUnspecial)} slot='close' variant='danger'>Quitar</Button>
+              </AlertDialog.Footer>
+            </AlertDialog.Dialog>
+          </AlertDialog.Container>
+        </AlertDialog.Backdrop>
+      </AlertDialog>
+
       <section className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
         <div>
           <h2 className='text-4xl font-bold'>Gestion de ofertas</h2>
@@ -183,7 +210,7 @@ export default function AdminOffersPage() {
           </p>
         </div>
         {role !== null && role !== 'designer' && (
-          <Link href='/admin/ofertas/nueva' className='inline-flex h-10 items-center justify-center rounded-lg bg-accent px-4 text-sm font-semibold text-white'>
+          <Link href='/admin/ofertas/nueva' className='inline-flex h-10 items-center justify-center rounded-lg bg-accent px-4 text-sm font-semibold text-accent-foreground'>
             + Nueva oferta
           </Link>
         )}
@@ -214,7 +241,7 @@ export default function AdminOffersPage() {
                 Editar
               </button>
               <button
-                onClick={() => removeSpecialOffer(specialOffer)}
+                onClick={() => setPendingUnspecial(specialOffer)}
                 className='h-9 rounded-lg border border-rose-200 px-3 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:hover:bg-rose-900/20'
               >
                 Quitar
@@ -281,7 +308,6 @@ export default function AdminOffersPage() {
                 <th className='px-4 py-3'>Precio</th>
                 <th className='px-4 py-3'>Estado</th>
                 <th className='px-4 py-3'>Especial</th>
-                <th className='px-4 py-3'>Multimedia</th>
                 <th className='px-4 py-3'></th>
               </tr>
             </thead>
@@ -320,7 +346,6 @@ export default function AdminOffersPage() {
                     )}
                     <td className='px-4 py-3'>
                       <p className='font-semibold'>{offer.title}</p>
-                      <p className='text-xs text-muted'>{offer.id}</p>
                     </td>
                     <td className='px-4 py-3 text-muted'>{offer.location.city}, {offer.location.country}</td>
                     <td className='px-4 py-3 text-muted'>{offer.duration.days}d / {offer.duration.nights}n</td>
@@ -330,13 +355,6 @@ export default function AdminOffersPage() {
                       {offer.isSpecialOffer && (
                         <span className='inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'>
                           <Star size={10} className='fill-current' /> Especial
-                        </span>
-                      )}
-                    </td>
-                    <td className='px-4 py-3'>
-                      {offer.mediaReady === false && (
-                        <span className='inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'>
-                          Pendiente
                         </span>
                       )}
                     </td>

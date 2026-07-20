@@ -101,7 +101,7 @@ export default function AdminDestinationsPage() {
   const tableLoading = loading || role === null;
 
   return (
-    <div className='space-y-5'>
+    <div className={`space-y-5 transition-[padding-right] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${previewDest ? 'md:pr-[456px]' : ''}`}>
       <DestinationPreviewDrawer
         destination={previewDest}
         isOpen={previewDest !== null}
@@ -145,7 +145,7 @@ export default function AdminDestinationsPage() {
         {role !== null && !isDesigner && (
           <Link
             href='/admin/destinos/nuevo'
-            className='inline-flex h-10 items-center justify-center rounded-lg bg-accent px-4 text-sm font-semibold text-white'
+            className='inline-flex h-10 items-center justify-center rounded-lg bg-accent px-4 text-sm font-semibold text-accent-foreground'
           >
             + Nuevo destino
           </Link>
