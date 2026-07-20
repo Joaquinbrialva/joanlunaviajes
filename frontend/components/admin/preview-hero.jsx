@@ -30,7 +30,7 @@ export default function PreviewHero({
   onClose,
 }) {
   return (
-    <div className="relative h-56 md:h-72 shrink-0 overflow-hidden bg-zinc-900">
+    <div className="relative h-40 md:h-56 shrink-0 overflow-hidden bg-zinc-900">
       {image ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={image} alt={title} className="absolute inset-0 w-full h-full object-cover" />
