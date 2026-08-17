@@ -99,7 +99,6 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       isPopular: Boolean(body.isPopular),
       isFeatured: Boolean(body.isFeatured),
       isRecommended,
-      mediaReady: Boolean(coverImageUrl),
       status: String(body.status || 'draft'),
     };
 
@@ -112,7 +111,8 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
     });
 
     res.status(201).json(newDestination);
-  } catch {
+  } catch (err) {
+    console.error('[POST /api/destinos]', err);
     res.status(500).json({ error: 'No se pudo guardar el destino.' });
   }
 });
@@ -126,7 +126,6 @@ router.patch('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
     const body = req.body;
     const isRecommended = Boolean(body.isRecommended);
     const newFeaturedImage = String(body.featuredImage || existing.featuredImage).trim();
-    const mediaReady = Boolean(body.featuredImage) ? true : (existing.mediaReady ?? false);
 
     const updateData = {
       name: String(body.name || existing.name).trim(),
@@ -165,7 +164,6 @@ router.patch('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
       isPopular: Boolean(body.isPopular),
       isFeatured: Boolean(body.isFeatured),
       isRecommended,
-      mediaReady,
       status: String(body.status || existing.status),
     };
 

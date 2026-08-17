@@ -12,7 +12,7 @@
 
 	/* Brand primitives — single source of truth, everything else references these */
 	--brand-primary: #ff7d2d;
-	--brand-primary-foreground: #ffffff;
+	--brand-primary-foreground: #12243b; /* white failed WCAG AA (~2.55:1); dark ink clears 6.1:1 */
 	--brand-secondary: #0e8f9e;
 	--brand-secondary-foreground: #ffffff;
 	--brand-tertiary: #ff5d73;
@@ -188,6 +188,9 @@
 	--color-primary: var(--primary);
 	--color-popover-foreground: var(--popover-foreground);
 	--color-popover: var(--popover);
+	--color-field-background: var(--field-background);
+	--color-field-foreground: var(--field-foreground);
+	--color-field-placeholder: var(--field-placeholder);
 	--color-card-foreground: var(--card-foreground);
 	--color-card: var(--card);
 	--radius-sm: calc(var(--radius) - 4px);

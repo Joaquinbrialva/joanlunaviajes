@@ -9,8 +9,6 @@ import {
   LuImage,
   LuMessageSquare,
   LuTrendingUp,
-  LuCircleCheck,
-  LuClock,
   LuArrowRight,
   LuPlus,
 } from 'react-icons/lu';
@@ -19,6 +17,7 @@ import {
   INQUIRY_STATUS_CLASS,
   INQUIRY_STATUS_LABEL,
 } from '@/lib/inquiries';
+import { Button } from '@/components/ui/button';
 
 /* ─── Helpers ─────────────────────────────────────────────────── */
 
@@ -124,7 +123,6 @@ function AdminAgentDashboard({ user, offers, destinations, inquiries, loading })
   const latestInquiries = [...inquiries]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
-  const pendingMedia = offers.filter((o) => o.mediaReady === false).length;
 
   return (
     <div className='space-y-7'>
@@ -132,67 +130,59 @@ function AdminAgentDashboard({ user, offers, destinations, inquiries, loading })
       {/* Header */}
       <section className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
-          <p className='text-xs uppercase tracking-[0.2em] font-semibold text-muted mb-1'>
-            Bienvenido, {user?.name?.split(' ')[0]}
-          </p>
-          <h1 className='text-3xl font-bold tracking-tight'>Resumen del panel</h1>
+          <h1 className='text-3xl font-bold tracking-tight'>Hola, {user?.name?.split(' ')[0]}</h1>
+          <p className='text-sm text-muted mt-1'>Este es el resumen de tu panel.</p>
         </div>
-        <Link
-          href='/admin/ofertas/nueva'
-          className='inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-orange-500 transition-colors shadow-lg shadow-orange-500/20 shrink-0'
-        >
-          <LuPlus className='h-4 w-4' />
-          Nueva oferta
-        </Link>
+        <Button asChild size='lg' className='shrink-0'>
+          <Link href='/admin/ofertas/nueva'>
+            <LuPlus className='h-4 w-4' />
+            Nueva oferta
+          </Link>
+        </Button>
       </section>
 
-      {/* Alert */}
-      {pendingMedia > 0 && (
-        <div className='flex items-center gap-3 rounded-2xl border border-sky-200 bg-sky-50 dark:border-sky-800/60 dark:bg-sky-900/10 px-5 py-3.5 text-sm text-sky-700 dark:text-sky-300'>
-          <LuImage className='h-4 w-4 shrink-0' />
-          <span>
-            <strong>{pendingMedia}</strong> oferta{pendingMedia > 1 ? 's' : ''} pendiente{pendingMedia > 1 ? 's' : ''} de imagen —{' '}
-            <Link href='/admin/ofertas' className='font-semibold underline underline-offset-2'>
-              Ver ofertas
-            </Link>
-          </span>
-        </div>
-      )}
-
-      {/* Stat cards */}
-      <section className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4'>
+      {/* Stat cards — revenue leads as the primary metric, the rest read as a compact list */}
+      <section className='grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-4'>
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+          <>
+            <StatCardSkeleton tall />
+            <div className='rounded-2xl border border-default bg-surface divide-y divide-default overflow-hidden'>
+              {Array.from({ length: 3 }).map((_, i) => <StatRowSkeleton key={i} />)}
+            </div>
+          </>
         ) : (
           <>
-            <StatCard
-              title='Ofertas activas'
-              value={offers.length}
-              icon={<LuClipboardList className='h-5 w-5' />}
-              growth={calcGrowth(offers)}
-              accent='orange'
-            />
-            <StatCard
-              title='Destinos'
-              value={destinations.length}
-              icon={<LuGlobe className='h-5 w-5' />}
-              growth={calcGrowth(destinations)}
-              accent='sky'
-            />
-            <StatCard
-              title='Cotizaciones'
-              value={inquiries.length}
-              icon={<LuMessageSquare className='h-5 w-5' />}
-              growth={calcGrowth(inquiries)}
-              accent='violet'
-            />
             <StatCard
               title='Ingresos estimados'
               value={formatUSD(monthlyRevenue)}
               icon={<LuTrendingUp className='h-5 w-5' />}
               growth={calcRevenueGrowth(offers)}
               accent='emerald'
+              tall
             />
+            <div className='rounded-2xl border border-default bg-surface divide-y divide-default overflow-hidden'>
+              <StatRow
+                title='Ofertas activas'
+                value={offers.length}
+                icon={<LuClipboardList className='h-4 w-4' />}
+                growth={calcGrowth(offers)}
+                accent='orange'
+              />
+              <StatRow
+                title='Destinos'
+                value={destinations.length}
+                icon={<LuGlobe className='h-4 w-4' />}
+                growth={calcGrowth(destinations)}
+                accent='sky'
+              />
+              <StatRow
+                title='Cotizaciones'
+                value={inquiries.length}
+                icon={<LuMessageSquare className='h-4 w-4' />}
+                growth={calcGrowth(inquiries)}
+                accent='violet'
+              />
+            </div>
           </>
         )}
       </section>
@@ -268,137 +258,66 @@ function AdminAgentDashboard({ user, offers, destinations, inquiries, loading })
 /* ─── Designer dashboard ─────────────────────────────────────── */
 
 function DesignerDashboard({ user, offers, loading }) {
-  const router    = useRouter();
-  const pending   = offers.filter((o) => o.mediaReady === false);
-  const completed = offers
-    .filter((o) => o.mediaReady === true)
+  const router = useRouter();
+  const recent = [...offers]
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-    .slice(0, 4);
+    .slice(0, 8);
 
   return (
     <div className='space-y-7'>
       <section>
-        <p className='text-xs uppercase tracking-[0.2em] font-semibold text-muted mb-1'>
-          Panel diseñador
-        </p>
-        <h1 className='text-3xl font-bold tracking-tight'>
-          Hola, {user?.name?.split(' ')[0] ?? 'Diseñador'} 👋
-        </h1>
+        <h1 className='text-3xl font-bold tracking-tight'>Hola, {user?.name?.split(' ')[0] ?? 'Diseñador'}</h1>
+        <p className='text-sm text-muted mt-1'>Ofertas recientes para revisar su imagen.</p>
       </section>
 
-      <div className='grid grid-cols-2 gap-4'>
-        {loading ? (
-          Array.from({ length: 2 }).map((_, i) => <StatCardSkeleton key={i} />)
-        ) : (
-          <>
-            <article className='rounded-2xl border border-default bg-surface p-5'>
-              <div className='flex items-center gap-2 mb-3'>
-                <div className='w-8 h-8 rounded-xl bg-sky-100 dark:bg-sky-900/30 grid place-content-center text-sky-600 dark:text-sky-400'>
-                  <LuClock className='h-4 w-4' />
-                </div>
-                <span className='text-sm font-semibold'>Pendientes</span>
-              </div>
-              <p className='text-4xl font-bold tracking-tight'>{pending.length}</p>
-              <p className='text-xs text-muted mt-1'>Ofertas sin imagen de portada</p>
-            </article>
-            <article className='rounded-2xl border border-default bg-surface p-5'>
-              <div className='flex items-center gap-2 mb-3'>
-                <div className='w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 grid place-content-center text-emerald-600 dark:text-emerald-400'>
-                  <LuCircleCheck className='h-4 w-4' />
-                </div>
-                <span className='text-sm font-semibold'>Con imagen</span>
-              </div>
-              <p className='text-4xl font-bold tracking-tight'>
-                {offers.filter((o) => o.mediaReady === true).length}
-              </p>
-              <p className='text-xs text-muted mt-1'>Ofertas con imagen subida</p>
-            </article>
-          </>
-        )}
-      </div>
-
       <section className='rounded-2xl border border-default bg-surface overflow-hidden'>
-        <div className='flex items-center justify-between border-b border-default px-5 py-4'>
-          <div>
-            <h2 className='text-lg font-bold flex items-center gap-2'>
-              <LuClock className='h-4 w-4 text-sky-500' />
-              Pendientes de imagen
-            </h2>
-            <p className='text-xs text-muted mt-0.5'>
-              {pending.length === 0
-                ? '¡Todo al día! No hay ofertas pendientes.'
-                : `${pending.length} oferta${pending.length > 1 ? 's' : ''} esperando su portada.`}
-            </p>
-          </div>
+        <div className='border-b border-default px-5 py-4'>
+          <h2 className='text-lg font-bold flex items-center gap-2'>
+            <LuImage className='h-4 w-4 text-accent' />
+            Ofertas
+          </h2>
         </div>
 
         {loading ? (
           <OfferListSkeleton />
-        ) : pending.length === 0 ? (
+        ) : recent.length === 0 ? (
           <div className='flex flex-col items-center gap-3 py-14 text-center'>
-            <LuCircleCheck className='h-10 w-10 text-emerald-400' />
-            <p className='text-sm font-semibold'>No hay nada pendiente</p>
-            <p className='text-xs text-muted'>Cuando se creen nuevas ofertas sin imagen, aparecerán aquí.</p>
+            <LuImage className='h-10 w-10 text-muted/40' />
+            <p className='text-sm font-semibold'>Sin ofertas todavía</p>
+            <p className='text-xs text-muted'>Cuando se creen nuevas ofertas aparecerán aquí.</p>
           </div>
         ) : (
           <ul className='divide-y divide-default'>
-            {pending.map((offer) => (
+            {recent.map((offer) => (
               <li key={offer.id} className='flex items-center gap-4 px-5 py-4'>
-                <div className='flex h-14 w-20 shrink-0 items-center justify-center rounded-xl bg-surface-secondary text-muted border border-dashed border-default'>
-                  <LuImage className='h-5 w-5' />
-                </div>
+                {offer.images?.[0]?.url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={offer.images[0].url} alt={offer.title} className='h-14 w-20 shrink-0 rounded-xl object-cover' />
+                ) : (
+                  <div className='flex h-14 w-20 shrink-0 items-center justify-center rounded-xl bg-surface-secondary text-muted border border-dashed border-default'>
+                    <LuImage className='h-5 w-5' />
+                  </div>
+                )}
                 <div className='min-w-0 flex-1'>
                   <p className='truncate font-semibold text-[13px]'>{offer.title}</p>
                   <p className='text-xs text-muted mt-0.5'>
                     {offer.location?.city ? `${offer.location.city}, ` : ''}{offer.location?.country}
                   </p>
-                  <p className='text-[11px] text-muted/60 mt-0.5'>Creada {timeAgo(offer.createdAt)}</p>
+                  <p className='text-[11px] text-muted/60 mt-0.5'>Actualizada {timeAgo(offer.updatedAt)}</p>
                 </div>
-                <button
-                  type='button'
+                <Button
+                  size='sm'
                   onClick={() => router.push(`/admin/ofertas/${offer.slug}/editar`)}
-                  className='shrink-0 inline-flex h-9 items-center gap-1.5 rounded-xl bg-accent px-4 text-[12px] font-semibold text-white hover:bg-orange-500 transition-colors shadow-md shadow-orange-500/20'
+                  className='shrink-0'
                 >
                   <LuImage className='h-3.5 w-3.5' />
-                  Subir imagen
-                </button>
+                  Editar imagen
+                </Button>
               </li>
             ))}
           </ul>
         )}
       </section>
-
-      {completed.length > 0 && (
-        <section className='rounded-2xl border border-default bg-surface overflow-hidden'>
-          <div className='border-b border-default px-5 py-4'>
-            <h2 className='text-lg font-bold flex items-center gap-2'>
-              <LuCircleCheck className='h-4 w-4 text-emerald-500' />
-              Recientemente completadas
-            </h2>
-          </div>
-          <ul className='divide-y divide-default'>
-            {completed.map((offer) => (
-              <li key={offer.id} className='flex items-center gap-4 px-5 py-3.5'>
-                {offer.images?.[0]?.url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={offer.images[0].url} alt={offer.title} className='h-12 w-16 shrink-0 rounded-xl object-cover' />
-                ) : (
-                  <div className='flex h-12 w-16 shrink-0 items-center justify-center rounded-xl bg-surface-secondary'>
-                    <LuImage className='h-4 w-4 text-muted' />
-                  </div>
-                )}
-                <div className='min-w-0 flex-1'>
-                  <p className='truncate text-[13px] font-semibold'>{offer.title}</p>
-                  <p className='text-xs text-muted mt-0.5'>{timeAgo(offer.updatedAt)}</p>
-                </div>
-                <span className='shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400'>
-                  <LuCircleCheck className='h-3 w-3' /> Listo
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
     </div>
   );
 }
@@ -412,17 +331,17 @@ const ACCENT_STYLES = {
   emerald: { icon: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', bar: 'from-emerald-400/50' },
 };
 
-function StatCard({ title, value, icon, growth, accent = 'orange' }) {
+function StatCard({ title, value, icon, growth, accent = 'orange', tall = false }) {
   const isNeg  = typeof growth === 'string' && growth.startsWith('-');
   const styles = ACCENT_STYLES[accent] || ACCENT_STYLES.orange;
 
   return (
-    <article className='rounded-2xl border border-default bg-surface overflow-hidden'>
+    <article className={`rounded-2xl border border-default bg-surface overflow-hidden ${tall ? 'flex flex-col justify-between' : ''}`}>
       {/* Accent top bar */}
       <div className={`h-px bg-gradient-to-r ${styles.bar} to-transparent`} />
-      <div className='p-5'>
+      <div className={tall ? 'p-6 flex-1 flex flex-col justify-between' : 'p-5'}>
         <div className='flex items-start justify-between mb-4'>
-          <div className={`w-10 h-10 rounded-xl grid place-content-center ${styles.icon}`}>
+          <div className={`${tall ? 'w-12 h-12' : 'w-10 h-10'} rounded-xl grid place-content-center ${styles.icon}`}>
             {icon}
           </div>
           {growth != null && (
@@ -437,10 +356,40 @@ function StatCard({ title, value, icon, growth, accent = 'orange' }) {
             </span>
           )}
         </div>
-        <p className='text-[2rem] font-bold tracking-tight leading-none text-foreground'>{value}</p>
-        <p className='text-xs text-muted mt-1.5 font-medium'>{title}</p>
+        <div>
+          <p className={`${tall ? 'text-[2.75rem]' : 'text-[2rem]'} font-bold tracking-tight leading-none text-foreground`}>{value}</p>
+          <p className='text-xs text-muted mt-1.5 font-medium'>{title}</p>
+        </div>
       </div>
     </article>
+  );
+}
+
+function StatRow({ title, value, icon, growth, accent = 'orange' }) {
+  const isNeg  = typeof growth === 'string' && growth.startsWith('-');
+  const styles = ACCENT_STYLES[accent] || ACCENT_STYLES.orange;
+
+  return (
+    <div className='flex items-center gap-3 px-5 py-4'>
+      <div className={`w-9 h-9 rounded-xl grid place-content-center shrink-0 ${styles.icon}`}>
+        {icon}
+      </div>
+      <div className='min-w-0 flex-1'>
+        <p className='text-xl font-bold tracking-tight leading-none text-foreground'>{value}</p>
+        <p className='text-xs text-muted mt-1 font-medium'>{title}</p>
+      </div>
+      {growth != null && (
+        <span
+          className={`shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full ${
+            isNeg
+              ? 'text-rose-600 bg-rose-50 dark:bg-rose-900/25'
+              : 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/25'
+          }`}
+        >
+          {growth}
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -450,15 +399,18 @@ function PageSkeleton() {
       {/* Header */}
       <section className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div className='space-y-2'>
-          <div className='h-2.5 w-24 rounded bg-surface-secondary' />
           <div className='h-8 w-56 rounded-lg bg-surface-secondary' />
+          <div className='h-3.5 w-64 rounded bg-surface-secondary' />
         </div>
         <div className='h-10 w-36 rounded-xl bg-surface-secondary shrink-0' />
       </section>
 
       {/* Stat cards */}
-      <section className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4'>
-        {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
+      <section className='grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-4'>
+        <StatCardSkeleton tall />
+        <div className='rounded-2xl border border-default bg-surface divide-y divide-default overflow-hidden'>
+          {Array.from({ length: 3 }).map((_, i) => <StatRowSkeleton key={i} />)}
+        </div>
       </section>
 
       {/* Table section */}
@@ -476,19 +428,32 @@ function PageSkeleton() {
   );
 }
 
-function StatCardSkeleton() {
+function StatCardSkeleton({ tall = false }) {
   return (
     <article className='rounded-2xl border border-default bg-surface overflow-hidden'>
       <div className='h-px bg-surface-secondary' />
-      <div className='p-5 animate-pulse'>
+      <div className={`animate-pulse ${tall ? 'p-6' : 'p-5'}`}>
         <div className='flex items-start justify-between mb-4'>
-          <div className='w-10 h-10 rounded-xl bg-surface-secondary' />
+          <div className={`${tall ? 'w-12 h-12' : 'w-10 h-10'} rounded-xl bg-surface-secondary`} />
           <div className='w-12 h-5 rounded-full bg-surface-secondary' />
         </div>
-        <div className='w-20 h-8 rounded-lg bg-surface-secondary mb-2' />
+        <div className={`${tall ? 'w-28 h-11' : 'w-20 h-8'} rounded-lg bg-surface-secondary mb-2`} />
         <div className='w-28 h-3 rounded bg-surface-secondary' />
       </div>
     </article>
+  );
+}
+
+function StatRowSkeleton() {
+  return (
+    <div className='flex items-center gap-3 px-5 py-4 animate-pulse'>
+      <div className='w-9 h-9 rounded-xl bg-surface-secondary shrink-0' />
+      <div className='min-w-0 flex-1 space-y-1.5'>
+        <div className='w-14 h-5 rounded bg-surface-secondary' />
+        <div className='w-20 h-2.5 rounded bg-surface-secondary' />
+      </div>
+      <div className='w-10 h-5 rounded-full bg-surface-secondary shrink-0' />
+    </div>
   );
 }
 

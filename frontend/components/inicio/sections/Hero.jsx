@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@heroui/react';
-import { LuArrowRight, LuMapPin, LuSearch } from 'react-icons/lu';
+import { LuSearch } from 'react-icons/lu';
 
 const DEFAULT_MEDIA = { type: 'image', url: '/assets/images/hero-img.jpg', poster: null };
 
@@ -76,7 +76,7 @@ export default function Hero() {
 					preload="metadata"
 					poster={media.poster || undefined}
 					onLoadedData={() => setMediaReady(true)}
-					className={`absolute inset-0 w-full h-full object-cover mix-blend-luminosity opacity-70 transition-opacity duration-700 ${mediaReady ? 'opacity-70' : 'opacity-0'}`}
+					className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${mediaReady ? 'opacity-100' : 'opacity-0'}`}
 				>
 					<source src={media.url} />
 				</video>
@@ -89,14 +89,13 @@ export default function Hero() {
 					quality={85}
 					sizes="100vw"
 					onLoad={() => setMediaReady(true)}
-					className={`object-cover mix-blend-luminosity transition-opacity duration-700 ${mediaReady ? 'opacity-70' : 'opacity-0'}`}
+					className={`object-cover transition-opacity duration-700 ${mediaReady ? 'opacity-100' : 'opacity-0'}`}
 					style={media.focalPoint ? { objectPosition: `${media.focalPoint.x}% ${media.focalPoint.y}%` } : undefined}
 				/>
 			)}
 
-			{/* Brand wash — naranja de marca protagonista, no decorativo */}
-			<div className="absolute inset-0 bg-gradient-to-t from-[#7a2d0e] via-brand-primary/60 to-brand-primary/85 mix-blend-multiply pointer-events-none" />
-			<div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10 pointer-events-none" />
+			{/* Legibilidad del texto — degradado neutro, sin lavado naranja */}
+			<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/45 to-black/25 pointer-events-none" />
 
 			{/* Content */}
 			<div
@@ -108,46 +107,36 @@ export default function Hero() {
 				}}
 			>
 				<h1
-					className="text-center text-white leading-[1.05] mb-4 font-extrabold tracking-tight"
+					className="text-center text-white leading-[1.05] mb-4 font-extrabold tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]"
 					style={{ fontSize: 'clamp(2.75rem, 6.5vw, 5.5rem)' }}
 				>
 					A cada destino,
 					<br />
-					<span className="text-[#12243b]">le sobra un motivo.</span>
+					<span className="text-accent">le sobra un motivo.</span>
 				</h1>
 
-				<p className="text-center text-white/85 mb-10 max-w-md text-[15px] leading-relaxed">
+				<p className="text-center text-white/90 mb-10 max-w-md text-[15px] leading-relaxed drop-shadow-[0_1px_6px_rgba(0,0,0,0.4)]">
 					Busca tu próximo viaje entre paquetes armados a medida, con asesoría experta y precios que no encontrarás en ningún portal.
 				</p>
 
 				{/* Buscador — acción primaria */}
 				<form
 					onSubmit={handleSearch}
-					className="w-full max-w-xl flex items-center gap-2 p-2 rounded-2xl bg-white shadow-2xl shadow-black/30"
+					className="w-full max-w-xl flex items-center gap-2 p-2 rounded-2xl bg-field-background shadow-2xl shadow-black/30"
 				>
-					<LuSearch size={18} className="text-muted shrink-0 ml-2" />
+					<LuSearch size={18} className="text-field-placeholder shrink-0 ml-2" />
 					<input
 						type="text"
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
 						placeholder="¿A dónde quieres viajar? Roma, Cancún, Bariloche…"
-						className="flex-1 h-11 min-w-0 outline-none text-sm text-foreground placeholder:text-muted bg-transparent"
+						className="flex-1 h-11 min-w-0 outline-none text-sm text-field-foreground placeholder:text-field-placeholder bg-transparent"
 						aria-label="Buscar destino u oferta"
 					/>
 					<Button type="submit" color="primary" className="shrink-0 rounded-xl px-5 h-11 font-semibold">
 						{({ isPending }) => (isPending ? 'Buscando…' : 'Buscar')}
 					</Button>
 				</form>
-
-				<button
-					type="button"
-					onClick={() => router.push('/destinos')}
-					className="mt-6 inline-flex items-center gap-1.5 text-white/75 hover:text-white transition-colors text-[13px] font-medium"
-				>
-					<LuMapPin size={13} />
-					o explora destinos por continente
-					<LuArrowRight size={13} />
-				</button>
 			</div>
 		</section>
 	);

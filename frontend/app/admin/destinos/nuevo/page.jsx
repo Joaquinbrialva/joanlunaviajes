@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button, Checkbox, NumberField, Spinner } from '@heroui/react';
-import { Check, Minus, Plus } from 'lucide-react';
+import { Button, Spinner } from '@heroui/react';
 import { toastError } from '@/lib/toast';
+import {
+  StepperBar, Panel, FL, FInput, FError, NumField, CheckPill, ReviewRow,
+} from '@/components/admin/form-ui';
 import HeroSelect from '@/components/ui/hero-select';
 import ItemListInput from '@/components/ui/item-list-input';
 import CountryCombobox from '@/components/ui/country-combobox';
@@ -72,138 +74,6 @@ const initialForm = {
   isRecommended: false,
   status: 'draft',
 };
-
-/* ─── Componentes visuales ───────────────────────────────────────────── */
-
-function StepperBar({ pasos, paso, maxStep, onGoToStep }) {
-  return (
-    <div className='flex items-start gap-0'>
-      {pasos.map((step, i) => {
-        const active = step.id === paso;
-        const done = step.id < paso;
-        const locked = step.id > maxStep;
-        return (
-          <div key={step.id} className='flex items-start flex-1 min-w-0'>
-            <div className='flex flex-col items-center min-w-0 flex-1'>
-              <button
-                type='button'
-                onClick={() => !locked && onGoToStep(step.id)}
-                disabled={locked}
-                className='flex flex-col items-center gap-2 group disabled:cursor-not-allowed'
-              >
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200 ${
-                  active
-                    ? 'bg-accent text-white shadow-lg shadow-accent/25 scale-110'
-                    : done
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-surface-secondary border-2 border-default text-muted/50'
-                }`}>
-                  {done ? <Check size={15} strokeWidth={2.5} /> : step.id}
-                </div>
-                <span className={`text-[10px] uppercase tracking-[0.12em] font-bold whitespace-nowrap transition-colors ${
-                  active ? 'text-accent' : done ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted/60'
-                }`}>
-                  {step.label}
-                </span>
-              </button>
-            </div>
-            {i < pasos.length - 1 && (
-              <div className='flex-1 flex items-start pt-[18px] px-1'>
-                <div className={`h-[2px] w-full rounded-full transition-colors duration-300 ${
-                  paso > step.id ? 'bg-emerald-400 dark:bg-emerald-600' : 'bg-border'
-                }`} />
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function Panel({ title, children, className = '' }) {
-  return (
-    <div className={`rounded-2xl border border-default/60 bg-surface-secondary/40 p-5 space-y-4 ${className}`}>
-      {title && <p className='text-[10px] uppercase tracking-[0.2em] font-bold text-muted/70'>{title}</p>}
-      {children}
-    </div>
-  );
-}
-
-function FL({ children }) {
-  return <span className='text-[10px] uppercase tracking-[0.15em] font-semibold text-muted block mb-1.5'>{children}</span>;
-}
-
-function FInput({ error, className = '', ...props }) {
-  return (
-    <input
-      className={`h-11 px-3.5 rounded-xl border w-full text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/60 transition-all ${
-        error ? 'border-rose-400 ring-2 ring-rose-400/20' : 'border-default hover:border-muted/50'
-      } ${className}`}
-      {...props}
-    />
-  );
-}
-
-function FError({ children }) {
-  if (!children) return null;
-  return <p className='text-xs text-rose-500 mt-1 flex items-center gap-1'>⚠ {children}</p>;
-}
-
-function NumField({ label, value, onChange, min = 0, max, withButtons = false, formatOptions }) {
-  return (
-    <div className='space-y-1.5'>
-      <FL>{label}</FL>
-      <NumberField
-        value={value ?? NaN}
-        onChange={(v) => onChange(isNaN(v) ? null : v)}
-        minValue={min}
-        maxValue={max}
-        formatOptions={formatOptions ?? { maximumFractionDigits: 0, useGrouping: false }}
-        className='w-full'
-      >
-        <NumberField.Group className='h-11 rounded-xl border border-default flex items-center overflow-hidden bg-surface hover:border-muted/50 transition-colors'>
-          {withButtons && (
-            <NumberField.DecrementButton className='h-full px-3 hover:bg-surface-secondary border-r border-default transition-colors flex items-center text-muted'>
-              <Minus size={13} />
-            </NumberField.DecrementButton>
-          )}
-          <NumberField.Input className='flex-1 h-full px-3.5 bg-transparent text-sm outline-none min-w-0 text-center' />
-          {withButtons && (
-            <NumberField.IncrementButton className='h-full px-3 hover:bg-surface-secondary border-l border-default transition-colors flex items-center text-muted'>
-              <Plus size={13} />
-            </NumberField.IncrementButton>
-          )}
-        </NumberField.Group>
-      </NumberField>
-    </div>
-  );
-}
-
-function CheckPill({ label, checked, onChange, note }) {
-  return (
-    <div>
-      <Checkbox isSelected={checked} onChange={onChange}>
-        <Checkbox.Control>
-          <Checkbox.Indicator />
-        </Checkbox.Control>
-        <Checkbox.Content>
-          <span className='text-sm font-medium'>{label}</span>
-        </Checkbox.Content>
-      </Checkbox>
-      {note && <p className='text-xs text-muted mt-0.5 ml-6'>{note}</p>}
-    </div>
-  );
-}
-
-function ReviewRow({ label, value }) {
-  return (
-    <div className='flex gap-4 py-2.5 px-4 border-b border-default/50 last:border-0'>
-      <span className='text-[11px] uppercase tracking-[0.1em] font-semibold text-muted w-28 shrink-0 pt-0.5'>{label}</span>
-      <span className='flex-1 text-sm font-medium text-foreground'>{value}</span>
-    </div>
-  );
-}
 
 const DRAFT_KEY = 'admin_nuevo_destino_draft';
 
@@ -275,7 +145,7 @@ export default function AdminNewDestinationPage() {
   }
 
   return (
-    <div className='space-y-8 max-w-4xl'>
+    <div className='space-y-8 max-w-7xl mx-auto'>
       {/* Encabezado */}
       <section>
         <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-muted mb-1'>
@@ -300,41 +170,43 @@ export default function AdminNewDestinationPage() {
               <p className='text-sm text-muted mt-0.5'>Nombre, país y datos de identificación.</p>
             </div>
 
-            <Panel title='Nombre'>
-              <div>
-                <FInput
-                  value={form.name}
-                  onChange={(e) => update('name', e.target.value)}
-                  placeholder='Ej: Patagonia Argentina'
-                  error={showErrors && !form.name}
-                  className='text-base h-12 font-medium'
-                />
-                <FError>{showErrors && !form.name ? 'El nombre es obligatorio.' : null}</FError>
-              </div>
-            </Panel>
-
-            <Panel title='Ubicación'>
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_2fr] gap-4 items-start'>
+              <Panel title='Nombre'>
                 <div>
-                  <FL>País *</FL>
-                  <CountryCombobox value={form.country} onChange={(v) => update('country', v)} placeholder='Seleccionar país...' />
-                  <FError>{showErrors && !form.country ? 'El país es obligatorio.' : null}</FError>
-                </div>
-                <div>
-                  <FL>Continente</FL>
-                  <HeroSelect
-                    value={form.continent}
-                    onValueChange={(v) => update('continent', v)}
-                    options={opcionesContinente}
-                    triggerClassName='h-11 rounded-xl border border-default bg-surface hover:border-muted/50 transition-colors'
+                  <FInput
+                    value={form.name}
+                    onChange={(e) => update('name', e.target.value)}
+                    placeholder='Ej: Patagonia Argentina'
+                    error={showErrors && !form.name}
+                    className='text-base h-12 font-medium'
                   />
+                  <FError>{showErrors && !form.name ? 'El nombre es obligatorio.' : null}</FError>
                 </div>
-                <div>
-                  <FL>Slug (se genera automáticamente)</FL>
-                  <FInput value={form.slug} onChange={(e) => update('slug', e.target.value)} placeholder='patagonia-argentina' className='font-mono text-xs' />
+              </Panel>
+
+              <Panel title='Ubicación'>
+                <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
+                  <div>
+                    <FL>País *</FL>
+                    <CountryCombobox value={form.country} onChange={(v) => update('country', v)} placeholder='Seleccionar país...' />
+                    <FError>{showErrors && !form.country ? 'El país es obligatorio.' : null}</FError>
+                  </div>
+                  <div>
+                    <FL>Continente</FL>
+                    <HeroSelect
+                      value={form.continent}
+                      onValueChange={(v) => update('continent', v)}
+                      options={opcionesContinente}
+                      triggerClassName='h-11 rounded-xl border border-default bg-surface hover:border-muted/50 transition-colors'
+                    />
+                  </div>
+                  <div>
+                    <FL>Slug (se genera automáticamente)</FL>
+                    <FInput value={form.slug} onChange={(e) => update('slug', e.target.value)} placeholder='patagonia-argentina' className='font-mono text-xs' />
+                  </div>
                 </div>
-              </div>
-            </Panel>
+              </Panel>
+            </div>
 
             <Panel title='Imagen destacada'>
               <CoverImageInput value={form.featuredImage} onChange={(url) => update('featuredImage', url)} />
@@ -350,66 +222,68 @@ export default function AdminNewDestinationPage() {
               <p className='text-sm text-muted mt-0.5'>Información práctica para el viajero.</p>
             </div>
 
-            <Panel title='Información de viaje'>
-              <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                <div>
-                  <FL>Aeropuerto IATA *</FL>
-                  <FInput
-                    value={form.airport}
-                    onChange={(e) => update('airport', e.target.value)}
-                    placeholder='EZE'
-                    error={showErrors && !form.airport}
-                    className='font-mono'
-                  />
-                  <FError>{showErrors && !form.airport ? 'El código IATA es obligatorio.' : null}</FError>
+            <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 items-start'>
+              <Panel title='Información de viaje'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                  <div>
+                    <FL>Aeropuerto IATA *</FL>
+                    <FInput
+                      value={form.airport}
+                      onChange={(e) => update('airport', e.target.value)}
+                      placeholder='EZE'
+                      error={showErrors && !form.airport}
+                      className='font-mono'
+                    />
+                    <FError>{showErrors && !form.airport ? 'El código IATA es obligatorio.' : null}</FError>
+                  </div>
+                  <div>
+                    <FL>Idioma *</FL>
+                    <FInput
+                      value={form.language}
+                      onChange={(e) => update('language', e.target.value)}
+                      placeholder='Español'
+                      error={showErrors && !form.language}
+                    />
+                    <FError>{showErrors && !form.language ? 'El idioma es obligatorio.' : null}</FError>
+                  </div>
+                  <div>
+                    <FL>Moneda</FL>
+                    <HeroSelect
+                      value={form.currency}
+                      onValueChange={(v) => update('currency', v)}
+                      options={opcionesMoneda}
+                      triggerClassName='h-11 rounded-xl border border-default bg-surface hover:border-muted/50 transition-colors'
+                    />
+                  </div>
+                  <div>
+                    <FL>Zona horaria</FL>
+                    <FInput value={form.timezone} onChange={(e) => update('timezone', e.target.value)} placeholder='America/Argentina/Buenos_Aires' />
+                  </div>
+                  <NumField label='Estadía recomendada (días)' value={form.recommendedStayDays} onChange={(v) => update('recommendedStayDays', v ?? 1)} min={1} withButtons />
                 </div>
-                <div>
-                  <FL>Idioma *</FL>
-                  <FInput
-                    value={form.language}
-                    onChange={(e) => update('language', e.target.value)}
-                    placeholder='Español'
-                    error={showErrors && !form.language}
-                  />
-                  <FError>{showErrors && !form.language ? 'El idioma es obligatorio.' : null}</FError>
-                </div>
-                <div>
-                  <FL>Moneda</FL>
-                  <HeroSelect
-                    value={form.currency}
-                    onValueChange={(v) => update('currency', v)}
-                    options={opcionesMoneda}
-                    triggerClassName='h-11 rounded-xl border border-default bg-surface hover:border-muted/50 transition-colors'
-                  />
-                </div>
-                <div>
-                  <FL>Zona horaria</FL>
-                  <FInput value={form.timezone} onChange={(e) => update('timezone', e.target.value)} placeholder='America/Argentina/Buenos_Aires' />
-                </div>
-                <NumField label='Estadía recomendada (días)' value={form.recommendedStayDays} onChange={(v) => update('recommendedStayDays', v ?? 1)} min={1} withButtons />
-              </div>
-            </Panel>
+              </Panel>
 
-            <Panel title='Clima'>
-              <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                <div>
-                  <FL>Tipo de clima</FL>
-                  <FInput value={form.climateType} onChange={(e) => update('climateType', e.target.value)} placeholder='Templado, Tropical...' />
+              <Panel title='Clima'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                  <div>
+                    <FL>Tipo de clima</FL>
+                    <FInput value={form.climateType} onChange={(e) => update('climateType', e.target.value)} placeholder='Templado, Tropical...' />
+                  </div>
+                  <NumField
+                    label='Temperatura promedio (°C)'
+                    value={form.averageTemperatureC}
+                    onChange={(v) => update('averageTemperatureC', v ?? 20)}
+                    min={-50}
+                    max={60}
+                    formatOptions={{ maximumFractionDigits: 1, useGrouping: false }}
+                  />
+                  <div className='sm:col-span-2'>
+                    <FL>Mejores meses (separados por coma)</FL>
+                    <FInput value={form.bestMonthsToVisit} onChange={(e) => update('bestMonthsToVisit', e.target.value)} placeholder='Enero, Febrero, Marzo' />
+                  </div>
                 </div>
-                <NumField
-                  label='Temperatura promedio (°C)'
-                  value={form.averageTemperatureC}
-                  onChange={(v) => update('averageTemperatureC', v ?? 20)}
-                  min={-50}
-                  max={60}
-                  formatOptions={{ maximumFractionDigits: 1, useGrouping: false }}
-                />
-                <div>
-                  <FL>Mejores meses (separados por coma)</FL>
-                  <FInput value={form.bestMonthsToVisit} onChange={(e) => update('bestMonthsToVisit', e.target.value)} placeholder='Enero, Febrero, Marzo' />
-                </div>
-              </div>
-            </Panel>
+              </Panel>
+            </div>
           </div>
         )}
 
@@ -455,7 +329,7 @@ export default function AdminNewDestinationPage() {
               </Panel>
             </div>
 
-            <Panel title='Galería de imágenes'>
+            <Panel title='Galería de imágenes' className='xl:max-w-3xl'>
               <p className='text-xs text-muted -mt-1'>Imágenes adicionales del destino.</p>
               <GalleryEditor
                 images={form.gallery ? form.gallery.split('\n').map((s) => s.trim()).filter(Boolean) : []}
@@ -552,7 +426,7 @@ export default function AdminNewDestinationPage() {
             <Button
               type='button'
               onClick={tryGoNext}
-              className='h-11 px-6 rounded-xl bg-accent text-white font-semibold text-sm shadow-sm shadow-accent/20 hover:bg-orange-500 transition-all'
+              className='h-11 px-6 rounded-xl bg-accent text-accent-foreground font-semibold text-sm shadow-sm shadow-accent/20 hover:bg-orange-500 transition-all'
             >
               Siguiente →
             </Button>
@@ -561,7 +435,7 @@ export default function AdminNewDestinationPage() {
               type='button'
               isPending={guardando}
               onClick={guardarDestino}
-              className='h-11 px-6 rounded-xl bg-accent text-white font-semibold text-sm shadow-sm shadow-accent/20 hover:bg-orange-500 transition-all'
+              className='h-11 px-6 rounded-xl bg-accent text-accent-foreground font-semibold text-sm shadow-sm shadow-accent/20 hover:bg-orange-500 transition-all'
             >
               {({ isPending }) => (
                 <>

@@ -376,7 +376,7 @@ export default function UsuariosPage() {
             <button
               type='submit'
               disabled={saving}
-              className='flex-1 h-11 rounded-xl bg-accent text-white text-[13px] font-semibold hover:bg-orange-500 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/20 disabled:opacity-70 flex items-center justify-center gap-2'
+              className='flex-1 h-11 rounded-xl bg-accent text-accent-foreground text-[13px] font-semibold hover:bg-orange-500 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/20 disabled:opacity-70 flex items-center justify-center gap-2'
             >
               {saving
                 ? <><Spinner color='current' size='sm' /> Guardando...</>
@@ -395,7 +395,7 @@ export default function UsuariosPage() {
         </div>
         <button
           onClick={openCreate}
-          className='inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-orange-500 transition-colors shadow-lg shadow-orange-500/20 shrink-0'
+          className='inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl bg-accent text-accent-foreground text-sm font-semibold hover:bg-orange-500 transition-colors shadow-lg shadow-orange-500/20 shrink-0'
         >
           <LuUserPlus className='h-4 w-4' />
           Nuevo usuario

@@ -1,7 +1,6 @@
 import Link from 'next/link';
 
 const EXPLORE = [
-  { label: 'Destinos', href: '/destinos' },
   { label: 'Ofertas', href: '/ofertas' },
 ];
 

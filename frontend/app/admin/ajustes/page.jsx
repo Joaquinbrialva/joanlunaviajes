@@ -14,19 +14,11 @@ const THEME_OPTIONS = [
 export default function AjustesPage() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [role, setRole] = useState(null);
 
   useEffect(() => setMounted(true), []);
 
-  useEffect(() => {
-    fetch('/api/auth/me')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => { if (data?.user) setRole(data.user.role); })
-      .catch(() => {});
-  }, []);
-
   return (
-    <div className='space-y-6 max-w-2xl'>
+    <div className='space-y-6 max-w-2xl mx-auto'>
       <section>
         <p className='text-sm text-muted mb-1'>
           <Link href='/admin' className='hover:underline'>Panel</Link> / Ajustes
@@ -64,31 +56,6 @@ export default function AjustesPage() {
             })}
           </div>
         )}
-      </div>
-
-      {/* Sidebar links */}
-      <div className='rounded-2xl border border-default bg-surface p-5 space-y-3'>
-        <div>
-          <h3 className='text-lg font-semibold'>Accesos rápidos</h3>
-          <p className='text-sm text-muted'>Navega rápidamente a las secciones del panel.</p>
-        </div>
-        <div className='grid grid-cols-2 gap-3'>
-          {[
-            { href: '/admin', label: 'Panel general' },
-            { href: '/admin/ofertas', label: 'Ofertas' },
-            { href: '/admin/destinos', label: 'Destinos' },
-            role !== 'designer' ? { href: '/admin/cotizaciones', label: 'Cotizaciones' } : null,
-            { href: '/admin/perfil', label: 'Mi perfil' },
-          ].filter(Boolean).map(({ href, label }) => (
-            <a
-              key={href}
-              href={href}
-              className='rounded-xl border border-default bg-surface-secondary px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-accent/40 hover:text-accent'
-            >
-              {label}
-            </a>
-          ))}
-        </div>
       </div>
 
       {/* App info */}

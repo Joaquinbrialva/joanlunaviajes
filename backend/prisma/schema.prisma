@@ -16,7 +16,6 @@ model Offer {
   isSpecialOffer     Boolean  @default(false)
   isFeatured         Boolean  @default(false)
   isPopular          Boolean  @default(false)
-  mediaReady         Boolean  @default(false)
   category           String   @default("Internacional")
   tags               String[]
   location           Json
@@ -50,7 +49,6 @@ model Destination {
   isPopular        Boolean  @default(false)
   isFeatured       Boolean  @default(false)
   isRecommended    Boolean  @default(false)
-  mediaReady       Boolean  @default(false)
   status           String   @default("draft")
   travelInfo       Json
   climate          Json

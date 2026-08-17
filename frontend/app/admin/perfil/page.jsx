@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Spinner } from '@heroui/react';
 import { LuUser, LuMail, LuLock, LuSave } from 'react-icons/lu';
 import { toastError, toastSuccess } from '@/lib/toast';
+import { Button } from '@/components/ui/button';
 
 const ROLE_LABELS = {
   admin: 'Administrador',
@@ -93,13 +95,13 @@ export default function PerfilPage() {
   if (!user) {
     return (
       <div className='flex items-center justify-center py-20'>
-        <div className='h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent' />
+        <Spinner size='lg' />
       </div>
     );
   }
 
   return (
-    <div className='space-y-6 max-w-2xl'>
+    <div className='space-y-6 max-w-2xl mx-auto'>
       <section>
         <p className='text-sm text-muted mb-1'>
           <Link href='/admin' className='hover:underline'>Panel</Link> / Mi perfil
@@ -158,18 +160,10 @@ export default function PerfilPage() {
         </div>
 
         <div className='flex justify-end'>
-          <button
-            type='submit'
-            disabled={savingInfo}
-            className='inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60'
-          >
-            {savingInfo ? (
-              <span className='h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent' />
-            ) : (
-              <LuSave className='h-4 w-4' />
-            )}
+          <Button type='submit' disabled={savingInfo}>
+            {savingInfo ? <Spinner size='sm' color='current' /> : <LuSave className='h-4 w-4' />}
             Guardar cambios
-          </button>
+          </Button>
         </div>
       </form>
 
@@ -223,18 +217,10 @@ export default function PerfilPage() {
         </div>
 
         <div className='flex justify-end'>
-          <button
-            type='submit'
-            disabled={savingPassword}
-            className='inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60'
-          >
-            {savingPassword ? (
-              <span className='h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent' />
-            ) : (
-              <LuLock className='h-4 w-4' />
-            )}
+          <Button type='submit' disabled={savingPassword}>
+            {savingPassword ? <Spinner size='sm' color='current' /> : <LuLock className='h-4 w-4' />}
             Cambiar contraseña
-          </button>
+          </Button>
         </div>
       </form>
     </div>

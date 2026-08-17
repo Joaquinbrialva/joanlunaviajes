@@ -150,7 +150,7 @@ export default function NotificationBell() {
       >
         <LuBell className='h-4 w-4' />
         {unread > 0 && (
-          <span className='absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white'>
+          <span className='absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground'>
             {unread > 9 ? '9+' : unread}
           </span>
         )}
@@ -256,7 +256,7 @@ export default function NotificationBell() {
                           <div className='flex items-center gap-2'>
                             <p className='text-sm font-medium leading-snug break-words'>{notif.title}</p>
                             {isFresh && (
-                              <span className='shrink-0 rounded-full bg-accent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white'>
+                              <span className='shrink-0 rounded-full bg-accent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-accent-foreground'>
                                 Nueva
                               </span>
                             )}

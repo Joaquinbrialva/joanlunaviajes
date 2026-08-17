@@ -7,6 +7,7 @@ import {
   LuInfo, LuChevronDown, LuSave, LuRotateCcw, LuCrop, LuX,
 } from 'react-icons/lu';
 import { toastSuccess, toastError } from '@/lib/toast';
+import { Button } from '@/components/ui/button';
 
 export default function AparienciaPage() {
   const [saved, setSaved] = useState(null);
@@ -167,7 +168,7 @@ export default function AparienciaPage() {
   }
 
   return (
-    <div className="max-w-5xl space-y-6">
+    <div className="max-w-5xl space-y-6 mx-auto">
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-4">
@@ -480,21 +481,17 @@ export default function AparienciaPage() {
 
           {/* Acciones */}
           <div className="rounded-2xl border border-default bg-surface p-3 space-y-2">
-            <button
+            <Button
               type="button"
               onClick={handleSave}
               disabled={!canSave}
-              className={`w-full h-10 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
-                canSave
-                  ? 'bg-accent text-white hover:bg-orange-600 shadow-md shadow-orange-500/20 cursor-pointer'
-                  : 'bg-surface-secondary text-muted cursor-not-allowed'
-              }`}
+              className="w-full"
             >
               {saving
                 ? <><Spinner color="current" size="sm" /> Guardando...</>
                 : <><LuSave className="w-3.5 h-3.5" /> Guardar cambios</>
               }
-            </button>
+            </Button>
 
             {hasChanges && (
               <button
@@ -516,7 +513,7 @@ export default function AparienciaPage() {
 
 function AparienciaSkeleton() {
   return (
-    <div className='max-w-5xl space-y-6 animate-pulse'>
+    <div className='max-w-5xl space-y-6 animate-pulse mx-auto'>
       <div className='space-y-2'>
         <div className='h-7 w-56 rounded-lg bg-surface-secondary' />
         <div className='h-4 w-72 rounded bg-surface-secondary' />
@@ -777,11 +774,11 @@ function CropEditor({ src, initialFocalPoint, onConfirm, onCancel, uploading, up
 
       {/* Botones de acción */}
       <div className="flex gap-2">
-        <button
+        <Button
           type="button"
           onClick={handleConfirm}
           disabled={uploading || !natural}
-          className="flex-1 h-10 rounded-xl bg-accent text-white text-[13px] font-semibold hover:bg-orange-600 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+          className="flex-1"
         >
           {uploading ? (
             <>
@@ -791,7 +788,7 @@ function CropEditor({ src, initialFocalPoint, onConfirm, onCancel, uploading, up
           ) : (
             <><LuCrop className="w-3.5 h-3.5" /> Confirmar recorte</>
           )}
-        </button>
+        </Button>
         <button
           type="button"
           onClick={onCancel}

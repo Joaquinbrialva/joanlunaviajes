@@ -192,22 +192,19 @@ function AdminInquiriesContent() {
       </AlertDialog>
 
       {/* Header */}
-      <section className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+      <section className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
-          <p className='text-xs uppercase tracking-[0.2em] font-semibold text-muted mb-1'>Bandeja de entrada</p>
           <h1 className='text-3xl font-bold tracking-tight'>Cotizaciones</h1>
           <p className='text-sm text-muted mt-1'>Gestiona y haz seguimiento de las consultas recibidas.</p>
         </div>
-        {/* Quick stats */}
-        <div className='flex items-center gap-3 shrink-0'>
+        <div className='flex items-center gap-4 shrink-0'>
           <div className='text-center px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40'>
-            <p className='text-xl font-bold text-amber-600 dark:text-amber-400 leading-none'>{pending}</p>
+            <p className='text-2xl font-bold text-amber-600 dark:text-amber-400 leading-none'>{pending}</p>
             <p className='text-[10px] text-amber-600/70 dark:text-amber-400/70 mt-0.5 font-medium uppercase tracking-wide'>Pendientes</p>
           </div>
-          <div className='text-center px-4 py-2 rounded-xl bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/40'>
-            <p className='text-xl font-bold text-sky-600 dark:text-sky-400 leading-none'>{contacted}</p>
-            <p className='text-[10px] text-sky-600/70 dark:text-sky-400/70 mt-0.5 font-medium uppercase tracking-wide'>Contactados</p>
-          </div>
+          <p className='text-sm text-muted'>
+            <span className='font-semibold text-foreground'>{contacted}</span> contactados
+          </p>
         </div>
       </section>
 

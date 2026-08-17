@@ -9,7 +9,6 @@ const STAFF_ROLES = ['admin', 'agent', 'designer'];
 const ROLE_LABELS = { admin: 'Administrador', agent: 'Agente', designer: 'Diseñador', client: 'Cliente' };
 
 const NAV_LINKS = [
-  { name: "Destinos", url: "/destinos" },
   { name: "Ofertas", url: "/ofertas" },
   { name: "Nosotros", url: "/nosotros" },
   { name: "Contacto", url: "/contacto" },

@@ -119,10 +119,10 @@ export default function NosotrosPage() {
               Ver ofertas <LuArrowRight size={14} />
             </Link>
             <Link
-              href="/destinos"
+              href="/contacto"
               className="inline-flex h-12 items-center justify-center rounded-full border border-border px-8 text-sm font-semibold text-foreground hover:bg-surface-secondary transition-colors"
             >
-              Explorar destinos
+              Contactar
             </Link>
           </div>
         </div>
