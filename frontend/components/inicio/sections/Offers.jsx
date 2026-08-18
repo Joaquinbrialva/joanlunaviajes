@@ -1,110 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { LuArrowRight, LuClock3, LuMapPin, LuTicket } from 'react-icons/lu';
-
-function getPrice(offer) {
-  return offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || 0;
-}
-
-function formatNumber(value) {
-  return new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(value);
-}
-
-function OfferCard({ offer }) {
-  const price = getPrice(offer);
-  const hasPrice = price > 0;
-  const cover = offer.images?.find((img) => img.isCover) || offer.images?.[0];
-  const discount = offer.pricing?.discountPercentage;
-  const currency = offer.pricing?.currency || 'USD';
-  const originalPrice = offer.pricing?.originalPrice;
-  const hasDiscount = discount > 0 && originalPrice && originalPrice > price;
-
-  return (
-    <Link href={`/ofertas/${offer.slug}`} className='group block h-full shrink-0 w-[240px] sm:w-[260px] snap-start'>
-      <article className='h-full bg-surface rounded-2xl overflow-hidden flex flex-col border border-border transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/10 hover:border-accent/25'>
-
-        {/* Image */}
-        <div className='relative overflow-hidden shrink-0' style={{ height: '140px' }}>
-          {cover?.url ? (
-            <Image
-              src={cover.url}
-              alt={offer.title}
-              fill
-              sizes='260px'
-              className='object-cover transition-transform duration-700 group-hover:scale-[1.07]'
-            />
-          ) : (
-            <div className='absolute inset-0 bg-surface-tertiary' />
-          )}
-          <div className='absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent' />
-
-          {/* Location chip */}
-          <div className='absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/45 backdrop-blur-sm rounded-full px-2 py-0.5'>
-            <LuMapPin size={9} className='text-white/80 shrink-0' />
-            <span className='text-white text-[10px] font-semibold truncate max-w-[120px]'>
-              {offer.location?.city}, {offer.location?.country}
-            </span>
-          </div>
-
-          {/* Badge */}
-          {hasDiscount ? (
-            <span className='absolute top-2 right-2 bg-accent text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg shadow-orange-500/30'>
-              -{discount}%
-            </span>
-          ) : offer.isFeatured ? (
-            <span className='absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full'>
-              Destacada
-            </span>
-          ) : null}
-        </div>
-
-        {/* Content */}
-        <div className='p-3 flex flex-col grow'>
-          <h3
-            className='leading-snug line-clamp-2 font-bold group-hover:text-accent transition-colors duration-300'
-            style={{ fontSize: '0.875rem' }}
-          >
-            {offer.title}
-          </h3>
-
-          {offer.duration?.days > 0 && (
-            <span className='flex items-center gap-1 text-[11px] text-muted mt-1.5'>
-              <LuClock3 size={10} />
-              {offer.duration.days} días
-            </span>
-          )}
-
-          {/* Price row */}
-          <div className='flex items-end justify-between gap-2 mt-auto pt-2.5 border-t border-border'>
-            <div>
-              {hasPrice && hasDiscount && originalPrice && (
-                <p className='text-[11px] text-muted line-through leading-none mb-0.5'>
-                  {currency} {formatNumber(originalPrice)}
-                </p>
-              )}
-              {hasPrice ? (
-                <p className='text-base font-bold text-accent leading-none'>
-                  {currency} {formatNumber(price)}
-                </p>
-              ) : (
-                <p className='text-xs font-medium text-muted italic'>Consultar</p>
-              )}
-              {offer.pricing?.pricePer && hasPrice && (
-                <p className='text-[10px] text-muted mt-0.5'>/{offer.pricing.pricePer}</p>
-              )}
-            </div>
-            <span className='text-accent opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-300 shrink-0'>
-              <LuArrowRight size={16} />
-            </span>
-          </div>
-        </div>
-
-      </article>
-    </Link>
-  );
-}
+import { LuArrowRight, LuTicket } from 'react-icons/lu';
+import OfferSlider from '@/components/inicio/ui/OfferSlider';
+import OfferTicketCard from '@/components/inicio/ui/OfferTicketCard';
 
 export default function Offers() {
   const [offers, setOffers] = useState([]);
@@ -154,11 +53,11 @@ export default function Offers() {
           <p className='text-sm text-muted'>Estamos preparando paquetes exclusivos. Vuelve pronto.</p>
         </div>
       ) : (
-        <div className='flex gap-4 overflow-x-auto py-4 -my-4 -mx-1 px-1 snap-x snap-mandatory'>
+        <OfferSlider>
           {offers.map((offer) => (
-            <OfferCard key={offer.id} offer={offer} />
+            <OfferTicketCard key={offer.id} offer={offer} />
           ))}
-        </div>
+        </OfferSlider>
       )}
 
       <div className='sm:hidden text-center'>
@@ -172,16 +71,19 @@ export default function Offers() {
 
 function OffersSkeleton() {
   return (
-    <div className='flex gap-4 overflow-x-auto py-4 -my-4 -mx-1 px-1'>
-      {Array.from({ length: 4 }).map((_, idx) => (
-        <div key={idx} className='shrink-0 w-[240px] sm:w-[260px] rounded-2xl bg-surface border border-border overflow-hidden flex flex-col animate-pulse'>
-          <div className='bg-surface-secondary' style={{ height: '140px' }} />
-          <div className='p-3 flex flex-col gap-2.5'>
-            <div className='h-3.5 w-3/4 rounded-full bg-border' />
-            <div className='h-3 w-1/2 rounded-full bg-border' />
-            <div className='pt-2.5 border-t border-border flex items-end justify-between'>
-              <div className='h-5 w-20 rounded-full bg-border' />
-              <div className='h-4 w-4 rounded-full bg-border' />
+    <div className='flex gap-5 overflow-hidden animate-pulse'>
+      {Array.from({ length: 3 }).map((_, idx) => (
+        <div key={idx} className='flex h-[168px] w-[300px] sm:w-[340px] shrink-0 overflow-hidden rounded-[22px] border border-border bg-surface'>
+          <div className='w-[36%] shrink-0 bg-surface-secondary' />
+          <div className='w-px shrink-0 border-l-2 border-dashed border-border' />
+          <div className='flex flex-1 flex-col justify-between gap-2.5 p-4 pl-5'>
+            <div className='space-y-2'>
+              <div className='h-4 w-4/5 rounded-full bg-border' />
+              <div className='h-3 w-2/3 rounded-full bg-border' />
+            </div>
+            <div className='flex items-end justify-between gap-2 border-t border-dashed border-border pt-2.5'>
+              <div className='h-6 w-20 rounded-full bg-border' />
+              <div className='h-8 w-8 rounded-full bg-border' />
             </div>
           </div>
         </div>

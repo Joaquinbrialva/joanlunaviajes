@@ -214,6 +214,15 @@
 	.border-default {
 		border-color: var(--border);
 	}
+
+	.scrollbar-hide {
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
+	}
 }
 
 html {
