@@ -80,8 +80,8 @@ export default function Hero() {
 	return (
 		<div className="relative">
 			<section
-				className="w-screen -mx-[calc((100vw-100%)/2)] relative overflow-hidden bg-background"
-				style={{ height: 'clamp(380px, 56vh, 560px)' }}
+				className="relative overflow-hidden rounded-2xl bg-background"
+				style={{ height: 'clamp(220px, 32vw, 400px)' }}
 				onMouseEnter={() => setPaused(true)}
 				onMouseLeave={() => setPaused(false)}
 			>
@@ -166,26 +166,24 @@ export default function Hero() {
 			</section>
 
 			{/* Card de búsqueda — superpuesta, se adapta al modo claro/oscuro via tokens del sitio */}
-			<div className="relative z-10 -mt-8 px-6 sm:px-10">
-				<div className="max-w-7xl mx-auto flex justify-center">
-					<form
-						onSubmit={handleSearch}
-						className="w-full max-w-xl flex items-center gap-2 p-2 rounded-2xl bg-surface border border-default shadow-2xl shadow-black/20"
-					>
-						<LuSearch size={18} className="text-muted shrink-0 ml-2" />
-						<input
-							type="text"
-							value={query}
-							onChange={(e) => setQuery(e.target.value)}
-							placeholder="¿A dónde quieres viajar? Roma, Cancún, Bariloche…"
-							className="flex-1 h-11 min-w-0 outline-none text-sm text-foreground placeholder:text-muted bg-transparent"
-							aria-label="Buscar destino u oferta"
-						/>
-						<Button type="submit" color="primary" className="shrink-0 rounded-xl px-5 h-11 font-semibold">
-							{({ isPending }) => (isPending ? 'Buscando…' : 'Buscar')}
-						</Button>
-					</form>
-				</div>
+			<div className="relative z-10 -mt-6 flex justify-center px-2">
+				<form
+					onSubmit={handleSearch}
+					className="w-full max-w-xl flex items-center gap-2 p-2 rounded-2xl bg-surface border border-default shadow-2xl shadow-black/20"
+				>
+					<LuSearch size={18} className="text-muted shrink-0 ml-2" />
+					<input
+						type="text"
+						value={query}
+						onChange={(e) => setQuery(e.target.value)}
+						placeholder="¿A dónde quieres viajar? Roma, Cancún, Bariloche…"
+						className="flex-1 h-11 min-w-0 outline-none text-sm text-foreground placeholder:text-muted bg-transparent"
+						aria-label="Buscar destino u oferta"
+					/>
+					<Button type="submit" color="primary" className="shrink-0 rounded-xl px-5 h-11 font-semibold">
+						{({ isPending }) => (isPending ? 'Buscando…' : 'Buscar')}
+					</Button>
+				</form>
 			</div>
 		</div>
 	);
