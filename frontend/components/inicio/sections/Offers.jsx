@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { LuArrowRight, LuTicket } from 'react-icons/lu';
 import OfferSlider from '@/components/inicio/ui/OfferSlider';
-import OfferTicketCard from '@/components/inicio/ui/OfferTicketCard';
+import OfferCard from '@/components/offer-card';
 
 export default function Offers() {
   const [offers, setOffers] = useState([]);
@@ -55,7 +55,9 @@ export default function Offers() {
       ) : (
         <OfferSlider>
           {offers.map((offer) => (
-            <OfferTicketCard key={offer.id} offer={offer} />
+            <div key={offer.id} data-offer-card className='w-[280px] shrink-0 snap-start sm:w-[320px]'>
+              <OfferCard offer={offer} />
+            </div>
           ))}
         </OfferSlider>
       )}
@@ -73,17 +75,18 @@ function OffersSkeleton() {
   return (
     <div className='flex gap-5 overflow-hidden animate-pulse'>
       {Array.from({ length: 3 }).map((_, idx) => (
-        <div key={idx} className='flex h-[168px] w-[300px] sm:w-[340px] shrink-0 overflow-hidden rounded-[22px] border border-border bg-surface'>
-          <div className='w-[36%] shrink-0 bg-surface-secondary' />
-          <div className='w-px shrink-0 border-l-2 border-dashed border-border' />
-          <div className='flex flex-1 flex-col justify-between gap-2.5 p-4 pl-5'>
-            <div className='space-y-2'>
-              <div className='h-4 w-4/5 rounded-full bg-border' />
-              <div className='h-3 w-2/3 rounded-full bg-border' />
-            </div>
-            <div className='flex items-end justify-between gap-2 border-t border-dashed border-border pt-2.5'>
-              <div className='h-6 w-20 rounded-full bg-border' />
-              <div className='h-8 w-8 rounded-full bg-border' />
+        <div key={idx} className='w-[280px] sm:w-[320px] shrink-0 overflow-hidden rounded-2xl border border-border bg-surface flex flex-col'>
+          <div className='h-52 bg-surface-secondary' />
+          <div className='flex items-center gap-3 px-4 py-2 bg-surface-secondary border-b border-border'>
+            <div className='h-3 w-10 rounded-full bg-border' />
+            <div className='h-3 w-14 rounded-full bg-border' />
+          </div>
+          <div className='p-4 flex flex-col gap-3 grow'>
+            <div className='h-4 w-3/4 rounded-full bg-border' />
+            <div className='h-3.5 w-1/2 rounded-full bg-border' />
+            <div className='mt-auto pt-3 border-t border-border flex items-end justify-between'>
+              <div className='h-6 w-24 rounded-full bg-border' />
+              <div className='h-9 w-24 rounded-full bg-border' />
             </div>
           </div>
         </div>
