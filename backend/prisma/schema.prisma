@@ -103,3 +103,12 @@ model Subscriber {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
 }
+
+model Update {
+  id        String   @id @default(uuid())
+  images    String[]
+  caption   String   @default("")
+  status    String   @default("published")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
