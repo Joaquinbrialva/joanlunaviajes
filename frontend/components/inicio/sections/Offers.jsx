@@ -154,7 +154,7 @@ export default function Offers() {
           <p className='text-sm text-muted'>Estamos preparando paquetes exclusivos. Vuelve pronto.</p>
         </div>
       ) : (
-        <div className='flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory'>
+        <div className='flex gap-4 overflow-x-auto py-4 -my-4 -mx-1 px-1 snap-x snap-mandatory'>
           {offers.map((offer) => (
             <OfferCard key={offer.id} offer={offer} />
           ))}
@@ -172,7 +172,7 @@ export default function Offers() {
 
 function OffersSkeleton() {
   return (
-    <div className='flex gap-4 overflow-x-auto pb-2 -mx-1 px-1'>
+    <div className='flex gap-4 overflow-x-auto py-4 -my-4 -mx-1 px-1'>
       {Array.from({ length: 4 }).map((_, idx) => (
         <div key={idx} className='shrink-0 w-[240px] sm:w-[260px] rounded-2xl bg-surface border border-border overflow-hidden flex flex-col animate-pulse'>
           <div className='bg-surface-secondary' style={{ height: '140px' }} />

@@ -11,7 +11,7 @@ export default function Destinations() {
   useEffect(() => {
     fetch('/api/destinos')
       .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data)) setDestinations(data); })
+      .then((data) => { if (Array.isArray(data)) setDestinations(data.filter((d) => d.status === 'published')); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);

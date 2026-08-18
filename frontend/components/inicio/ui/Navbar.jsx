@@ -1,7 +1,7 @@
 'use client'
 import ThemeToggle from "@/app/ThemeToggle";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { LuLayoutDashboard, LuLogOut, LuMenu, LuUser, LuX } from "react-icons/lu";
 import Logo from "@/components/ui/logo";
@@ -23,7 +23,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const userMenuRef = useRef(null);
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
