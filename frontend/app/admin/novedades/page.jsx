@@ -5,7 +5,7 @@ import { Button, Checkbox, Spinner, toast } from '@heroui/react';
 import { LuPlus, LuPencil, LuTrash2, LuSparkles } from 'react-icons/lu';
 import GalleryEditor from '@/components/ui/gallery-editor';
 import { toastError, toastSuccess } from '@/lib/toast';
-import { PageHeader, Section, Panel, ConfirmDialog, TextareaField, EmptyState, NovedadStatusChip } from '@/components/admin/kit';
+import { PageHeader, Section, Dialog, ConfirmDialog, TextareaField, EmptyState, NovedadStatusChip } from '@/components/admin/kit';
 
 const EMPTY_FORM = { images: [], caption: '', status: 'published' };
 
@@ -96,7 +96,7 @@ export default function NovedadesPage() {
         Esta acción no se puede deshacer. La novedad dejará de mostrarse en el sitio.
       </ConfirmDialog>
 
-      <Panel isOpen={drawerOpen} onClose={closeDrawer} title={editing ? 'Editar novedad' : 'Nueva novedad'} size='lg'>
+      <Dialog isOpen={drawerOpen} onClose={closeDrawer} title={editing ? 'Editar novedad' : 'Nueva novedad'} size='lg'>
         <form onSubmit={handleSubmit} className='space-y-4 p-5'>
           <div>
             <label className='mb-1.5 block text-[13px] font-medium text-foreground'>
@@ -127,7 +127,7 @@ export default function NovedadesPage() {
             </Button>
           </div>
         </form>
-      </Panel>
+      </Dialog>
 
       <PageHeader
         title='Novedades'

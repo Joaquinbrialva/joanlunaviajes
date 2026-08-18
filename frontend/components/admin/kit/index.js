@@ -4,6 +4,7 @@ export { default as InitialsAvatar } from './initials-avatar';
 export { default as PageHeader } from './page-header';
 export { default as EmptyState } from './empty-state';
 export { default as Panel } from './panel';
+export { default as Dialog } from './dialog';
 export { default as ConfirmDialog } from './confirm-dialog';
 export { default as Section } from './section';
 export { default as TableToolbar } from './toolbar';
