@@ -12,7 +12,7 @@ const SELECT_TRIGGER_CLASS = 'h-11 rounded-xl border border-default bg-surface p
 const DATE_TRIGGER_CLASS = 'h-11 px-3 rounded-xl border border-default w-full flex items-center gap-2 text-sm text-left hover:bg-surface-secondary transition-colors';
 const ANY_DEST = 'all';
 
-export default function HeroSearchWidget() {
+export default function HeroSearchWidget({ loading = false }) {
 	const [countries, setCountries] = useState([]);
 	const [destino, setDestino] = useState(ANY_DEST);
 	const [fecha, setFecha] = useState('');
@@ -42,6 +42,26 @@ export default function HeroSearchWidget() {
 		if (fecha) params.set('date', fecha);
 		params.set('pax', String(personas));
 		router.push(`/ofertas?${params.toString()}`);
+	}
+
+	if (loading) {
+		return (
+			<div className="w-full max-w-3xl flex flex-col sm:flex-row items-stretch sm:items-end gap-3 p-3 rounded-2xl bg-surface border border-default shadow-2xl shadow-black/20">
+				<div className="flex-1 min-w-0">
+					<div className="h-3 w-16 rounded mb-1.5 ml-0.5 bg-surface-secondary animate-pulse" />
+					<div className="h-11 rounded-xl bg-surface-secondary animate-pulse" />
+				</div>
+				<div className="flex-1 min-w-0">
+					<div className="h-3 w-12 rounded mb-1.5 ml-0.5 bg-surface-secondary animate-pulse" />
+					<div className="h-11 rounded-xl bg-surface-secondary animate-pulse" />
+				</div>
+				<div className="sm:w-36">
+					<div className="h-3 w-16 rounded mb-1.5 ml-0.5 bg-surface-secondary animate-pulse" />
+					<div className="h-11 rounded-xl bg-surface-secondary animate-pulse" />
+				</div>
+				<div className="shrink-0 h-11 w-full sm:w-24 rounded-xl bg-surface-secondary animate-pulse" />
+			</div>
+		);
 	}
 
 	return (

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Spinner } from '@heroui/react';
 import { LuArrowLeft, LuMail, LuCircleCheck } from 'react-icons/lu';
+import Logo from '@/components/ui/logo';
 
 export default function OlvideContrasenaPage() {
   const [email,   setEmail]   = useState('');
@@ -34,13 +35,8 @@ export default function OlvideContrasenaPage() {
 
       {/* Panel izquierdo */}
       <div className="hidden lg:flex lg:w-[42%] relative flex-col justify-between p-12 overflow-hidden shrink-0 bg-gradient-to-br from-brand-primary/[0.10] to-surface-secondary">
-        <Link href="/login" className="relative z-10 inline-flex items-baseline gap-1 select-none group">
-          <span className="text-foreground text-[14px] font-extrabold tracking-tight uppercase transition-opacity group-hover:opacity-80">
-            JOANLUNA
-          </span>
-          <span className="text-brand-primary text-[14px] font-medium lowercase">
-            viajes
-          </span>
+        <Link href="/login" className="relative z-10 inline-flex items-center select-none group">
+          <Logo className="h-6 w-auto transition-opacity group-hover:opacity-80" />
         </Link>
 
         <div className="relative z-10">

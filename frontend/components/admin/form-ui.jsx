@@ -1,6 +1,6 @@
 'use client';
 
-import { Checkbox, Description, NumberField } from '@heroui/react';
+import { Checkbox, Description, Fieldset, NumberField } from '@heroui/react';
 import { Check, Minus, Plus } from 'lucide-react';
 
 /* Shared primitives for the admin offer/destination wizards.
@@ -50,14 +50,14 @@ export function StepperBar({ pasos, paso, maxStep = Infinity, onGoToStep }) {
   );
 }
 
-export function Panel({ title, children, className = '' }) {
+export function FieldGroup({ title, children, className = '' }) {
   return (
-    <div className={`rounded-2xl border border-default/60 bg-surface-secondary/40 p-5 space-y-4 ${className}`}>
+    <Fieldset className={`border-t border-default/70 pt-5 ${className}`}>
       {title && (
-        <p className='text-[10px] uppercase tracking-[0.2em] font-bold text-muted/70'>{title}</p>
+        <Fieldset.Legend className='text-[10px] uppercase tracking-[0.2em] font-bold text-muted/70'>{title}</Fieldset.Legend>
       )}
-      {children}
-    </div>
+      <Fieldset.Group>{children}</Fieldset.Group>
+    </Fieldset>
   );
 }
 

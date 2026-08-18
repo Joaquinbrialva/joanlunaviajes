@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Button, Spinner, Tooltip } from '@heroui/react';
 import { Info } from 'lucide-react';
 import { toastError } from '@/lib/toast';
+import { PageHeader, LinkButton } from '@/components/admin/kit';
 import {
-  StepperBar, Panel, FL, FInput, FError, NumField,
+  StepperBar, FieldGroup, FL, FInput, FError, NumField,
   PillToggle, LuggageChip, CheckPill, ReviewRow, StarSelector,
 } from '@/components/admin/form-ui';
 import HeroSelect from '@/components/ui/hero-select';
@@ -215,24 +215,18 @@ export default function AdminNewOfferPage() {
           <h2 className='text-2xl font-bold'>Sin permiso</h2>
           <p className='text-muted mt-1'>Los diseñadores no pueden crear ofertas.</p>
         </div>
-        <Link href='/admin/ofertas' className='inline-flex h-10 items-center rounded-xl bg-accent px-5 text-sm font-semibold text-accent-foreground'>
-          Volver a ofertas
-        </Link>
+        <LinkButton href='/admin/ofertas'>Volver a ofertas</LinkButton>
       </div>
     );
   }
 
   return (
     <div className='space-y-8 max-w-7xl mx-auto'>
-      {/* Encabezado */}
-      <section>
-        <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-muted mb-1'>
-          <Link href='/admin/ofertas' className='hover:text-accent transition-colors'>Ofertas</Link>
-          <span className='mx-1.5 opacity-40'>·</span>Nueva
-        </p>
-        <h2 className='text-3xl font-bold tracking-tight'>Nueva oferta</h2>
-        <p className='text-sm text-muted mt-1'>Completa los datos para publicar una propuesta comercial.</p>
-      </section>
+      <PageHeader
+        crumbs={[{ label: 'Ofertas', href: '/admin/ofertas' }, { label: 'Nueva' }]}
+        title='Nueva oferta'
+        description='Completa los datos para publicar una propuesta comercial.'
+      />
 
       {/* Stepper */}
       <StepperBar pasos={pasos} paso={paso} maxStep={maxStep} onGoToStep={goToStep} />
@@ -248,7 +242,7 @@ export default function AdminNewOfferPage() {
               <p className='text-sm text-muted mt-0.5'>Define el destino, la ruta y las imágenes de la oferta.</p>
             </div>
 
-            <Panel title='Título de la oferta'>
+            <FieldGroup title='Título de la oferta'>
               <div>
                 <FInput
                   value={form.title}
@@ -259,15 +253,15 @@ export default function AdminNewOfferPage() {
                 />
                 <FError>{showErrors && !form.title ? 'El título es obligatorio.' : null}</FError>
               </div>
-            </Panel>
+            </FieldGroup>
 
             <div className='grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_2fr] gap-4 items-start'>
-              <Panel title='Tipo de viaje'>
+              <FieldGroup title='Tipo de viaje'>
                 <PillToggle options={opcionesTipoViaje} value={form.tripType} onChange={(v) => update('tripType', v)} />
-              </Panel>
+              </FieldGroup>
 
               {form.tripType === 'multi' ? (
-                <Panel title='Ruta completa'>
+                <FieldGroup title='Ruta completa'>
                   <div>
                     <FL>Descripción de la ruta *</FL>
                     <FInput
@@ -278,9 +272,9 @@ export default function AdminNewOfferPage() {
                     />
                     <FError>{showErrors && !form.customRoute ? 'La ruta es obligatoria para viajes multi-destino.' : null}</FError>
                   </div>
-                </Panel>
+                </FieldGroup>
               ) : (
-                <Panel title='Ruta'>
+                <FieldGroup title='Ruta'>
                   <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
                     <div>
                       <FL>País de origen</FL>
@@ -304,11 +298,11 @@ export default function AdminNewOfferPage() {
                       <FInput value={form.destinationCity} onChange={(e) => update('destinationCity', e.target.value)} placeholder='Lima' />
                     </div>
                   </div>
-                </Panel>
+                </FieldGroup>
               )}
             </div>
 
-            <Panel title='Imágenes'>
+            <FieldGroup title='Imágenes'>
               <div className='grid grid-cols-1 lg:grid-cols-2 gap-5'>
                 <div>
                   <FL>Imagen de portada</FL>
@@ -323,7 +317,7 @@ export default function AdminNewOfferPage() {
                   />
                 </div>
               </div>
-            </Panel>
+            </FieldGroup>
           </div>
         )}
 
@@ -336,7 +330,7 @@ export default function AdminNewOfferPage() {
             </div>
 
             <div className='grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-4 items-start'>
-              <Panel title='Fechas del viaje'>
+              <FieldGroup title='Fechas del viaje'>
                 <div>
                   <FL>Rango de fechas (ida y vuelta)</FL>
                   <RangeDatePickerField
@@ -355,10 +349,10 @@ export default function AdminNewOfferPage() {
                   />
                   <p className='text-xs text-muted mt-1'>Se muestra si no hay fechas exactas.</p>
                 </div>
-              </Panel>
+              </FieldGroup>
 
               {(form.startDate || form.endDate) && (
-                <Panel title='Duración'>
+                <FieldGroup title='Duración'>
                   {form.startDate && form.endDate && (
                     <p className='text-xs text-accent font-medium -mb-1'>Calculado automáticamente · puedes ajustar</p>
                   )}
@@ -366,12 +360,12 @@ export default function AdminNewOfferPage() {
                     <NumField label='Días' value={form.days} onChange={(v) => update('days', v ?? 1)} min={1} withButtons />
                     <NumField label='Noches' value={form.nights} onChange={(v) => update('nights', v ?? 0)} min={0} withButtons />
                   </div>
-                </Panel>
+                </FieldGroup>
               )}
             </div>
 
             <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 items-start'>
-              <Panel title='Vuelo'>
+              <FieldGroup title='Vuelo'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                   <div>
                     <FL>Aerolínea</FL>
@@ -400,9 +394,9 @@ export default function AdminNewOfferPage() {
                     <LuggageChip label='Equipaje despachado' checked={form.luggageChecked} onChange={(v) => update('luggageChecked', v)} />
                   </div>
                 </div>
-              </Panel>
+              </FieldGroup>
 
-              <Panel title='Precio'>
+              <FieldGroup title='Precio'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                   <div>
                     <FL>Moneda</FL>
@@ -433,10 +427,10 @@ export default function AdminNewOfferPage() {
                   </div>
                   <NumField label='Cupos disponibles' value={form.seats} onChange={(v) => update('seats', v ?? 1)} min={1} withButtons />
                 </div>
-              </Panel>
+              </FieldGroup>
             </div>
 
-            <Panel title='Alojamiento'>
+            <FieldGroup title='Alojamiento'>
               <CheckPill
                 label='¿La oferta incluye alojamiento?'
                 checked={form.hasHotel}
@@ -472,7 +466,7 @@ export default function AdminNewOfferPage() {
                   </div>
                 </div>
               )}
-            </Panel>
+            </FieldGroup>
           </div>
         )}
 
@@ -484,7 +478,7 @@ export default function AdminNewOfferPage() {
               <p className='text-sm text-muted mt-0.5'>Descripción, inclusions y puntos destacados.</p>
             </div>
 
-            <Panel title='Descripción'>
+            <FieldGroup title='Descripción'>
               <div>
                 <FL>Resumen comercial</FL>
                 <textarea
@@ -494,33 +488,33 @@ export default function AdminNewOfferPage() {
                   placeholder='Descripción breve que aparece en la tarjeta de oferta...'
                 />
               </div>
-            </Panel>
+            </FieldGroup>
 
             <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'>
-              <Panel title='Incluye'>
+              <FieldGroup title='Incluye'>
                 <ItemListInput
                   label=''
                   items={form.includes}
                   onChange={(v) => update('includes', v)}
                   placeholder='Ej: Vuelos, Hotel, Traslados...'
                 />
-              </Panel>
-              <Panel title='No incluye'>
+              </FieldGroup>
+              <FieldGroup title='No incluye'>
                 <ItemListInput
                   label=''
                   items={form.notIncludes}
                   onChange={(v) => update('notIncludes', v)}
                   placeholder='Ej: Propinas, Gastos personales...'
                 />
-              </Panel>
-              <Panel title='Highlights' className='md:col-span-2 xl:col-span-1'>
+              </FieldGroup>
+              <FieldGroup title='Highlights' className='md:col-span-2 xl:col-span-1'>
                 <ItemListInput
                   label=''
                   items={form.highlights}
                   onChange={(v) => update('highlights', v)}
                   placeholder='Ej: Asistencia local, Coordinación integral...'
                 />
-              </Panel>
+              </FieldGroup>
             </div>
           </div>
         )}
@@ -533,7 +527,7 @@ export default function AdminNewOfferPage() {
               <p className='text-sm text-muted mt-0.5'>Revisa los datos antes de publicar.</p>
             </div>
 
-            <div className='rounded-2xl border border-default bg-surface-secondary/50 overflow-hidden'>
+            <div className='rounded-2xl bg-surface-secondary/50 overflow-hidden'>
               <ReviewRow label='Título' value={form.title || '—'} />
               <ReviewRow label='Ruta' value={buildRouteLabel(form)} />
               <ReviewRow label='Aerolínea' value={form.airline ? `${form.airline} · ${form.flightType === 'direct' ? 'Directo' : 'Con escala'}` : '—'} />
@@ -575,7 +569,7 @@ export default function AdminNewOfferPage() {
               </div>
             )}
 
-            <Panel title='Publicación'>
+            <FieldGroup title='Publicación'>
               <div className='grid grid-cols-1 md:grid-cols-[200px_1fr] gap-5 items-start'>
                 <div>
                   <FL>Estado</FL>
@@ -608,7 +602,7 @@ export default function AdminNewOfferPage() {
                   </div>
                 </div>
               </div>
-            </Panel>
+            </FieldGroup>
           </div>
         )}
 

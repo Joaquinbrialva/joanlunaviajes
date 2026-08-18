@@ -2,12 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { Button, Checkbox, Spinner, toast } from '@heroui/react';
-import { LuPlus, LuPencil, LuTrash2, LuSparkles } from 'react-icons/lu';
-import GalleryEditor from '@/components/ui/gallery-editor';
+import { LuPlus, LuPencil, LuTrash2, LuSparkles, LuVideo } from 'react-icons/lu';
+import NovedadImagePicker from '@/components/admin/novedad-image-picker';
 import { toastError, toastSuccess } from '@/lib/toast';
 import { PageHeader, Section, Dialog, ConfirmDialog, TextareaField, EmptyState, NovedadStatusChip } from '@/components/admin/kit';
 
-const EMPTY_FORM = { images: [], caption: '', status: 'published' };
+const EMPTY_FORM = { media: [], caption: '', status: 'published' };
+
+function itemToPayload(item) {
+  return item.type === 'video'
+    ? { url: item.url, type: 'video', trimStart: item.trimStart, trimEnd: item.trimEnd }
+    : { url: item.url, type: 'image' };
+}
+
+function recordToMedia(item) {
+  if (Array.isArray(item.media) && item.media.length > 0) return item.media;
+  return (item.images || []).map((url) => ({ url, type: 'image' }));
+}
 
 export default function NovedadesPage() {
   const [updates, setUpdates] = useState([]);
@@ -34,7 +45,7 @@ export default function NovedadesPage() {
 
   function openEdit(item) {
     setEditing(item);
-    setForm({ images: item.images || [], caption: item.caption || '', status: item.status || 'published' });
+    setForm({ media: recordToMedia(item), caption: item.caption || '', status: item.status || 'published' });
     setDrawerOpen(true);
   }
 
@@ -50,25 +61,30 @@ export default function NovedadesPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (form.images.length === 0) {
-      toastError('Agregá al menos una imagen.');
+    if (form.media.length === 0) {
+      toastError('Agregá al menos una imagen o video.');
       return;
     }
     setSaving(true);
     try {
-      const body = { images: form.images, caption: form.caption, status: form.status };
       if (editing) {
+        const body = { media: [itemToPayload(form.media[0])], caption: form.caption, status: form.status };
         const res = await fetch(`/api/novedades/${editing.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al actualizar.');
         setUpdates((prev) => prev.map((u) => (u.id === editing.id ? data : u)));
         toastSuccess('Novedad actualizada');
       } else {
-        const res = await fetch('/api/novedades', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Error al crear.');
-        setUpdates((prev) => [data, ...prev]);
-        toastSuccess('Novedad creada');
+        // Cada imagen/video del lote se publica como una novedad independiente.
+        const created = [];
+        for (const item of form.media) {
+          const res = await fetch('/api/novedades', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ media: [itemToPayload(item)], caption: form.caption, status: form.status }) });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Error al crear.');
+          created.push(data);
+        }
+        setUpdates((prev) => [...created, ...prev]);
+        toastSuccess(created.length > 1 ? `${created.length} novedades creadas` : 'Novedad creada');
       }
       closeDrawer();
     } catch (err) {
@@ -100,9 +116,9 @@ export default function NovedadesPage() {
         <form onSubmit={handleSubmit} className='space-y-4 p-5'>
           <div>
             <label className='mb-1.5 block text-[13px] font-medium text-foreground'>
-              Imágenes <span className='text-accent'>*</span>
+              {editing ? 'Imagen o video' : 'Imágenes o videos'} <span className='text-accent'>*</span>
             </label>
-            <GalleryEditor images={form.images} onChange={(arr) => update('images', arr)} />
+            <NovedadImagePicker items={form.media} onChange={(arr) => update('media', arr)} maxImages={editing ? 1 : undefined} />
           </div>
 
           <TextareaField
@@ -143,8 +159,8 @@ export default function NovedadesPage() {
       <Section>
         <div className='p-4 md:p-5'>
           {loading ? (
-            <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4'>
-              {Array.from({ length: 4 }).map((_, i) => <div key={i} className='aspect-square animate-pulse rounded-xl bg-surface-secondary' />)}
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+              {Array.from({ length: 4 }).map((_, i) => <div key={i} className='aspect-[3/1] animate-pulse rounded-xl bg-surface-secondary' />)}
             </div>
           ) : updates.length === 0 ? (
             <EmptyState
@@ -154,29 +170,41 @@ export default function NovedadesPage() {
               action={<Button onClick={openCreate}>Nueva novedad</Button>}
             />
           ) : (
-            <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4'>
-              {updates.map((item) => (
-                <div key={item.id} className='group relative aspect-square overflow-hidden rounded-xl border border-default bg-surface-secondary'>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {item.images?.[0] && <img src={item.images[0]} alt={item.caption || 'Novedad'} className='h-full w-full object-cover' />}
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0' />
-                  <div className='absolute left-2 top-2'><NovedadStatusChip status={item.status} /></div>
-                  <div className='absolute bottom-2 left-2 right-2 flex items-end justify-between gap-2'>
-                    <div className='min-w-0'>
-                      {item.caption && <p className='truncate text-xs font-medium text-white'>{item.caption}</p>}
-                      <p className='text-[10px] text-white/70'>{item.images?.length || 0} foto{item.images?.length !== 1 ? 's' : ''}</p>
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+              {updates.map((item) => {
+                const media = recordToMedia(item);
+                const cover = media[0];
+                return (
+                  <div key={item.id} className='group relative aspect-[3/1] overflow-hidden rounded-xl border border-default bg-surface-secondary'>
+                    {cover && (cover.type === 'video' ? (
+                      <video src={cover.url} className='h-full w-full object-cover' muted playsInline />
+                    ) : (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={cover.url} alt={item.caption || 'Novedad'} className='h-full w-full object-cover' />
+                    ))}
+                    <div className='absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/0' />
+                    <div className='absolute left-3 top-3 flex items-center gap-1.5'>
+                      <NovedadStatusChip status={item.status} solid />
+                      {cover?.type === 'video' && (
+                        <span className='flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-semibold text-white'>
+                          <LuVideo className='h-3 w-3' /> video
+                        </span>
+                      )}
                     </div>
-                    <div className='flex shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100'>
-                      <button onClick={() => openEdit(item)} className='flex h-7 w-7 items-center justify-center rounded-lg bg-black/50 text-white hover:bg-black/70' title='Editar'>
-                        <LuPencil size={13} />
+                    <div className='absolute right-2 top-2 flex shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100'>
+                      <button onClick={() => openEdit(item)} className='flex h-8 w-8 items-center justify-center rounded-lg bg-black/50 text-white hover:bg-black/70' title='Editar'>
+                        <LuPencil size={14} />
                       </button>
-                      <button onClick={() => setPendingDelete(item.id)} className='flex h-7 w-7 items-center justify-center rounded-lg bg-black/50 text-white hover:bg-danger/80' title='Eliminar'>
-                        <LuTrash2 size={13} />
+                      <button onClick={() => setPendingDelete(item.id)} className='flex h-8 w-8 items-center justify-center rounded-lg bg-black/50 text-white hover:bg-danger/80' title='Eliminar'>
+                        <LuTrash2 size={14} />
                       </button>
+                    </div>
+                    <div className='absolute bottom-3 left-3 right-3'>
+                      {item.caption && <p className='truncate text-sm font-medium text-white'>{item.caption}</p>}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

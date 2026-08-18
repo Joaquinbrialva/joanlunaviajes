@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Button, Spinner } from '@heroui/react';
 import { toastError } from '@/lib/toast';
+import { PageHeader } from '@/components/admin/kit';
 import {
-  StepperBar, Panel, FL, FInput, FError, NumField, CheckPill, ReviewRow,
+  StepperBar, FieldGroup, FL, FInput, FError, NumField, CheckPill, ReviewRow,
 } from '@/components/admin/form-ui';
 import HeroSelect from '@/components/ui/hero-select';
 import ItemListInput from '@/components/ui/item-list-input';
@@ -146,15 +146,11 @@ export default function AdminNewDestinationPage() {
 
   return (
     <div className='space-y-8 max-w-7xl mx-auto'>
-      {/* Encabezado */}
-      <section>
-        <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-muted mb-1'>
-          <Link href='/admin/destinos' className='hover:text-accent transition-colors'>Destinos</Link>
-          <span className='mx-1.5 opacity-40'>·</span>Nuevo
-        </p>
-        <h2 className='text-3xl font-bold tracking-tight'>Nuevo destino</h2>
-        <p className='text-sm text-muted mt-1'>Completa los datos para publicar un destino turístico.</p>
-      </section>
+      <PageHeader
+        crumbs={[{ label: 'Destinos', href: '/admin/destinos' }, { label: 'Nuevo' }]}
+        title='Nuevo destino'
+        description='Completa los datos para publicar un destino turístico.'
+      />
 
       {/* Stepper */}
       <StepperBar pasos={pasos} paso={paso} maxStep={maxStep} onGoToStep={goToStep} />
@@ -171,7 +167,7 @@ export default function AdminNewDestinationPage() {
             </div>
 
             <div className='grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_2fr] gap-4 items-start'>
-              <Panel title='Nombre'>
+              <FieldGroup title='Nombre'>
                 <div>
                   <FInput
                     value={form.name}
@@ -182,9 +178,9 @@ export default function AdminNewDestinationPage() {
                   />
                   <FError>{showErrors && !form.name ? 'El nombre es obligatorio.' : null}</FError>
                 </div>
-              </Panel>
+              </FieldGroup>
 
-              <Panel title='Ubicación'>
+              <FieldGroup title='Ubicación'>
                 <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
                   <div>
                     <FL>País *</FL>
@@ -205,12 +201,12 @@ export default function AdminNewDestinationPage() {
                     <FInput value={form.slug} onChange={(e) => update('slug', e.target.value)} placeholder='patagonia-argentina' className='font-mono text-xs' />
                   </div>
                 </div>
-              </Panel>
+              </FieldGroup>
             </div>
 
-            <Panel title='Imagen destacada'>
+            <FieldGroup title='Imagen destacada'>
               <CoverImageInput value={form.featuredImage} onChange={(url) => update('featuredImage', url)} />
-            </Panel>
+            </FieldGroup>
           </div>
         )}
 
@@ -223,7 +219,7 @@ export default function AdminNewDestinationPage() {
             </div>
 
             <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 items-start'>
-              <Panel title='Información de viaje'>
+              <FieldGroup title='Información de viaje'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                   <div>
                     <FL>Aeropuerto IATA *</FL>
@@ -261,9 +257,9 @@ export default function AdminNewDestinationPage() {
                   </div>
                   <NumField label='Estadía recomendada (días)' value={form.recommendedStayDays} onChange={(v) => update('recommendedStayDays', v ?? 1)} min={1} withButtons />
                 </div>
-              </Panel>
+              </FieldGroup>
 
-              <Panel title='Clima'>
+              <FieldGroup title='Clima'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                   <div>
                     <FL>Tipo de clima</FL>
@@ -282,7 +278,7 @@ export default function AdminNewDestinationPage() {
                     <FInput value={form.bestMonthsToVisit} onChange={(e) => update('bestMonthsToVisit', e.target.value)} placeholder='Enero, Febrero, Marzo' />
                   </div>
                 </div>
-              </Panel>
+              </FieldGroup>
             </div>
           </div>
         )}
@@ -295,7 +291,7 @@ export default function AdminNewDestinationPage() {
               <p className='text-sm text-muted mt-0.5'>Textos, highlights y galería.</p>
             </div>
 
-            <Panel title='Descripciones'>
+            <FieldGroup title='Descripciones'>
               <div className='space-y-4'>
                 <div>
                   <FL>Descripción larga *</FL>
@@ -318,24 +314,24 @@ export default function AdminNewDestinationPage() {
                   <FError>{showErrors && !form.shortDescription ? 'La descripción corta es obligatoria.' : null}</FError>
                 </div>
               </div>
-            </Panel>
+            </FieldGroup>
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <Panel title='Highlights'>
+              <FieldGroup title='Highlights'>
                 <ItemListInput label='' items={form.highlights} onChange={(v) => update('highlights', v)} placeholder='Ej: Tours guiados, Gastronomía local...' />
-              </Panel>
-              <Panel title='Estilos de viaje'>
+              </FieldGroup>
+              <FieldGroup title='Estilos de viaje'>
                 <ItemListInput label='' items={form.travelStyles} onChange={(v) => update('travelStyles', v)} placeholder='Ej: Cultural, Naturaleza...' />
-              </Panel>
+              </FieldGroup>
             </div>
 
-            <Panel title='Galería de imágenes' className='xl:max-w-3xl'>
+            <FieldGroup title='Galería de imágenes' className='xl:max-w-3xl'>
               <p className='text-xs text-muted -mt-1'>Imágenes adicionales del destino.</p>
               <GalleryEditor
                 images={form.gallery ? form.gallery.split('\n').map((s) => s.trim()).filter(Boolean) : []}
                 onChange={(arr) => update('gallery', arr.join('\n'))}
               />
-            </Panel>
+            </FieldGroup>
           </div>
         )}
 
@@ -347,7 +343,7 @@ export default function AdminNewDestinationPage() {
               <p className='text-sm text-muted mt-0.5'>Revisa los datos antes de publicar.</p>
             </div>
 
-            <div className='rounded-2xl border border-default bg-surface-secondary/50 overflow-hidden'>
+            <div className='rounded-2xl bg-surface-secondary/50 overflow-hidden'>
               <ReviewRow label='Nombre' value={form.name || '—'} />
               <ReviewRow label='País' value={`${form.country || '—'} · ${form.continent}`} />
               <ReviewRow label='Aeropuerto' value={form.airport || '—'} />
@@ -385,7 +381,7 @@ export default function AdminNewDestinationPage() {
               </div>
             )}
 
-            <Panel title='Publicación'>
+            <FieldGroup title='Publicación'>
               <div className='grid grid-cols-1 md:grid-cols-[200px_1fr] gap-5 items-start'>
                 <div>
                   <FL>Estado</FL>
@@ -407,7 +403,7 @@ export default function AdminNewDestinationPage() {
                   />
                 </div>
               </div>
-            </Panel>
+            </FieldGroup>
           </div>
         )}
 

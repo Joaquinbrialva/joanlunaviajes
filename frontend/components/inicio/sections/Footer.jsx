@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Logo from '@/components/ui/logo';
 
 const EXPLORE = [
   { label: 'Ofertas', href: '/ofertas' },
@@ -19,13 +20,8 @@ export default function Footer() {
 
           {/* Marca */}
           <div className="space-y-4">
-            <Link href="/" className="inline-flex items-baseline gap-1 select-none">
-              <span className="text-[15px] font-extrabold tracking-tight uppercase text-white leading-none">
-                JOANLUNA
-              </span>
-              <span className="text-brand-primary leading-none text-[14px] font-medium lowercase">
-                viajes
-              </span>
+            <Link href="/" className="inline-flex items-center select-none">
+              <Logo className="h-6 w-auto" />
             </Link>
             <p className="text-sm text-slate-500 leading-relaxed max-w-[260px]">
               Experiencias de viaje memorables con itinerarios curados y atención 100% personalizada.

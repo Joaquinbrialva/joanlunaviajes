@@ -107,6 +107,7 @@ model Subscriber {
 model Update {
   id        String   @id @default(uuid())
   images    String[]
+  media     Json     @default("[]")
   caption   String   @default("")
   status    String   @default("published")
   createdAt DateTime @default(now())

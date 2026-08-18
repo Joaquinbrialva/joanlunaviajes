@@ -55,7 +55,7 @@ export function RoleStatusChip({ role }) {
   return <StatusChip color={s.color}>{s.label}</StatusChip>;
 }
 
-export function NovedadStatusChip({ status }) {
+export function NovedadStatusChip({ status, solid = false }) {
   const s = NOVEDAD_STATUS[status] || NOVEDAD_STATUS.published;
-  return <StatusChip color={s.color}>{s.label}</StatusChip>;
+  return <StatusChip color={s.color} variant={solid ? 'solid' : 'soft'}>{s.label}</StatusChip>;
 }

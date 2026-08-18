@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { LuArrowUpRight, LuMapPin } from 'react-icons/lu';
+import { LuArrowUpRight, LuMapPin, LuSparkles } from 'react-icons/lu';
 
 
 export default function CollageGrid({ destinations = [] }) {
@@ -30,12 +30,11 @@ export default function CollageGrid({ destinations = [] }) {
 }
 
 function DestinationCard({ destination: dest }) {
+  const highlightCount = dest.highlights?.length || 0;
+
   return (
     <Link href={`/destinos/${dest.slug}`} className='group block'>
-      <article
-        className='relative overflow-hidden rounded-2xl transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-2xl group-hover:shadow-black/25'
-        style={{ aspectRatio: '3 / 2' }}
-      >
+      <article className='relative overflow-hidden rounded-3xl aspect-[3/4] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-xl dark:hover:shadow-2xl dark:hover:shadow-black/50'>
         {/* Image */}
         {dest.featuredImage ? (
           <Image
@@ -43,29 +42,24 @@ function DestinationCard({ destination: dest }) {
             alt={dest.name}
             fill
             sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
-            className='object-cover transition-transform duration-700 group-hover:scale-[1.07]'
+            className='object-cover'
           />
         ) : (
           <div className='absolute inset-0 bg-slate-900' />
         )}
 
         {/* Base gradient */}
-        <div className='absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/5' />
-
-        {/* Hover accent overlay */}
-        <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500'
-          style={{ background: 'linear-gradient(to top, rgba(255,126,45,0.18) 0%, transparent 50%)' }}
-        />
+        <div className='absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/5' />
 
         {/* Popular badge */}
         {dest.isPopular && (
-          <span className='absolute top-3.5 left-3.5 bg-accent text-white text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-[0.15em] shadow-md'>
+          <span className='absolute top-3.5 left-3.5 bg-accent text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-widest shadow-md'>
             Popular
           </span>
         )}
 
-        {/* Arrow — appears on hover */}
-        <div className='absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-300'>
+        {/* Arrow */}
+        <div className='absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center'>
           <LuArrowUpRight size={14} className='text-white' />
         </div>
 
@@ -73,32 +67,38 @@ function DestinationCard({ destination: dest }) {
         <div className='absolute inset-x-0 bottom-0 p-4'>
           {/* Country eyebrow */}
           <div className='flex items-center gap-1.5 mb-1.5'>
-            <LuMapPin size={9} className='text-white/40 shrink-0' />
-            <span className='text-white/40 text-[9px] uppercase tracking-[0.22em] font-bold'>
+            <LuMapPin size={10} className='text-white/40 shrink-0' />
+            <span className='text-white/40 text-xs uppercase tracking-widest font-bold'>
               {dest.country}
             </span>
           </div>
 
-          {/* Destination name — Cormorant medium weight */}
-          <h3
-            className='text-white font-bold text-lg leading-tight group-hover:text-orange-100 transition-colors duration-300'
-          >
+          {/* Destination name */}
+          <h3 className='text-white font-bold text-xl leading-tight'>
             {dest.name}
           </h3>
 
-          {/* Description — slides up on hover */}
+          {highlightCount > 0 && (
+            <div className='flex items-center gap-1.5 mt-1.5 text-white/70'>
+              <LuSparkles size={12} className='shrink-0' />
+              <span className='text-xs font-medium'>
+                {highlightCount} {highlightCount === 1 ? 'lugar imperdible' : 'lugares imperdibles'}
+              </span>
+            </div>
+          )}
+
           {dest.shortDescription && (
-            <p className='text-white/50 text-[11px] leading-relaxed line-clamp-2 max-h-0 overflow-hidden opacity-0 group-hover:max-h-[3rem] group-hover:opacity-100 group-hover:mt-2 transition-all duration-400'>
+            <p className='text-white/50 text-xs leading-relaxed line-clamp-2 mt-2'>
               {dest.shortDescription}
             </p>
           )}
 
           {/* CTA */}
-          <div className='flex items-center gap-1.5 mt-2 opacity-60 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-300'>
-            <span className='text-accent text-[10px] font-bold uppercase tracking-[0.18em]'>
+          <div className='flex items-center gap-1.5 mt-2.5'>
+            <span className='text-accent text-xs font-bold uppercase tracking-widest'>
               Explorar
             </span>
-            <LuArrowUpRight size={10} className='text-accent' />
+            <LuArrowUpRight size={12} className='text-accent' />
           </div>
         </div>
       </article>

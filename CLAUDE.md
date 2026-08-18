@@ -81,14 +81,12 @@ Backend npm scripts of note: `db:generate`, `db:push`, `db:migrate` (prisma migr
 | DELETE | `/api/cotizaciones/:id` | Delete inquiry (admin/agent only) |
 | GET/POST/PATCH/DELETE | `/api/users` | Admin user management (admin only) |
 | POST | `/api/upload` | Upload a single image to Supabase Storage (any authed user) |
-| POST | `/api/upload/media` | Upload hero image/video (admin/agent/designer) |
-| GET | `/api/settings/hero` | Public — current homepage hero media |
-| PATCH | `/api/settings/hero` | Update hero media (admin/agent/designer) |
+| POST | `/api/upload/media` | Upload image/video for novedades (admin/agent/designer) |
 | GET | `/health` | Health check |
 
 Auth middleware (`backend/src/middleware/auth.js`): `requireAuth` (any logged-in user), `optionalAuth` (attaches `req.user` if present, doesn't block), `requireRole(...roles)` (returns a `[requireAuth, checker]` array — mount with `...requireRole(...)` in route definitions).
 
-Roles: `admin`, `agent`, `designer`, `client`. Keep the role list in sync across `backend/src/routes/users.js` (`VALID_ROLES`), `backend/src/routes/upload.js` / `settings.js` (`ALLOWED_ROLES`), and `frontend/app/admin/usuarios/page.jsx` (`ROLES`) — they've drifted before.
+Roles: `admin`, `agent`, `designer`, `client`. Keep the role list in sync across `backend/src/routes/users.js` (`VALID_ROLES`), `backend/src/routes/upload.js` (`ALLOWED_ROLES`), and `frontend/app/admin/usuarios/page.jsx` (`ROLES`) — they've drifted before.
 
 There is no `Notification` model and no `/api/notifications/*` route. `frontend/components/admin/notification-bell.jsx` still polls those endpoints and will silently no-op (this is known and intentionally left as-is for now, not a bug to "fix" reflexively).
 
@@ -126,7 +124,6 @@ There is no `Notification` model and no `/api/notifications/*` route. `frontend/
 | `/admin/usuarios` | User management (admin only) |
 | `/admin/perfil` | Own profile |
 | `/admin/ajustes` | Settings |
-| `/admin/apariencia` | Hero media / appearance settings |
 
 Auth is enforced via `frontend/middleware.js` (cookie presence check on `/admin/*`).
 

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { InputOTP, Spinner } from '@heroui/react';
 import { LuMailCheck, LuArrowLeft, LuRefreshCw, LuShieldCheck } from 'react-icons/lu';
 import { toastError, toastSuccess } from '@/lib/toast';
+import Logo from '@/components/ui/logo';
 
 const EXPIRY_SECONDS = 15 * 60;
 const RESEND_COOLDOWN = 60;
@@ -96,13 +97,8 @@ function VerificarContent() {
       {/* ── Panel izquierdo ── */}
       <div className="hidden lg:flex lg:w-[42%] relative flex-col justify-between p-12 overflow-hidden shrink-0 bg-gradient-to-br from-brand-primary/[0.10] to-surface-secondary">
         {/* Wordmark */}
-        <Link href="/" className="relative z-10 inline-flex items-baseline gap-1 select-none group">
-          <span className="text-foreground text-[14px] font-extrabold tracking-tight uppercase transition-opacity group-hover:opacity-80">
-            JOANLUNA
-          </span>
-          <span className="text-brand-primary text-[14px] font-medium lowercase">
-            viajes
-          </span>
+        <Link href="/" className="relative z-10 inline-flex items-center select-none group">
+          <Logo className="h-6 w-auto transition-opacity group-hover:opacity-80" />
         </Link>
 
         {/* Copy central */}

@@ -1,14 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { LuMonitor, LuMoon, LuSun } from 'react-icons/lu';
+import { PageHeader, Section } from '@/components/admin/kit';
 
 const THEME_OPTIONS = [
   { value: 'light', label: 'Claro', icon: LuSun },
   { value: 'dark', label: 'Oscuro', icon: LuMoon },
   { value: 'system', label: 'Sistema', icon: LuMonitor },
+];
+
+const INFO_ROWS = [
+  { label: 'Aplicación', value: 'Joanluna Viajes — Panel Admin' },
+  { label: 'Versión', value: '1.0.0' },
+  { label: 'Frontend', value: 'Next.js 15' },
+  { label: 'Backend', value: 'Express 4' },
 ];
 
 export default function AjustesPage() {
@@ -18,22 +25,10 @@ export default function AjustesPage() {
   useEffect(() => setMounted(true), []);
 
   return (
-    <div className='space-y-6 max-w-2xl mx-auto'>
-      <section>
-        <p className='text-sm text-muted mb-1'>
-          <Link href='/admin' className='hover:underline'>Panel</Link> / Ajustes
-        </p>
-        <h2 className='text-4xl font-bold'>Ajustes</h2>
-        <p className='text-muted'>Personaliza la experiencia del panel.</p>
-      </section>
+    <div className='mx-auto max-w-2xl space-y-6'>
+      <PageHeader crumbs={[{ label: 'Panel', href: '/admin' }, { label: 'Ajustes' }]} title='Ajustes' description='Personaliza la experiencia del panel.' />
 
-      {/* Appearance */}
-      <div className='rounded-2xl border border-default bg-surface p-5 space-y-4'>
-        <div>
-          <h3 className='text-lg font-semibold'>Apariencia</h3>
-          <p className='text-sm text-muted'>Selecciona el tema visual del panel de administración.</p>
-        </div>
-
+      <Section title='Apariencia' description='Selecciona el tema visual del panel de administración.' bodyClassName='p-5 pt-0'>
         {mounted && (
           <div className='grid grid-cols-3 gap-3'>
             {THEME_OPTIONS.map(({ value, label, icon: Icon }) => {
@@ -44,9 +39,7 @@ export default function AjustesPage() {
                   type='button'
                   onClick={() => setTheme(value)}
                   className={`flex flex-col items-center gap-2.5 rounded-xl border-2 p-4 text-sm font-medium transition-colors ${
-                    active
-                      ? 'border-accent bg-accent/5 text-accent'
-                      : 'border-default bg-surface-secondary text-foreground hover:border-accent/40'
+                    active ? 'border-accent bg-accent/5 text-accent' : 'border-default bg-surface-secondary text-foreground hover:border-accent/40'
                   }`}
                 >
                   <Icon className='h-5 w-5' />
@@ -56,27 +49,16 @@ export default function AjustesPage() {
             })}
           </div>
         )}
-      </div>
+      </Section>
 
-      {/* App info */}
-      <div className='rounded-2xl border border-default bg-surface p-5 space-y-3'>
-        <h3 className='text-lg font-semibold'>Información del sistema</h3>
-        <dl className='space-y-2 text-sm'>
-          <Row label='Aplicación' value='Joanluna Viajes — Panel Admin' />
-          <Row label='Versión' value='1.0.0' />
-          <Row label='Frontend' value='Next.js 15' />
-          <Row label='Backend' value='Express 4' />
-        </dl>
-      </div>
-    </div>
-  );
-}
-
-function Row({ label, value }) {
-  return (
-    <div className='flex items-center justify-between'>
-      <dt className='text-muted'>{label}</dt>
-      <dd className='font-medium'>{value}</dd>
+      <Section title='Información del sistema' bodyClassName='p-5 pt-0 space-y-2 text-sm'>
+        {INFO_ROWS.map((row) => (
+          <div key={row.label} className='flex items-center justify-between'>
+            <dt className='text-muted'>{row.label}</dt>
+            <dd className='font-medium'>{row.value}</dd>
+          </div>
+        ))}
+      </Section>
     </div>
   );
 }

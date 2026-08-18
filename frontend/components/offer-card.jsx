@@ -36,7 +36,7 @@ export default function OfferCard({ offer }) {
               alt={cover.alt || offer.title}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-[1.06]"
+              className="object-cover"
             />
           ) : (
             <div className="h-full w-full bg-surface-tertiary" />

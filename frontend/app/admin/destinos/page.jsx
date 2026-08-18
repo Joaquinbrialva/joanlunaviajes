@@ -1,15 +1,15 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import HeroSelect from '@/components/ui/hero-select';
-import { AlertDialog, Button, toast } from '@heroui/react';
-import { Eye, PenLine, Trash2, Globe } from 'lucide-react';
+import { Button, Chip, Skeleton, toast } from '@heroui/react';
+import { LuEye, LuPencil, LuTrash2, LuGlobe, LuPlus } from 'react-icons/lu';
 import DestinationPreviewDrawer from '@/components/admin/destination-preview-drawer';
 import { toastError } from '@/lib/toast';
 import { usePagination } from '@/hooks/use-pagination';
 import AdminTablePagination from '@/components/ui/admin-table-pagination';
+import { PageHeader, Section, TableToolbar, EmptyState, ConfirmDialog, RowCheckbox, LinkButton } from '@/components/admin/kit';
 
 export default function AdminDestinationsPage() {
   const [destinations, setDestinations] = useState([]);
@@ -35,29 +35,18 @@ export default function AdminDestinationsPage() {
       .then((r) => r.json())
       .then((data) => { if (active && Array.isArray(data)) setDestinations(data); })
       .catch(() => {
-        if (active) {
-          setDestinations([]);
-          toastError('No se pudieron cargar los destinos. Verificá tu conexión.');
-        }
+        if (active) { setDestinations([]); toastError('No se pudieron cargar los destinos. Verificá tu conexión.'); }
       })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
+      .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
 
-  const continents = useMemo(
-    () => ['all', ...new Set(destinations.map((d) => d.continent))],
-    [destinations]
-  );
+  const continents = useMemo(() => ['all', ...new Set(destinations.map((d) => d.continent))], [destinations]);
 
   const rows = useMemo(() => {
     const query = search.trim().toLowerCase();
     return destinations.filter((d) => {
-      const searchMatch =
-        query.length === 0 ||
-        d.name.toLowerCase().includes(query) ||
-        d.country.toLowerCase().includes(query);
+      const searchMatch = query.length === 0 || d.name.toLowerCase().includes(query) || d.country.toLowerCase().includes(query);
       const continentMatch = continent === 'all' || d.continent === continent;
       return searchMatch && continentMatch;
     });
@@ -72,9 +61,7 @@ export default function AdminDestinationsPage() {
 
     const deleteFn = async () => {
       if (toDelete.type === 'batch') {
-        const results = await Promise.all(
-          selectedIds.map((id) => fetch(`/api/destinos/${id}`, { method: 'DELETE' }))
-        );
+        const results = await Promise.all(selectedIds.map((id) => fetch(`/api/destinos/${id}`, { method: 'DELETE' })));
         if (results.some((r) => !r.ok)) throw new Error('Alguna eliminación falló');
         setDestinations((prev) => prev.filter((d) => !selectedIds.includes(d.id)));
         setSelected(new Set());
@@ -87,256 +74,128 @@ export default function AdminDestinationsPage() {
     };
 
     const count = toDelete.type === 'batch' ? selectedIds.length : 1;
-    toast.promise(deleteFn, {
-      loading: 'Eliminando...',
-      success: count > 1 ? `${count} destinos eliminados` : 'Destino eliminado',
-      error: (err) => err?.message || 'No se pudo eliminar',
-    });
+    toast.promise(deleteFn, { loading: 'Eliminando...', success: count > 1 ? `${count} destinos eliminados` : 'Destino eliminado', error: (err) => err?.message || 'No se pudo eliminar' });
   }
 
   const isDesigner = role === 'designer';
-  const deleteLabel = pendingDelete?.type === 'batch'
-    ? `${selected.size} destino(s) seleccionado(s)`
-    : 'este destino';
+  const deleteLabel = pendingDelete?.type === 'batch' ? `${selected.size} destino(s) seleccionado(s)` : 'este destino';
   const tableLoading = loading || role === null;
 
   return (
     <div className={`space-y-5 transition-[padding-right] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${previewDest ? 'md:pr-[456px]' : ''}`}>
-      <DestinationPreviewDrawer
-        destination={previewDest}
-        isOpen={previewDest !== null}
-        onClose={() => setPreviewDest(null)}
-      />
+      <DestinationPreviewDrawer destination={previewDest} isOpen={previewDest !== null} onClose={() => setPreviewDest(null)} />
 
       {!isDesigner && (
-        <AlertDialog isOpen={pendingDelete !== null} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
-          <AlertDialog.Backdrop variant='blur'>
-            <AlertDialog.Container>
-              <AlertDialog.Dialog>
-                <AlertDialog.CloseTrigger />
-                <AlertDialog.Header>
-                  <AlertDialog.Icon status='danger' />
-                  <AlertDialog.Heading>¿Eliminar destino(s)?</AlertDialog.Heading>
-                </AlertDialog.Header>
-                <AlertDialog.Body>
-                  <p className='text-sm text-muted'>
-                    Estás a punto de eliminar <strong>{deleteLabel}</strong>. Esta acción no se puede deshacer.
-                  </p>
-                </AlertDialog.Body>
-                <AlertDialog.Footer className='flex justify-end gap-2'>
-                  <Button slot='close' variant='tertiary'>Cancelar</Button>
-                  <Button onClick={executeDelete} slot='close' variant='danger'>Eliminar</Button>
-                </AlertDialog.Footer>
-              </AlertDialog.Dialog>
-            </AlertDialog.Container>
-          </AlertDialog.Backdrop>
-        </AlertDialog>
+        <ConfirmDialog isOpen={pendingDelete !== null} onOpenChange={(open) => { if (!open) setPendingDelete(null); }} title='¿Eliminar destino(s)?' onConfirm={executeDelete}>
+          Estás a punto de eliminar <strong>{deleteLabel}</strong>. Esta acción no se puede deshacer.
+        </ConfirmDialog>
       )}
 
-      <section className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
-        <div>
-          <h2 className='text-4xl font-bold'>Gestión de destinos</h2>
-          <p className='text-muted'>
-            {isDesigner
-              ? 'Puedes ver los destinos y editar sus imágenes.'
-              : 'Controla contenido, metadata SEO y visibilidad comercial.'}
-          </p>
-        </div>
-        {role !== null && !isDesigner && (
-          <Link
-            href='/admin/destinos/nuevo'
-            className='inline-flex h-10 items-center justify-center rounded-lg bg-accent px-4 text-sm font-semibold text-accent-foreground'
-          >
-            + Nuevo destino
-          </Link>
+      <PageHeader
+        title='Gestión de destinos'
+        description={isDesigner ? 'Puedes ver los destinos y editar sus imágenes.' : 'Controla contenido, metadata SEO y visibilidad comercial.'}
+        actions={role !== null && !isDesigner && (
+          <LinkButton href='/admin/destinos/nuevo'>
+            <LuPlus className='h-4 w-4' />
+            Nuevo destino
+          </LinkButton>
         )}
-      </section>
+      />
 
-      <section className='space-y-4 rounded-2xl border border-default bg-surface p-4 md:p-5'>
+      <Section>
+        <TableToolbar search={search} onSearchChange={setSearch} placeholder='Buscar por nombre o país...'>
+          <HeroSelect
+            value={continent}
+            onValueChange={setContinent}
+            options={continents.map((item) => ({ value: item, label: item === 'all' ? 'Todos los continentes' : item }))}
+            triggerClassName='h-9 min-w-[190px] rounded-xl border border-default bg-surface-secondary px-3 text-[13px]'
+          />
+        </TableToolbar>
+
         {!isDesigner && selected.size > 0 && (
-          <div className='flex items-center gap-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 dark:border-rose-800 dark:bg-rose-900/10'>
-            <span className='text-sm font-medium text-rose-700 dark:text-rose-400'>
-              {selected.size} seleccionado(s)
-            </span>
-            <Button size='sm' variant='danger-soft' color='danger' onPress={() => setPendingDelete({ type: 'batch' })} startContent={<Trash2 size={14} />}>
+          <div className='flex items-center gap-3 border-b border-default bg-danger/5 px-5 py-2.5'>
+            <span className='text-sm font-medium text-danger'>{selected.size} seleccionado(s)</span>
+            <Button size='sm' variant='danger-soft' onClick={() => setPendingDelete({ type: 'batch' })}>
+              <LuTrash2 className='h-3.5 w-3.5' />
               Eliminar seleccionados
             </Button>
           </div>
         )}
 
-        <div className='grid grid-cols-1 gap-3 md:grid-cols-[1fr_240px]'>
-          <input
-            className='h-10 rounded-lg border border-default bg-surface-secondary px-3 text-sm'
-            placeholder='Buscar por nombre o país...'
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <HeroSelect
-            value={continent}
-            onValueChange={(value) => setContinent(value)}
-            options={continents.map((item) => ({
-              value: item,
-              label: item === 'all' ? 'Todos los continentes' : item,
-            }))}
-            triggerClassName='h-10 rounded-lg border border-default bg-surface-secondary px-3'
-          />
-        </div>
-
-        <div className='overflow-x-auto rounded-xl border border-default'>
+        <div className='overflow-x-auto'>
           {tableLoading ? (
-            <DestinationTableSkeleton />
+            <div className='space-y-2 p-5'>{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className='h-11 rounded-lg' />)}</div>
           ) : (
             <table className='w-full min-w-[600px] text-sm'>
-            <thead>
-              <tr className='border-b border-default bg-surface-secondary text-left text-xs font-medium text-muted'>
-                {!isDesigner && (
-                  <th className='w-10 px-4 py-3'>
-                    <SquareCheckbox
-                      checked={pageItems.length > 0 && pageItems.every((d) => selected.has(d.id))}
-                      onChange={(v) => setSelected(v ? new Set(pageItems.map((d) => d.id)) : new Set())}
-                    />
-                  </th>
-                )}
-                <th className='px-4 py-3'>Destino</th>
-                <th className='px-4 py-3'>País</th>
-                <th className='px-4 py-3'>Continente</th>
-                <th className='px-4 py-3'>Budget diario</th>
-                <th className='px-4 py-3'>Popular</th>
-                <th className='px-4 py-3'></th>
-              </tr>
-            </thead>
-            <tbody className='divide-y divide-default'>
-              {rows.length === 0 ? (
-                <tr>
-                  <td colSpan={!isDesigner ? 7 : 6} className='px-4 py-12 text-center'>
-                    {destinations.length === 0 ? (
-                      <div className='flex flex-col items-center gap-2'>
-                        <Globe className='h-9 w-9 text-muted/40' />
-                        <p className='font-semibold text-foreground'>Sin destinos todavía</p>
-                        <p className='text-sm text-muted'>Crea el primer destino para que aparezca aquí.</p>
-                      </div>
-                    ) : (
-                      <p className='text-muted'>No hay destinos que coincidan con la búsqueda.</p>
-                    )}
-                  </td>
+              <thead>
+                <tr className='border-b border-default bg-surface-secondary text-left text-xs font-medium text-muted'>
+                  {!isDesigner && <th className='w-10 px-4 py-3'><RowCheckbox checked={pageItems.length > 0 && pageItems.every((d) => selected.has(d.id))} onChange={(v) => setSelected(v ? new Set(pageItems.map((d) => d.id)) : new Set())} /></th>}
+                  <th className='px-4 py-3'>Destino</th>
+                  <th className='px-4 py-3'>País</th>
+                  <th className='px-4 py-3'>Continente</th>
+                  <th className='px-4 py-3'>Budget diario</th>
+                  <th className='px-4 py-3'>Popular</th>
+                  <th className='px-4 py-3' />
                 </tr>
-              ) : pageItems.map((destination) => {
-                const isSelected = selected.has(destination.id);
-                return (
-                  <tr key={destination.id} className={`transition-colors ${isSelected ? 'bg-orange-50 dark:bg-orange-900/20' : 'hover:bg-surface-secondary/50'}`}>
-                    {!isDesigner && (
-                      <td className='px-4 py-3'>
-                        <SquareCheckbox
-                          checked={isSelected}
-                          onChange={(v) => {
-                            const next = new Set(selected);
-                            v ? next.add(destination.id) : next.delete(destination.id);
-                            setSelected(next);
-                          }}
-                        />
-                      </td>
-                    )}
-                    <td className='px-4 py-3'>
-                      <p className='font-semibold'>{destination.name}</p>
-                      <p className='text-xs text-muted'>{destination.id}</p>
-                    </td>
-                    <td className='px-4 py-3 text-muted'>{destination.country}</td>
-                    <td className='px-4 py-3 text-muted'>{destination.continent}</td>
-                    <td className='px-4 py-3 font-medium'>USD {destination.stats.averageDailyBudgetUSD}</td>
-                    <td className='px-4 py-3'>
-                      {destination.isPopular ? (
-                        <span className='inline-flex rounded-full bg-orange-100 px-2 py-0.5 text-xs font-semibold text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'>
-                          Popular
-                        </span>
+              </thead>
+              <tbody className='divide-y divide-default'>
+                {rows.length === 0 ? (
+                  <tr>
+                    <td colSpan={isDesigner ? 6 : 7} className='px-4 py-2'>
+                      {destinations.length === 0 ? (
+                        <EmptyState icon={LuGlobe} title='Sin destinos todavía' description='Crea el primer destino para que aparezca aquí.' />
                       ) : (
-                        <span className='text-xs text-muted'>—</span>
+                        <p className='py-10 text-center text-muted'>No hay destinos que coincidan con la búsqueda.</p>
                       )}
                     </td>
-                    <td className='px-4 py-3'>
-                      <div className='flex items-center justify-end gap-1'>
-                        <button
-                          onClick={() => setPreviewDest(destination)}
-                          className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground'
-                          title='Ver resumen'
-                        >
-                          <Eye size={15} />
-                        </button>
-                        <button
-                          onClick={() => router.push(`/admin/destinos/${destination.slug}/editar`)}
-                          className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground'
-                          title='Editar'
-                        >
-                          <PenLine size={15} />
-                        </button>
-                        {!isDesigner && (
-                          <button
-                            onClick={() => setPendingDelete({ type: 'single', id: destination.id })}
-                            className='flex h-8 w-8 items-center justify-center rounded-lg text-rose-500 transition-colors hover:bg-rose-50 dark:hover:bg-rose-900/20'
-                            title='Eliminar'
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        )}
-                      </div>
-                    </td>
                   </tr>
-                );
-              })}
-            </tbody>
+                ) : pageItems.map((destination) => {
+                  const isSelected = selected.has(destination.id);
+                  return (
+                    <tr key={destination.id} className={`transition-colors ${isSelected ? 'bg-accent/5' : 'hover:bg-surface-secondary/50'}`}>
+                      {!isDesigner && (
+                        <td className='px-4 py-3'>
+                          <RowCheckbox checked={isSelected} onChange={(v) => { const next = new Set(selected); v ? next.add(destination.id) : next.delete(destination.id); setSelected(next); }} />
+                        </td>
+                      )}
+                      <td className='px-4 py-3'>
+                        <p className='font-semibold'>{destination.name}</p>
+                        <p className='text-xs text-muted'>{destination.id}</p>
+                      </td>
+                      <td className='px-4 py-3 text-muted'>{destination.country}</td>
+                      <td className='px-4 py-3 text-muted'>{destination.continent}</td>
+                      <td className='px-4 py-3 font-medium'>USD {destination.stats.averageDailyBudgetUSD}</td>
+                      <td className='px-4 py-3'>
+                        {destination.isPopular ? (
+                          <Chip color='accent' variant='soft' size='sm'><Chip.Label>Popular</Chip.Label></Chip>
+                        ) : (
+                          <span className='text-xs text-muted'>—</span>
+                        )}
+                      </td>
+                      <td className='px-4 py-3'>
+                        <div className='flex items-center justify-end gap-1'>
+                          <button onClick={() => setPreviewDest(destination)} className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground' title='Ver resumen'>
+                            <LuEye className='h-[15px] w-[15px]' />
+                          </button>
+                          <button onClick={() => router.push(`/admin/destinos/${destination.slug}/editar`)} className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground' title='Editar'>
+                            <LuPencil className='h-[15px] w-[15px]' />
+                          </button>
+                          {!isDesigner && (
+                            <button onClick={() => setPendingDelete({ type: 'single', id: destination.id })} className='flex h-8 w-8 items-center justify-center rounded-lg text-danger transition-colors hover:bg-danger/10' title='Eliminar'>
+                              <LuTrash2 className='h-[15px] w-[15px]' />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
             </table>
           )}
         </div>
-        <AdminTablePagination
-          page={page}
-          totalPages={totalPages}
-          from={from}
-          to={to}
-          total={rows.length}
-          onChange={setPage}
-        />
-      </section>
+        <AdminTablePagination page={page} totalPages={totalPages} from={from} to={to} total={rows.length} onChange={setPage} />
+      </Section>
     </div>
   );
 }
-
-function DestinationTableSkeleton() {
-  return (
-    <div className='animate-pulse min-w-[600px]'>
-      <div className='border-b border-default bg-surface-secondary/60 flex gap-4 px-4 py-3'>
-        {[10, 140, 100, 110, 100, 70].map((w, i) => (
-          <div key={i} className='h-3 rounded bg-surface-secondary shrink-0' style={{ width: w }} />
-        ))}
-      </div>
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className='flex items-center gap-4 px-4 py-3.5 border-b border-default'>
-          <div className='h-4 w-4 rounded-sm bg-surface-secondary shrink-0' />
-          <div className='flex-1 space-y-1.5'>
-            <div className='h-3 w-36 rounded bg-surface-secondary' />
-            <div className='h-2.5 w-20 rounded bg-surface-secondary' />
-          </div>
-          <div className='h-3 w-24 rounded bg-surface-secondary shrink-0' />
-          <div className='h-3 w-28 rounded bg-surface-secondary shrink-0' />
-          <div className='h-3 w-20 rounded bg-surface-secondary shrink-0' />
-          <div className='h-5 w-16 rounded-full bg-surface-secondary shrink-0' />
-          <div className='h-6 w-16 rounded-lg bg-surface-secondary shrink-0' />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function SquareCheckbox({ checked, onChange }) {
-  return (
-    <label className='inline-flex cursor-pointer'>
-      <input type='checkbox' className='sr-only' checked={checked} onChange={(e) => onChange(e.target.checked)} />
-      <span className={`flex h-4 w-4 items-center justify-center rounded-sm border transition-colors ${checked ? 'border-accent bg-accent' : 'border-default bg-surface'}`}>
-        {checked && (
-          <svg width='10' height='8' viewBox='0 0 10 8' fill='none'>
-            <path d='M1 4l3 3 5-6' stroke='white' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />
-          </svg>
-        )}
-      </span>
-    </label>
-  );
-}
-

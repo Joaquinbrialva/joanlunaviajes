@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button, Spinner } from '@heroui/react';
+import { Button, Chip, Spinner } from '@heroui/react';
 import { toastError, toastSuccess } from '@/lib/toast';
+import { PageHeader } from '@/components/admin/kit';
 import {
-  StepperBar, Panel, FL, FInput, FError, NumField, CheckPill, ReviewRow,
+  StepperBar, FieldGroup, FL, FInput, FError, NumField, CheckPill, ReviewRow,
 } from '@/components/admin/form-ui';
 import HeroSelect from '@/components/ui/hero-select';
 import ItemListInput from '@/components/ui/item-list-input';
@@ -129,14 +129,11 @@ function DesignerMediaViewDestino({ slug, destId, form, update }) {
 
   return (
     <div className='space-y-6 max-w-xl mx-auto'>
-      <section>
-        <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-muted mb-1'>
-          <Link href='/admin/destinos' className='hover:text-accent transition-colors'>Destinos</Link>
-          <span className='mx-1.5 opacity-40'>·</span>Multimedia
-        </p>
-        <h2 className='text-3xl font-bold tracking-tight'>Editar multimedia</h2>
-        <p className='text-xs text-muted font-mono mt-1'>{slug}</p>
-      </section>
+      <PageHeader
+        crumbs={[{ label: 'Destinos', href: '/admin/destinos' }, { label: 'Multimedia' }]}
+        title='Editar multimedia'
+        description={slug}
+      />
       <div className='rounded-2xl border border-default bg-surface p-6 md:p-8 space-y-6'>
         <div className='space-y-2'>
           <FL>Imagen destacada (portada)</FL>
@@ -270,22 +267,19 @@ export default function EditDestinationPage() {
 
   return (
     <div className='space-y-8 max-w-7xl mx-auto'>
-      <section className='flex items-start justify-between gap-4'>
-        <div>
-          <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-muted mb-1'>
-            <Link href='/admin/destinos' className='hover:text-accent transition-colors'>Destinos</Link>
-            <span className='mx-1.5 opacity-40'>·</span>Editar
-          </p>
-          <h2 className='text-3xl font-bold tracking-tight'>Editar destino</h2>
-          <p className='text-xs text-muted font-mono mt-1'>{slug}</p>
-        </div>
-        {hasChanges && (
-          <span className='shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 px-2.5 py-1.5 rounded-full'>
-            <span className='h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse' />
-            Cambios sin guardar
-          </span>
+      <PageHeader
+        crumbs={[{ label: 'Destinos', href: '/admin/destinos' }, { label: 'Editar' }]}
+        title='Editar destino'
+        description={slug}
+        actions={hasChanges && (
+          <Chip color='warning' variant='soft'>
+            <Chip.Label className='flex items-center gap-1.5'>
+              <span className='h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500' />
+              Cambios sin guardar
+            </Chip.Label>
+          </Chip>
         )}
-      </section>
+      />
 
       <StepperBar pasos={pasos} paso={paso} maxStep={maxStep} onGoToStep={setPaso} />
 
@@ -298,14 +292,14 @@ export default function EditDestinationPage() {
               <p className='text-sm text-muted mt-0.5'>Nombre, país y datos de identificación.</p>
             </div>
             <div className='grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_2fr] gap-4 items-start'>
-              <Panel title='Nombre'>
+              <FieldGroup title='Nombre'>
                 <div>
                   <FInput value={form.name} onChange={(e) => update('name', e.target.value)}
                     error={showErrors && !form.name} className='text-base h-12 font-medium' />
                   <FError>{showErrors && !form.name ? 'El nombre es obligatorio.' : null}</FError>
                 </div>
-              </Panel>
-              <Panel title='Ubicación'>
+              </FieldGroup>
+              <FieldGroup title='Ubicación'>
                 <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
                   <div>
                     <FL>País *</FL>
@@ -322,11 +316,11 @@ export default function EditDestinationPage() {
                     <FInput value={form.slug} onChange={(e) => update('slug', e.target.value)} readOnly className='font-mono text-xs opacity-60 cursor-not-allowed' />
                   </div>
                 </div>
-              </Panel>
+              </FieldGroup>
             </div>
-            <Panel title='Imagen destacada'>
+            <FieldGroup title='Imagen destacada'>
               <CoverImageInput value={form.featuredImage} onChange={(url) => update('featuredImage', url)} />
-            </Panel>
+            </FieldGroup>
           </div>
         )}
 
@@ -337,7 +331,7 @@ export default function EditDestinationPage() {
               <p className='text-sm text-muted mt-0.5'>Información práctica para el viajero.</p>
             </div>
             <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 items-start'>
-              <Panel title='Información de viaje'>
+              <FieldGroup title='Información de viaje'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                   <div>
                     <FL>Aeropuerto IATA *</FL>
@@ -362,8 +356,8 @@ export default function EditDestinationPage() {
                   </div>
                   <NumField label='Estadía recomendada (días)' value={form.recommendedStayDays} onChange={(v) => update('recommendedStayDays', v ?? 1)} min={1} withButtons />
                 </div>
-              </Panel>
-              <Panel title='Clima'>
+              </FieldGroup>
+              <FieldGroup title='Clima'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                   <div>
                     <FL>Tipo de clima</FL>
@@ -377,7 +371,7 @@ export default function EditDestinationPage() {
                     <FInput value={form.bestMonthsToVisit} onChange={(e) => update('bestMonthsToVisit', e.target.value)} placeholder='Enero, Febrero, Marzo' />
                   </div>
                 </div>
-              </Panel>
+              </FieldGroup>
             </div>
           </div>
         )}
@@ -388,7 +382,7 @@ export default function EditDestinationPage() {
               <h3 className='text-lg font-bold'>Contenido editorial</h3>
               <p className='text-sm text-muted mt-0.5'>Textos, highlights y galería.</p>
             </div>
-            <Panel title='Descripciones'>
+            <FieldGroup title='Descripciones'>
               <div className='space-y-4'>
                 <div>
                   <FL>Descripción larga *</FL>
@@ -409,22 +403,22 @@ export default function EditDestinationPage() {
                   <FError>{showErrors && !form.shortDescription ? 'La descripción corta es obligatoria.' : null}</FError>
                 </div>
               </div>
-            </Panel>
+            </FieldGroup>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <Panel title='Highlights'>
+              <FieldGroup title='Highlights'>
                 <ItemListInput label='' items={form.highlights} onChange={(v) => update('highlights', v)} placeholder='Ej: Tours guiados...' />
-              </Panel>
-              <Panel title='Estilos de viaje'>
+              </FieldGroup>
+              <FieldGroup title='Estilos de viaje'>
                 <ItemListInput label='' items={form.travelStyles} onChange={(v) => update('travelStyles', v)} placeholder='Ej: Cultural, Naturaleza...' />
-              </Panel>
+              </FieldGroup>
             </div>
-            <Panel title='Galería de imágenes' className='xl:max-w-3xl'>
+            <FieldGroup title='Galería de imágenes' className='xl:max-w-3xl'>
               <p className='text-xs text-muted -mt-1'>Imágenes adicionales del destino.</p>
               <GalleryEditor
                 images={form.gallery ? form.gallery.split('\n').map((s) => s.trim()).filter(Boolean) : []}
                 onChange={(arr) => update('gallery', arr.join('\n'))}
               />
-            </Panel>
+            </FieldGroup>
           </div>
         )}
 
@@ -434,7 +428,7 @@ export default function EditDestinationPage() {
               <h3 className='text-lg font-bold'>Revisión</h3>
               <p className='text-sm text-muted mt-0.5'>Revisa los datos antes de guardar.</p>
             </div>
-            <div className='rounded-2xl border border-default bg-surface-secondary/50 overflow-hidden'>
+            <div className='rounded-2xl bg-surface-secondary/50 overflow-hidden'>
               <ReviewRow label='Nombre' value={form.name || '—'} />
               <ReviewRow label='País' value={`${form.country || '—'} · ${form.continent}`} />
               <ReviewRow label='Aeropuerto' value={form.airport || '—'} />
@@ -466,7 +460,7 @@ export default function EditDestinationPage() {
                 <span>Este destino será marcado como recomendado. El anterior será desactivado automáticamente.</span>
               </div>
             )}
-            <Panel title='Publicación'>
+            <FieldGroup title='Publicación'>
               <div className='grid grid-cols-1 md:grid-cols-[200px_1fr] gap-5 items-start'>
                 <div>
                   <FL>Estado</FL>
@@ -480,7 +474,7 @@ export default function EditDestinationPage() {
                     note='Solo puede haber uno a la vez. Marcar aquí desactivará el anterior.' />
                 </div>
               </div>
-            </Panel>
+            </FieldGroup>
           </div>
         )}
 

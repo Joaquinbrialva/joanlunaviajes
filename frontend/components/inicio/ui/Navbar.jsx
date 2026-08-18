@@ -84,14 +84,14 @@ export default function Navbar() {
       <div
         className="mx-auto backdrop-blur-2xl border bg-white/85 dark:bg-slate-950/85 border-slate-200/70 dark:border-white/[0.08] shadow-lg shadow-black/[0.06] dark:shadow-black/40"
         style={{
-          maxWidth: isIsland ? '78rem' : '100vw',
+          maxWidth: isIsland ? '92rem' : '100vw',
           borderRadius: isIsland ? '1.25rem' : '0rem',
           transition,
         }}
       >
 
         {/* Main bar — logo a la izquierda, links, acciones a la derecha */}
-        <div className="px-5 sm:px-8 flex items-center h-[72px] gap-4">
+        <div className="mx-auto max-w-6xl px-4 flex items-center h-[72px] gap-4">
 
           {/* Logo */}
           <Link href="/" className="shrink-0 flex items-center select-none">
@@ -113,6 +113,13 @@ export default function Navbar() {
 
           {/* Columna derecha — Actions + ThemeToggle al final */}
           <div className="flex-1 hidden md:flex items-center justify-end gap-2">
+            {authLoading && (
+              <>
+                <span className="h-9 w-32 rounded-full bg-slate-200/70 dark:bg-white/10 animate-pulse" />
+                <span className="h-9 w-24 rounded-full bg-slate-200/70 dark:bg-white/10 animate-pulse" />
+              </>
+            )}
+
             {!authLoading && !isStaff && (
               <Link
                 href="/cotizar"

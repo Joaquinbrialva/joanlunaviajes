@@ -3,7 +3,6 @@ import {
   LuClipboardList,
   LuGlobe,
   LuMessageSquare,
-  LuImage,
   LuUsers,
   LuSparkles,
 } from 'react-icons/lu';
@@ -27,7 +26,6 @@ export const NAV_GROUPS = [
   {
     label: 'Administración',
     links: [
-      { href: '/admin/apariencia', label: 'Apariencia', icon: LuImage, showForRoles: ['admin', 'designer'] },
       { href: '/admin/usuarios', label: 'Usuarios', icon: LuUsers, showForRoles: ['admin'] },
     ],
   },

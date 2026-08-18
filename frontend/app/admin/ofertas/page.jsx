@@ -2,15 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import HeroSelect from '@/components/ui/hero-select';
-import { AlertDialog, Button, toast } from '@heroui/react';
-import { Eye, PenLine, Star, Trash2, ClipboardList } from 'lucide-react';
-import OfferPreviewDrawer from '@/components/admin/offer-preview-drawer';
+import { Button, Chip, Skeleton, toast } from '@heroui/react';
+import { LuPencil, LuStar, LuTrash2, LuClipboardList, LuPlus } from 'react-icons/lu';
 import { toastError } from '@/lib/toast';
 import { usePagination } from '@/hooks/use-pagination';
 import AdminTablePagination from '@/components/ui/admin-table-pagination';
+import { PageHeader, Section, TableToolbar, EmptyState, ConfirmDialog, RowCheckbox, OfferStatusChip, LinkButton } from '@/components/admin/kit';
 
 function getOfferPrice(offer) {
   return offer.pricing?.price || offer.pricing?.finalPrice || offer.pricing?.originalPrice || 0;
@@ -34,7 +33,6 @@ export default function AdminOffersPage() {
   const [selected, setSelected] = useState(new Set());
   const [pendingDelete, setPendingDelete] = useState(null);
   const [pendingUnspecial, setPendingUnspecial] = useState(null);
-  const [previewOffer, setPreviewOffer] = useState(null);
   const [role, setRole] = useState(null);
   const router = useRouter();
 
@@ -49,21 +47,12 @@ export default function AdminOffersPage() {
     let active = true;
     fetch('/api/ofertas', { cache: 'no-store' })
       .then((r) => r.json())
-      .then((data) => {
-        if (active && Array.isArray(data)) setOffers(data);
-      })
+      .then((data) => { if (active && Array.isArray(data)) setOffers(data); })
       .catch(() => {
-        if (active) {
-          setOffers([]);
-          toastError('No se pudieron cargar las ofertas. Verificá tu conexión.');
-        }
+        if (active) { setOffers([]); toastError('No se pudieron cargar las ofertas. Verificá tu conexión.'); }
       })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, []);
 
   const specialOffer = useMemo(() => offers.find((o) => o.isSpecialOffer) || null, [offers]);
@@ -73,23 +62,13 @@ export default function AdminOffersPage() {
       const res = await fetch(`/api/ofertas/${offer.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...offer,
-          title: offer.title,
-          destinationCountry: offer.location?.country,
-          destinationCity: offer.location?.city,
-          isSpecialOffer: false,
-        }),
+        body: JSON.stringify({ ...offer, title: offer.title, destinationCountry: offer.location?.country, destinationCity: offer.location?.city, isSpecialOffer: false }),
       });
       if (!res.ok) throw new Error('No se pudo actualizar la oferta.');
       const updated = await res.json();
       setOffers((prev) => prev.map((o) => (o.id === offer.id ? updated : o)));
     };
-    toast.promise(run, {
-      loading: 'Actualizando...',
-      success: 'Ya no es la oferta especial',
-      error: (err) => err?.message || 'No se pudo actualizar la oferta.',
-    });
+    toast.promise(run, { loading: 'Actualizando...', success: 'Ya no es la oferta especial', error: (err) => err?.message || 'No se pudo actualizar la oferta.' });
   }
 
   const rows = useMemo(() => {
@@ -107,7 +86,6 @@ export default function AdminOffersPage() {
   }, [offers, search, status]);
 
   const { page, setPage, pageItems, totalPages, from, to } = usePagination(rows);
-
   const allRowsSelected = pageItems.length > 0 && pageItems.every((offer) => selected.has(offer.id));
 
   function executeDelete() {
@@ -125,103 +103,40 @@ export default function AdminOffersPage() {
         const res = await fetch(`/api/ofertas/${toDelete.id}`, { method: 'DELETE' });
         if (!res.ok) throw new Error('No se pudo eliminar la oferta');
         setOffers((prev) => prev.filter((offer) => offer.id !== toDelete.id));
-        setSelected((prev) => {
-          const next = new Set(prev);
-          next.delete(toDelete.id);
-          return next;
-        });
+        setSelected((prev) => { const next = new Set(prev); next.delete(toDelete.id); return next; });
       }
     };
 
     const count = toDelete.type === 'batch' ? selectedIds.length : 1;
-    toast.promise(deleteFn, {
-      loading: 'Eliminando...',
-      success: count > 1 ? `${count} ofertas eliminadas` : 'Oferta eliminada',
-      error: (err) => err?.message || 'No se pudo eliminar',
-    });
+    toast.promise(deleteFn, { loading: 'Eliminando...', success: count > 1 ? `${count} ofertas eliminadas` : 'Oferta eliminada', error: (err) => err?.message || 'No se pudo eliminar' });
   }
 
-  const deleteLabel = pendingDelete?.type === 'batch'
-    ? `${selected.size} oferta(s) seleccionada(s)`
-    : 'esta oferta';
+  const deleteLabel = pendingDelete?.type === 'batch' ? `${selected.size} oferta(s) seleccionada(s)` : 'esta oferta';
   const tableLoading = loading || role === null;
+  const isDesigner = role === 'designer';
 
   return (
-    <div className={`space-y-5 transition-[padding-right] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${previewOffer ? 'md:pr-[456px]' : ''}`}>
-      <OfferPreviewDrawer
-        offer={previewOffer}
-        isOpen={previewOffer !== null}
-        onClose={() => setPreviewOffer(null)}
+    <div className='space-y-5'>
+      <ConfirmDialog isOpen={pendingDelete !== null} onOpenChange={(open) => { if (!open) setPendingDelete(null); }} title='¿Eliminar oferta(s)?' onConfirm={executeDelete}>
+        Estás por eliminar <strong>{deleteLabel}</strong>. Esta acción no se puede deshacer.
+      </ConfirmDialog>
+
+      <ConfirmDialog isOpen={pendingUnspecial !== null} onOpenChange={(open) => { if (!open) setPendingUnspecial(null); }} status='warning' title='¿Quitar oferta especial?' confirmLabel='Quitar' onConfirm={() => removeSpecialOffer(pendingUnspecial)}>
+        <strong>{pendingUnspecial?.title}</strong> dejará de mostrarse como oferta especial en el sidebar de /ofertas.
+      </ConfirmDialog>
+
+      <PageHeader
+        title='Gestión de ofertas'
+        description={isDesigner ? 'Sube la imagen de portada de las ofertas pendientes.' : 'Administra disponibilidad, precios y estado comercial.'}
+        actions={role !== null && !isDesigner && (
+          <LinkButton href='/admin/ofertas/nueva'>
+            <LuPlus className='h-4 w-4' />
+            Nueva oferta
+          </LinkButton>
+        )}
       />
 
-      <AlertDialog isOpen={pendingDelete !== null} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
-        <AlertDialog.Backdrop variant='blur'>
-          <AlertDialog.Container>
-            <AlertDialog.Dialog>
-              <AlertDialog.CloseTrigger />
-              <AlertDialog.Header>
-                <AlertDialog.Icon status='danger' />
-                <AlertDialog.Heading>¿Eliminar oferta(s)?</AlertDialog.Heading>
-              </AlertDialog.Header>
-              <AlertDialog.Body>
-                <p className='text-sm text-muted'>
-                  Estas por eliminar <strong>{deleteLabel}</strong>. Esta accion no se puede deshacer.
-                </p>
-              </AlertDialog.Body>
-              <AlertDialog.Footer className='flex justify-end gap-2'>
-                <Button slot='close' variant='tertiary'>Cancelar</Button>
-                <Button onClick={executeDelete} slot='close' variant='danger'>Eliminar</Button>
-              </AlertDialog.Footer>
-            </AlertDialog.Dialog>
-          </AlertDialog.Container>
-        </AlertDialog.Backdrop>
-      </AlertDialog>
-
-      <AlertDialog isOpen={pendingUnspecial !== null} onOpenChange={(open) => { if (!open) setPendingUnspecial(null); }}>
-        <AlertDialog.Backdrop variant='blur'>
-          <AlertDialog.Container>
-            <AlertDialog.Dialog>
-              <AlertDialog.CloseTrigger />
-              <AlertDialog.Header>
-                <AlertDialog.Icon status='warning' />
-                <AlertDialog.Heading>¿Quitar oferta especial?</AlertDialog.Heading>
-              </AlertDialog.Header>
-              <AlertDialog.Body>
-                <p className='text-sm text-muted'>
-                  <strong>{pendingUnspecial?.title}</strong> dejará de mostrarse como oferta especial en el sidebar de /ofertas.
-                </p>
-              </AlertDialog.Body>
-              <AlertDialog.Footer className='flex justify-end gap-2'>
-                <Button slot='close' variant='tertiary'>Cancelar</Button>
-                <Button onClick={() => removeSpecialOffer(pendingUnspecial)} slot='close' variant='danger'>Quitar</Button>
-              </AlertDialog.Footer>
-            </AlertDialog.Dialog>
-          </AlertDialog.Container>
-        </AlertDialog.Backdrop>
-      </AlertDialog>
-
-      <section className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
-        <div>
-          <h2 className='text-4xl font-bold'>Gestion de ofertas</h2>
-          <p className='text-muted'>
-            {role === 'designer'
-              ? 'Sube la imagen de portada de las ofertas pendientes.'
-              : 'Administra disponibilidad, precios y estado comercial.'}
-          </p>
-        </div>
-        {role !== null && role !== 'designer' && (
-          <Link href='/admin/ofertas/nueva' className='inline-flex h-10 items-center justify-center rounded-lg bg-accent px-4 text-sm font-semibold text-accent-foreground'>
-            + Nueva oferta
-          </Link>
-        )}
-      </section>
-
-      <section className='space-y-3 rounded-2xl border border-default bg-surface p-4 md:p-5'>
-        <div className='flex items-center gap-2'>
-          <Star size={18} className='fill-amber-400 text-amber-400' />
-          <h3 className='text-lg font-bold'>Oferta especial</h3>
-          <span className='ml-1 text-xs text-muted'>(solo una a la vez, visible en el sidebar de /ofertas)</span>
-        </div>
+      <Section title='Oferta especial' description='Solo una a la vez, visible en el sidebar de /ofertas' bodyClassName='p-4 md:p-5'>
         {specialOffer ? (
           <div className='flex items-center gap-4 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10'>
             {specialOffer.images?.[0]?.url && (
@@ -234,231 +149,116 @@ export default function AdminOffersPage() {
               <p className='text-sm text-muted'>{specialOffer.location.city}, {specialOffer.location.country}</p>
             </div>
             <div className='flex shrink-0 gap-2'>
-              <button
-                onClick={() => router.push(`/admin/ofertas/${specialOffer.slug}/editar`)}
-                className='h-9 rounded-lg border border-default px-3 text-sm font-medium transition-colors hover:bg-surface-secondary'
-              >
-                Editar
-              </button>
-              <button
-                onClick={() => setPendingUnspecial(specialOffer)}
-                className='h-9 rounded-lg border border-rose-200 px-3 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:hover:bg-rose-900/20'
-              >
-                Quitar
-              </button>
+              <Button size='sm' variant='tertiary' onClick={() => router.push(`/admin/ofertas/${specialOffer.slug}/editar`)}>Editar</Button>
+              <Button size='sm' variant='danger-soft' onClick={() => setPendingUnspecial(specialOffer)}>Quitar</Button>
             </div>
           </div>
         ) : (
-          <p className='py-2 text-sm text-muted'>
-            Ninguna oferta marcada como especial. Edita una oferta y marca la opcion en el paso de revision.
-          </p>
+          <p className='text-sm text-muted'>Ninguna oferta marcada como especial. Edita una oferta y marca la opción en el paso de revisión.</p>
         )}
-      </section>
+      </Section>
 
-      <section className='space-y-4 rounded-2xl border border-default bg-surface p-4 md:p-5'>
-        {role !== 'designer' && selected.size > 0 && (
-          <div className='flex items-center gap-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 dark:border-rose-800 dark:bg-rose-900/10'>
-            <span className='text-sm font-medium text-rose-700 dark:text-rose-400'>
-              {selected.size} seleccionada(s)
-            </span>
-            <Button size='sm' variant='danger-soft' color='danger' onPress={() => setPendingDelete({ type: 'batch' })} startContent={<Trash2 size={14} />}>
-              Eliminar seleccionadas
-            </Button>
-          </div>
-        )}
-
-        <div className='grid grid-cols-1 gap-3 md:grid-cols-[1fr_220px]'>
-          <input
-            className='h-10 rounded-lg border border-default bg-surface-secondary px-3 text-sm'
-            placeholder='Buscar por titulo o destino...'
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      <Section>
+        <TableToolbar search={search} onSearchChange={setSearch} placeholder='Buscar por título o destino...'>
           <HeroSelect
             value={status}
-            onValueChange={(value) => setStatus(value)}
+            onValueChange={setStatus}
             options={[
               { value: 'all', label: 'Todos los estados' },
               { value: 'active', label: 'Activas' },
               { value: 'featured', label: 'Destacadas' },
               { value: 'low_stock', label: 'Pocos cupos' },
             ]}
-            triggerClassName='h-10 rounded-lg border border-default bg-surface-secondary px-3'
+            triggerClassName='h-9 min-w-[190px] rounded-xl border border-default bg-surface-secondary px-3 text-[13px]'
           />
-        </div>
+        </TableToolbar>
 
-        <div className='overflow-x-auto rounded-xl border border-default'>
+        {!isDesigner && selected.size > 0 && (
+          <div className='flex items-center gap-3 border-b border-default bg-danger/5 px-5 py-2.5'>
+            <span className='text-sm font-medium text-danger'>{selected.size} seleccionada(s)</span>
+            <Button size='sm' variant='danger-soft' onClick={() => setPendingDelete({ type: 'batch' })}>
+              <LuTrash2 className='h-3.5 w-3.5' />
+              Eliminar seleccionadas
+            </Button>
+          </div>
+        )}
+
+        <div className='overflow-x-auto'>
           {tableLoading ? (
-            <OfferTableSkeleton />
+            <div className='space-y-2 p-5'>{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className='h-11 rounded-lg' />)}</div>
           ) : (
             <table className='w-full min-w-[640px] text-sm'>
-            <thead>
-              <tr className='border-b border-default bg-surface-secondary text-left text-xs font-medium text-muted'>
-                {role !== 'designer' && (
-                  <th className='w-10 px-4 py-3'>
-                    <SquareCheckbox
-                      checked={allRowsSelected}
-                      onChange={(v) => setSelected(v ? new Set(pageItems.map((o) => o.id)) : new Set())}
-                    />
-                  </th>
-                )}
-                <th className='px-4 py-3'>Oferta</th>
-                <th className='px-4 py-3'>Destino</th>
-                <th className='px-4 py-3'>Duración</th>
-                <th className='px-4 py-3'>Precio</th>
-                <th className='px-4 py-3'>Estado</th>
-                <th className='px-4 py-3'>Especial</th>
-                <th className='px-4 py-3'></th>
-              </tr>
-            </thead>
-            <tbody className='divide-y divide-default'>
-              {rows.length === 0 ? (
-                <tr>
-                  <td colSpan={role !== 'designer' ? 9 : 8} className='px-4 py-12 text-center'>
-                    {offers.length === 0 ? (
-                      <div className='flex flex-col items-center gap-2'>
-                        <ClipboardList className='h-9 w-9 text-muted/40' />
-                        <p className='font-semibold text-foreground'>Sin ofertas todavía</p>
-                        <p className='text-sm text-muted'>Crea la primera oferta para que aparezca aquí.</p>
-                      </div>
-                    ) : (
-                      <p className='text-muted'>No hay ofertas que coincidan con la búsqueda.</p>
-                    )}
-                  </td>
+              <thead>
+                <tr className='border-b border-default bg-surface-secondary text-left text-xs font-medium text-muted'>
+                  {!isDesigner && <th className='w-10 px-4 py-3'><RowCheckbox checked={allRowsSelected} onChange={(v) => setSelected(v ? new Set(pageItems.map((o) => o.id)) : new Set())} /></th>}
+                  <th className='px-4 py-3'>Oferta</th>
+                  <th className='px-4 py-3'>Destino</th>
+                  <th className='px-4 py-3'>Duración</th>
+                  <th className='px-4 py-3'>Precio</th>
+                  <th className='px-4 py-3'>Estado</th>
+                  <th className='px-4 py-3'>Especial</th>
+                  <th className='px-4 py-3' />
                 </tr>
-              ) : pageItems.map((offer) => {
-                const price = getOfferPrice(offer);
-                const offerStatus = getStatus(offer);
-                const isSelected = selected.has(offer.id);
-                return (
-                  <tr key={offer.id} className={`transition-colors ${isSelected ? 'bg-orange-50 dark:bg-orange-900/20' : 'hover:bg-surface-secondary/50'}`}>
-                    {role !== 'designer' && (
-                      <td className='px-4 py-3'>
-                        <SquareCheckbox
-                          checked={isSelected}
-                          onChange={(v) => {
-                            const next = new Set(selected);
-                            v ? next.add(offer.id) : next.delete(offer.id);
-                            setSelected(next);
-                          }}
-                        />
-                      </td>
-                    )}
-                    <td className='px-4 py-3'>
-                      <p className='font-semibold'>{offer.title}</p>
-                    </td>
-                    <td className='px-4 py-3 text-muted'>{offer.location.city}, {offer.location.country}</td>
-                    <td className='px-4 py-3 text-muted'>{offer.duration.days}d / {offer.duration.nights}n</td>
-                    <td className='px-4 py-3 font-medium'>{formatPrice(price, offer.pricing.currency)}</td>
-                    <td className='px-4 py-3'><StatusPill status={offerStatus} /></td>
-                    <td className='px-4 py-3'>
-                      {offer.isSpecialOffer && (
-                        <span className='inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'>
-                          <Star size={10} className='fill-current' /> Especial
-                        </span>
+              </thead>
+              <tbody className='divide-y divide-default'>
+                {rows.length === 0 ? (
+                  <tr>
+                    <td colSpan={isDesigner ? 7 : 8} className='px-4 py-2'>
+                      {offers.length === 0 ? (
+                        <EmptyState icon={LuClipboardList} title='Sin ofertas todavía' description='Crea la primera oferta para que aparezca aquí.' />
+                      ) : (
+                        <p className='py-10 text-center text-muted'>No hay ofertas que coincidan con la búsqueda.</p>
                       )}
                     </td>
-                    <td className='px-4 py-3'>
-                      <div className='flex items-center justify-end gap-1'>
-                        <button
-                          onClick={() => setPreviewOffer(offer)}
-                          className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground'
-                          title='Ver resumen'
-                        >
-                          <Eye size={15} />
-                        </button>
-                        <button
-                          onClick={() => router.push(`/admin/ofertas/${offer.slug}/editar`)}
-                          className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground'
-                          title='Editar'
-                        >
-                          <PenLine size={15} />
-                        </button>
-                        {role !== 'designer' && (
-                          <button
-                            onClick={() => setPendingDelete({ type: 'single', id: offer.id })}
-                            className='flex h-8 w-8 items-center justify-center rounded-lg text-rose-500 transition-colors hover:bg-rose-50 dark:hover:bg-rose-900/20'
-                            title='Eliminar'
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        )}
-                      </div>
-                    </td>
                   </tr>
-                );
-              })}
-            </tbody>
+                ) : pageItems.map((offer) => {
+                  const price = getOfferPrice(offer);
+                  const offerStatus = getStatus(offer);
+                  const isSelected = selected.has(offer.id);
+                  return (
+                    <tr
+                      key={offer.id}
+                      onClick={() => router.push(`/admin/ofertas/${offer.slug}/ver`)}
+                      className={`cursor-pointer transition-colors ${isSelected ? 'bg-accent/5' : 'hover:bg-surface-secondary/50'}`}
+                    >
+                      {!isDesigner && (
+                        <td className='px-4 py-3' onClick={(e) => e.stopPropagation()}>
+                          <RowCheckbox checked={isSelected} onChange={(v) => { const next = new Set(selected); v ? next.add(offer.id) : next.delete(offer.id); setSelected(next); }} />
+                        </td>
+                      )}
+                      <td className='px-4 py-3'><p className='font-semibold'>{offer.title}</p></td>
+                      <td className='px-4 py-3 text-muted'>{offer.location.city}, {offer.location.country}</td>
+                      <td className='px-4 py-3 text-muted'>{offer.duration.days}d / {offer.duration.nights}n</td>
+                      <td className='px-4 py-3 font-medium'>{formatPrice(price, offer.pricing.currency)}</td>
+                      <td className='px-4 py-3'><OfferStatusChip status={offerStatus} /></td>
+                      <td className='px-4 py-3'>
+                        {offer.isSpecialOffer && (
+                          <Chip color='warning' variant='soft' size='sm'>
+                            <Chip.Label className='flex items-center gap-1'><LuStar className='h-2.5 w-2.5' /> Especial</Chip.Label>
+                          </Chip>
+                        )}
+                      </td>
+                      <td className='px-4 py-3' onClick={(e) => e.stopPropagation()}>
+                        <div className='flex items-center justify-end gap-1'>
+                          <button onClick={() => router.push(`/admin/ofertas/${offer.slug}/editar`)} className='flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-secondary hover:text-foreground' title='Editar'>
+                            <LuPencil className='h-[15px] w-[15px]' />
+                          </button>
+                          {!isDesigner && (
+                            <button onClick={() => setPendingDelete({ type: 'single', id: offer.id })} className='flex h-8 w-8 items-center justify-center rounded-lg text-danger transition-colors hover:bg-danger/10' title='Eliminar'>
+                              <LuTrash2 className='h-[15px] w-[15px]' />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
             </table>
           )}
         </div>
-        <AdminTablePagination
-          page={page}
-          totalPages={totalPages}
-          from={from}
-          to={to}
-          total={rows.length}
-          onChange={setPage}
-        />
-      </section>
+        <AdminTablePagination page={page} totalPages={totalPages} from={from} to={to} total={rows.length} onChange={setPage} />
+      </Section>
     </div>
   );
 }
-
-function OfferTableSkeleton() {
-  return (
-    <div className='animate-pulse min-w-[640px]'>
-      <div className='border-b border-default bg-surface-secondary/60 flex gap-4 px-4 py-3'>
-        {[10, 160, 120, 80, 80, 80, 60, 80].map((w, i) => (
-          <div key={i} className='h-3 rounded bg-surface-secondary shrink-0' style={{ width: w }} />
-        ))}
-      </div>
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className='flex items-center gap-4 px-4 py-3.5 border-b border-default'>
-          <div className='h-4 w-4 rounded-sm bg-surface-secondary shrink-0' />
-          <div className='flex-1 space-y-1.5'>
-            <div className='h-3 w-40 rounded bg-surface-secondary' />
-            <div className='h-2.5 w-24 rounded bg-surface-secondary' />
-          </div>
-          <div className='h-3 w-28 rounded bg-surface-secondary shrink-0' />
-          <div className='h-3 w-16 rounded bg-surface-secondary shrink-0' />
-          <div className='h-3 w-20 rounded bg-surface-secondary shrink-0' />
-          <div className='h-5 w-16 rounded-full bg-surface-secondary shrink-0' />
-          <div className='h-3 w-12 rounded bg-surface-secondary shrink-0' />
-          <div className='h-3 w-16 rounded bg-surface-secondary shrink-0' />
-          <div className='h-6 w-20 rounded-lg bg-surface-secondary shrink-0' />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function StatusPill({ status }) {
-  const map = {
-    active: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-    featured: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-    low_stock: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
-  };
-  const label = { active: 'Activa', featured: 'Destacada', low_stock: 'Pocos cupos' };
-  return (
-    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${map[status]}`}>
-      {label[status]}
-    </span>
-  );
-}
-
-function SquareCheckbox({ checked, onChange }) {
-  return (
-    <label className='inline-flex cursor-pointer'>
-      <input type='checkbox' className='sr-only' checked={checked} onChange={(e) => onChange(e.target.checked)} />
-      <span className={`flex h-4 w-4 items-center justify-center rounded-sm border transition-colors ${checked ? 'border-accent bg-accent' : 'border-default bg-surface'}`}>
-        {checked && (
-          <svg width='10' height='8' viewBox='0 0 10 8' fill='none'>
-            <path d='M1 4l3 3 5-6' stroke='white' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />
-          </svg>
-        )}
-      </span>
-    </label>
-  );
-}
-

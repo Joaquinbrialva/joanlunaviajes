@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button, Spinner, Tooltip } from '@heroui/react';
+import { Button, Chip, Spinner, Tooltip } from '@heroui/react';
 import { Info } from 'lucide-react';
 import { toastError, toastSuccess } from '@/lib/toast';
+import { PageHeader } from '@/components/admin/kit';
 import {
-  StepperBar, Panel, FL, FInput, FError, NumField,
+  StepperBar, FieldGroup, FL, FInput, FError, NumField,
   PillToggle, LuggageChip, CheckPill, ReviewRow, StarSelector,
 } from '@/components/admin/form-ui';
 import HeroSelect from '@/components/ui/hero-select';
@@ -159,14 +159,11 @@ function DesignerMediaView({ slug, offerId, form, update }) {
 
   return (
     <div className='space-y-6 max-w-xl mx-auto'>
-      <section>
-        <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-muted mb-1'>
-          <Link href='/admin/ofertas' className='hover:text-accent transition-colors'>Ofertas</Link>
-          <span className='mx-1.5 opacity-40'>·</span>Multimedia
-        </p>
-        <h2 className='text-3xl font-bold tracking-tight'>Editar multimedia</h2>
-        <p className='text-xs text-muted font-mono mt-1'>{slug}</p>
-      </section>
+      <PageHeader
+        crumbs={[{ label: 'Ofertas', href: '/admin/ofertas' }, { label: 'Multimedia' }]}
+        title='Editar multimedia'
+        description={slug}
+      />
 
       <div className='rounded-2xl border border-default bg-surface p-6 md:p-8 space-y-6'>
         {!form.coverImage && (
@@ -321,22 +318,19 @@ export default function EditOfferPage() {
 
   return (
     <div className='space-y-8 max-w-7xl mx-auto'>
-      <section className='flex items-start justify-between gap-4'>
-        <div>
-          <p className='text-[10px] uppercase tracking-[0.2em] font-semibold text-muted mb-1'>
-            <Link href='/admin/ofertas' className='hover:text-accent transition-colors'>Ofertas</Link>
-            <span className='mx-1.5 opacity-40'>·</span>Editar
-          </p>
-          <h2 className='text-3xl font-bold tracking-tight'>Editar oferta</h2>
-          <p className='text-xs text-muted font-mono mt-1'>{slug}</p>
-        </div>
-        {hasChanges && (
-          <span className='shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 px-2.5 py-1.5 rounded-full'>
-            <span className='h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse' />
-            Cambios sin guardar
-          </span>
+      <PageHeader
+        crumbs={[{ label: 'Ofertas', href: '/admin/ofertas' }, { label: 'Editar' }]}
+        title='Editar oferta'
+        description={slug}
+        actions={hasChanges && (
+          <Chip color='warning' variant='soft'>
+            <Chip.Label className='flex items-center gap-1.5'>
+              <span className='h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500' />
+              Cambios sin guardar
+            </Chip.Label>
+          </Chip>
         )}
-      </section>
+      />
 
       <StepperBar pasos={pasos} paso={paso} maxStep={maxStep} onGoToStep={setPaso} />
 
@@ -348,28 +342,28 @@ export default function EditOfferPage() {
               <h3 className='text-lg font-bold'>Información general</h3>
               <p className='text-sm text-muted mt-0.5'>Define el destino, la ruta y las imágenes.</p>
             </div>
-            <Panel title='Título de la oferta'>
+            <FieldGroup title='Título de la oferta'>
               <div>
                 <FInput value={form.title} onChange={(e) => update('title', e.target.value)}
                   error={showErrors && !form.title} className='text-base h-12 font-medium' />
                 <FError>{showErrors && !form.title ? 'El título es obligatorio.' : null}</FError>
               </div>
-            </Panel>
+            </FieldGroup>
             <div className='grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_2fr] gap-4 items-start'>
-              <Panel title='Tipo de viaje'>
+              <FieldGroup title='Tipo de viaje'>
                 <PillToggle options={opcionesTipoViaje} value={form.tripType} onChange={(v) => update('tripType', v)} />
-              </Panel>
+              </FieldGroup>
               {form.tripType === 'multi' ? (
-                <Panel title='Ruta completa'>
+                <FieldGroup title='Ruta completa'>
                   <div>
                     <FL>Descripción de la ruta *</FL>
                     <FInput value={form.customRoute} onChange={(e) => update('customRoute', e.target.value)}
                       placeholder='Buenos Aires → Lima → Bogotá → Buenos Aires' error={showErrors && !form.customRoute} />
                     <FError>{showErrors && !form.customRoute ? 'La ruta es obligatoria para viajes multi-destino.' : null}</FError>
                   </div>
-                </Panel>
+                </FieldGroup>
               ) : (
-                <Panel title='Ruta'>
+                <FieldGroup title='Ruta'>
                   <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
                     <div><FL>País de origen</FL><CountryCombobox value={form.originCountry} onChange={(v) => update('originCountry', v)} placeholder='Argentina' /></div>
                     <div><FL>Ciudad de origen</FL><FInput value={form.originCity} onChange={(e) => update('originCity', e.target.value)} placeholder='Buenos Aires' /></div>
@@ -381,10 +375,10 @@ export default function EditOfferPage() {
                     </div>
                     <div><FL>Ciudad de destino</FL><FInput value={form.destinationCity} onChange={(e) => update('destinationCity', e.target.value)} placeholder='Lima' /></div>
                   </div>
-                </Panel>
+                </FieldGroup>
               )}
             </div>
-            <Panel title='Imágenes'>
+            <FieldGroup title='Imágenes'>
               <div className='grid grid-cols-1 lg:grid-cols-2 gap-5'>
                 <div><FL>Imagen de portada</FL><CoverImageInput value={form.coverImage} onChange={(url) => update('coverImage', url)} /></div>
                 <div>
@@ -393,7 +387,7 @@ export default function EditOfferPage() {
                   <GalleryEditor images={form.galleryImages || []} onChange={(imgs) => update('galleryImages', imgs)} />
                 </div>
               </div>
-            </Panel>
+            </FieldGroup>
           </div>
         )}
 
@@ -404,7 +398,7 @@ export default function EditOfferPage() {
               <p className='text-sm text-muted mt-0.5'>Fechas, duración, vuelo y precios.</p>
             </div>
             <div className='grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-4 items-start'>
-              <Panel title='Fechas del viaje'>
+              <FieldGroup title='Fechas del viaje'>
                 <div>
                   <FL>Rango de fechas</FL>
                   <RangeDatePickerField startDate={form.startDate} endDate={form.endDate} tripType={form.tripType}
@@ -415,19 +409,19 @@ export default function EditOfferPage() {
                   <FInput value={form.availableMonths} onChange={(e) => update('availableMonths', e.target.value)} placeholder='Ej: Enero a Marzo, Junio a Agosto' />
                   <p className='text-xs text-muted mt-1'>Se muestra si no hay fechas exactas.</p>
                 </div>
-              </Panel>
+              </FieldGroup>
               {(form.startDate || form.endDate) && (
-                <Panel title='Duración'>
+                <FieldGroup title='Duración'>
                   {form.startDate && form.endDate && <p className='text-xs text-accent font-medium -mb-1'>Calculado automáticamente · puedes ajustar</p>}
                   <div className='grid grid-cols-2 gap-4'>
                     <NumField label='Días' value={form.days} onChange={(v) => update('days', v ?? 1)} min={1} withButtons />
                     <NumField label='Noches' value={form.nights} onChange={(v) => update('nights', v ?? 0)} min={0} withButtons />
                   </div>
-                </Panel>
+                </FieldGroup>
               )}
             </div>
             <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 items-start'>
-              <Panel title='Vuelo'>
+              <FieldGroup title='Vuelo'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                   <div><FL>Aerolínea</FL><AirlineCombobox value={form.airline} iata={form.airlineIata} onChange={({ name, iata }) => setForm((prev) => ({ ...prev, airline: name, airlineIata: iata }))} /></div>
                   <div><FL>Tipo de vuelo</FL><PillToggle options={opcionesTipoVuelo} value={form.flightType} onChange={(v) => { update('flightType', v); if (v === 'direct') update('layoverCity', ''); }} /></div>
@@ -446,8 +440,8 @@ export default function EditOfferPage() {
                     <LuggageChip label='Equipaje despachado' checked={form.luggageChecked} onChange={(v) => update('luggageChecked', v)} />
                   </div>
                 </div>
-              </Panel>
-              <Panel title='Precio'>
+              </FieldGroup>
+              <FieldGroup title='Precio'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                   <div>
                     <FL>Moneda</FL>
@@ -458,10 +452,10 @@ export default function EditOfferPage() {
                   <div><FL>Aclaración de precio</FL><FInput value={form.priceNote} onChange={(e) => update('priceNote', e.target.value)} placeholder='por persona' /></div>
                   <NumField label='Cupos disponibles' value={form.seats} onChange={(v) => update('seats', v ?? 1)} min={1} withButtons />
                 </div>
-              </Panel>
+              </FieldGroup>
             </div>
 
-            <Panel title='Alojamiento'>
+            <FieldGroup title='Alojamiento'>
               <CheckPill
                 label='¿La oferta incluye alojamiento?'
                 checked={form.hasHotel}
@@ -497,7 +491,7 @@ export default function EditOfferPage() {
                   </div>
                 </div>
               )}
-            </Panel>
+            </FieldGroup>
           </div>
         )}
 
@@ -507,17 +501,17 @@ export default function EditOfferPage() {
               <h3 className='text-lg font-bold'>Contenido</h3>
               <p className='text-sm text-muted mt-0.5'>Descripción, inclusiones y puntos destacados.</p>
             </div>
-            <Panel title='Descripción'>
+            <FieldGroup title='Descripción'>
               <div>
                 <FL>Resumen comercial</FL>
                 <textarea className='min-h-28 px-3.5 py-3 rounded-xl border border-default w-full text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/60 resize-y hover:border-muted/50 transition-all'
                   value={form.summary} onChange={(e) => update('summary', e.target.value)} placeholder='Descripción breve para la tarjeta de oferta...' />
               </div>
-            </Panel>
+            </FieldGroup>
             <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'>
-              <Panel title='Incluye'><ItemListInput label='' items={form.includes} onChange={(v) => update('includes', v)} placeholder='Ej: Vuelos, Hotel...' /></Panel>
-              <Panel title='No incluye'><ItemListInput label='' items={form.notIncludes} onChange={(v) => update('notIncludes', v)} placeholder='Ej: Propinas...' /></Panel>
-              <Panel title='Highlights' className='md:col-span-2 xl:col-span-1'><ItemListInput label='' items={form.highlights} onChange={(v) => update('highlights', v)} placeholder='Ej: Asistencia local...' /></Panel>
+              <FieldGroup title='Incluye'><ItemListInput label='' items={form.includes} onChange={(v) => update('includes', v)} placeholder='Ej: Vuelos, Hotel...' /></FieldGroup>
+              <FieldGroup title='No incluye'><ItemListInput label='' items={form.notIncludes} onChange={(v) => update('notIncludes', v)} placeholder='Ej: Propinas...' /></FieldGroup>
+              <FieldGroup title='Highlights' className='md:col-span-2 xl:col-span-1'><ItemListInput label='' items={form.highlights} onChange={(v) => update('highlights', v)} placeholder='Ej: Asistencia local...' /></FieldGroup>
             </div>
           </div>
         )}
@@ -528,7 +522,7 @@ export default function EditOfferPage() {
               <h3 className='text-lg font-bold'>Revisión</h3>
               <p className='text-sm text-muted mt-0.5'>Revisa los datos antes de guardar.</p>
             </div>
-            <div className='rounded-2xl border border-default bg-surface-secondary/50 overflow-hidden'>
+            <div className='rounded-2xl bg-surface-secondary/50 overflow-hidden'>
               <ReviewRow label='Título' value={form.title || '—'} />
               <ReviewRow label='Ruta' value={buildRouteLabel(form)} />
               <ReviewRow label='Aerolínea' value={form.airline ? `${form.airline} · ${form.flightType === 'direct' ? 'Directo' : 'Con escala'}` : '—'} />
@@ -564,7 +558,7 @@ export default function EditOfferPage() {
                 <span>Esta oferta será marcada como oferta especial. La anterior será desactivada automáticamente.</span>
               </div>
             )}
-            <Panel title='Publicación'>
+            <FieldGroup title='Publicación'>
               <div className='grid grid-cols-1 md:grid-cols-[200px_1fr] gap-5 items-start'>
                 <div>
                   <FL>Estado</FL>
@@ -593,7 +587,7 @@ export default function EditOfferPage() {
                   </div>
                 </div>
               </div>
-            </Panel>
+            </FieldGroup>
           </div>
         )}
 

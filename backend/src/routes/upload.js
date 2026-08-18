@@ -1,10 +1,21 @@
 import { Router } from 'express';
 import multer from 'multer';
 import path from 'node:path';
+import sharp from 'sharp';
 import { requireAuth } from '../middleware/auth.js';
 import { supabase } from '../store/supabase.js';
 
 const BUCKET = 'images';
+const MAX_IMAGE_DIMENSION = 1920;
+
+async function optimizeImage(buffer) {
+  const optimized = await sharp(buffer)
+    .rotate() // aplica orientación EXIF antes de despojarla
+    .resize({ width: MAX_IMAGE_DIMENSION, height: MAX_IMAGE_DIMENSION, fit: 'inside', withoutEnlargement: true })
+    .webp({ quality: 82 })
+    .toBuffer();
+  return { buffer: optimized, contentType: 'image/webp', ext: '.webp' };
+}
 
 async function ensureBucket() {
   const { data: buckets } = await supabase.storage.listBuckets();
@@ -14,7 +25,7 @@ async function ensureBucket() {
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB
+  limits: { fileSize: 15 * 1024 * 1024 }, // 15 MB (se comprime server-side a WebP)
   fileFilter: (_req, file, cb) => {
     if (file.mimetype.startsWith('image/')) return cb(null, true);
     cb(new Error('Solo se permiten imágenes.'));
@@ -29,15 +40,15 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
 
   try {
     await ensureBucket();
-    const ext = path.extname(req.file.originalname).toLowerCase() || '.jpg';
+    const { buffer, contentType, ext } = await optimizeImage(req.file.buffer);
     const baseName = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
     const folder = String(req.body.folder || req.query.folder || '').trim().replace(/^\/|\/$/g, '');
     const filename = folder ? `${folder}/${baseName}` : baseName;
 
     const { error } = await supabase.storage
       .from(BUCKET)
-      .upload(filename, req.file.buffer, {
-        contentType: req.file.mimetype,
+      .upload(filename, buffer, {
+        contentType,
         upsert: false,
       });
 
@@ -71,16 +82,27 @@ router.post('/media', requireAuth, uploadMedia.single('file'), async (req, res) 
 
   try {
     await ensureBucket();
-    const ext = path.extname(req.file.originalname).toLowerCase() ||
-      (req.file.mimetype.startsWith('video/') ? '.mp4' : '.jpg');
+    const isImage = req.file.mimetype.startsWith('image/');
+    let buffer = req.file.buffer;
+    let contentType = req.file.mimetype;
+    let ext = path.extname(req.file.originalname).toLowerCase() ||
+      (isImage ? '.jpg' : '.mp4');
+
+    if (isImage) {
+      const optimized = await optimizeImage(req.file.buffer);
+      buffer = optimized.buffer;
+      contentType = optimized.contentType;
+      ext = optimized.ext;
+    }
+
     const baseName = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
     const folder = String(req.body.folder || req.query.folder || 'hero').trim().replace(/^\/|\/$/g, '');
     const filename = `${folder}/${baseName}`;
 
     const { error } = await supabase.storage
       .from(BUCKET)
-      .upload(filename, req.file.buffer, {
-        contentType: req.file.mimetype,
+      .upload(filename, buffer, {
+        contentType,
         upsert: false,
       });
 

@@ -70,8 +70,8 @@ function DestinationsSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 animate-pulse">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="rounded-2xl bg-surface border border-border overflow-hidden">
-          <div className="bg-surface-secondary" style={{ aspectRatio: '3 / 2' }} />
+        <div key={i} className="rounded-3xl bg-surface border border-border overflow-hidden">
+          <div className="bg-surface-secondary" style={{ aspectRatio: '3 / 4' }} />
         </div>
       ))}
     </div>
