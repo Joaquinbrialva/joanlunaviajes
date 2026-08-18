@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { prisma } from '../store/prisma.js';
-import { requireRole } from '../middleware/auth.js';
+import { prisma, withRetry } from '../store/prisma.js';
+import { optionalAuth, requireRole } from '../middleware/auth.js';
 
 function normalizeList(value) {
   if (Array.isArray(value)) return value.map(String).filter(Boolean);
@@ -9,10 +9,16 @@ function normalizeList(value) {
 
 const router = Router();
 
-// GET /api/novedades — público, todas las novedades (el filtrado a "publicado" lo hace el frontend público)
-router.get('/', async (_req, res) => {
+const STAFF_ROLES = ['admin', 'agent', 'designer'];
+
+// GET /api/novedades — público ve solo publicadas, staff ve todas
+router.get('/', optionalAuth, async (req, res) => {
   try {
-    const updates = await prisma.update.findMany({ orderBy: { createdAt: 'desc' } });
+    const isStaff = STAFF_ROLES.includes(req.user?.role);
+    const updates = await prisma.update.findMany({
+      where: isStaff ? undefined : { status: 'published' },
+      orderBy: { createdAt: 'desc' },
+    });
     res.json(updates);
   } catch (err) {
     console.error('[GET /api/novedades]', err);
@@ -34,7 +40,7 @@ router.post('/', ...requireRole('admin', 'agent', 'designer'), async (req, res) 
       status: req.body.status === 'draft' ? 'draft' : 'published',
     };
 
-    const created = await prisma.update.create({ data });
+    const created = await withRetry(() => prisma.update.create({ data }));
     res.status(201).json(created);
   } catch (err) {
     console.error('[POST /api/novedades]', err);
@@ -61,7 +67,7 @@ router.patch('/:id', ...requireRole('admin', 'agent', 'designer'), async (req, r
         : existing.status,
     };
 
-    const updated = await prisma.update.update({ where: { id: req.params.id }, data: updateData });
+    const updated = await withRetry(() => prisma.update.update({ where: { id: req.params.id }, data: updateData }));
     res.json(updated);
   } catch (err) {
     console.error('[PATCH /api/novedades]', err);
@@ -72,7 +78,7 @@ router.patch('/:id', ...requireRole('admin', 'agent', 'designer'), async (req, r
 // DELETE /api/novedades/:id  (admin, agent, designer)
 router.delete('/:id', ...requireRole('admin', 'agent', 'designer'), async (req, res) => {
   try {
-    await prisma.update.delete({ where: { id: req.params.id } });
+    await withRetry(() => prisma.update.delete({ where: { id: req.params.id } }));
     res.status(204).send();
   } catch (err) {
     if (err.code === 'P2025') return res.status(404).json({ error: 'Novedad no encontrada.' });

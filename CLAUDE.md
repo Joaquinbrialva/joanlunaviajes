@@ -45,7 +45,7 @@ Two separate apps: a **Next.js frontend** (`frontend/`) and an **Express backend
 
 ### Data layer
 
-Data is persisted in **Postgres (hosted on Supabase)** via **Prisma**. `backend/prisma/schema.prisma` defines the models: `Offer`, `Destination`, `Inquiry`, `User`, `Subscriber` (all UUID ids). `backend/src/store/prisma.js` exports the `prisma` client (plus a `withRetry` helper for transient connection errors). There is no `prisma/migrations` history — schema changes are applied with `npm run db:push` (Prisma db push), not versioned migrations.
+Data is persisted in **Postgres (hosted on Supabase)** via **Prisma**. `backend/prisma/schema.prisma` defines the models: `Offer`, `Destination`, `Inquiry`, `User`, `Subscriber`, `Update` (all UUID ids). `Update` is the "Novedades" feature — photo albums with an optional caption, publicly shown on the homepage below the Hero. `backend/src/store/prisma.js` exports the `prisma` client (plus a `withRetry` helper for transient connection errors). There is no `prisma/migrations` history — schema changes are applied with `npm run db:push` (Prisma db push), not versioned migrations.
 
 Uploaded images/video (offer/destination galleries, hero media) go to **Supabase Storage** (`images` bucket, public) via `backend/src/store/supabase.js` — not local disk.
 
@@ -69,6 +69,10 @@ Backend npm scripts of note: `db:generate`, `db:push`, `db:migrate` (prisma migr
 | POST | `/api/destinos` | Create destination (admin/agent) |
 | PATCH | `/api/destinos/:id` | Update destination by id (admin/agent) |
 | DELETE | `/api/destinos/:id` | Delete destination (admin/agent) |
+| GET | `/api/novedades` | List novedades (all for staff, published-only for public) |
+| POST | `/api/novedades` | Create novedad (admin/agent/designer) |
+| PATCH | `/api/novedades/:id` | Update novedad by id (admin/agent/designer) |
+| DELETE | `/api/novedades/:id` | Delete novedad by id (admin/agent/designer) |
 | GET | `/api/cotizaciones` | List inquiries (admin/agent) |
 | GET | `/api/cotizaciones/mis` | Inquiries for the logged-in user |
 | GET | `/api/cotizaciones/:id` | Get one inquiry (staff, or owner by userId/email) |
@@ -117,6 +121,7 @@ There is no `Notification` model and no `/api/notifications/*` route. `frontend/
 | `/admin/destinos` | Admin destination management |
 | `/admin/destinos/nuevo` | Create destination form |
 | `/admin/destinos/[slug]/editar` | Edit destination form |
+| `/admin/novedades` | Admin novedades management (photo albums shown on homepage) |
 | `/admin/cotizaciones` | Quote inbox |
 | `/admin/usuarios` | User management (admin only) |
 | `/admin/perfil` | Own profile |
