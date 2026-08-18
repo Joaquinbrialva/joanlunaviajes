@@ -8,10 +8,12 @@ export default function HeroSelect({
   options,
   className = 'w-full',
   triggerClassName = '',
+  ariaLabel,
 }) {
   return (
     <Select
       className={className}
+      aria-label={ariaLabel}
       selectedKey={value != null && value !== '' ? String(value) : null}
       onSelectionChange={(key) => onValueChange(key != null ? String(key) : '')}
     >

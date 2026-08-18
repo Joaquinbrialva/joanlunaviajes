@@ -10,10 +10,11 @@ import DatePickerField from '@/components/ui/date-picker-field';
 const FIELD_LABEL_CLASS = 'text-[10px] uppercase tracking-widest text-muted font-semibold block mb-1.5 ml-0.5';
 const SELECT_TRIGGER_CLASS = 'h-11 rounded-xl border border-default bg-surface px-3 text-sm';
 const DATE_TRIGGER_CLASS = 'h-11 px-3 rounded-xl border border-default w-full flex items-center gap-2 text-sm text-left hover:bg-surface-secondary transition-colors';
+const ANY_DEST = 'all';
 
 export default function HeroSearchWidget() {
 	const [countries, setCountries] = useState([]);
-	const [destino, setDestino] = useState('');
+	const [destino, setDestino] = useState(ANY_DEST);
 	const [fecha, setFecha] = useState('');
 	const [personas, setPersonas] = useState(1);
 	const router = useRouter();
@@ -30,14 +31,14 @@ export default function HeroSearchWidget() {
 	}, []);
 
 	const destinoOptions = [
-		{ value: '', label: 'Cualquier destino' },
+		{ value: ANY_DEST, label: 'Cualquier destino' },
 		...countries.map((c) => ({ value: c, label: c })),
 	];
 
 	function handleSubmit(e) {
 		e.preventDefault();
 		const params = new URLSearchParams();
-		if (destino) params.set('dest', destino);
+		if (destino && destino !== ANY_DEST) params.set('dest', destino);
 		if (fecha) params.set('date', fecha);
 		params.set('pax', String(personas));
 		router.push(`/ofertas?${params.toString()}`);
@@ -55,6 +56,7 @@ export default function HeroSearchWidget() {
 					onValueChange={setDestino}
 					options={destinoOptions}
 					triggerClassName={SELECT_TRIGGER_CLASS}
+					ariaLabel="Destino"
 				/>
 			</div>
 
@@ -75,6 +77,7 @@ export default function HeroSearchWidget() {
 					onChange={(v) => setPersonas(isNaN(v) ? 1 : Math.max(1, v))}
 					minValue={1}
 					formatOptions={{ maximumFractionDigits: 0, useGrouping: false }}
+					aria-label="Cantidad de personas"
 				>
 					<NumberField.Group className="h-11 rounded-xl border border-default flex items-center overflow-hidden bg-surface w-full">
 						<NumberField.DecrementButton className="h-full px-3 hover:bg-surface-secondary border-r border-default flex items-center text-muted hover:text-foreground transition-colors">
