@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Button, Spinner } from '@heroui/react';
-import { LuChevronLeft, LuChevronRight, LuSearch } from 'react-icons/lu';
+import { Spinner } from '@heroui/react';
+import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
+import HeroSearchWidget from '@/components/inicio/ui/HeroSearchWidget';
 
 const SLIDE_INTERVAL_MS = 5000;
 
@@ -17,9 +17,7 @@ export default function Hero() {
 	const [slides, setSlides] = useState(null); // null = aún no resuelto, [] = sin novedades
 	const [slideIndex, setSlideIndex] = useState(0);
 	const [paused, setPaused] = useState(false);
-	const [query, setQuery] = useState('');
 	const videoRef = useRef(null);
-	const router = useRouter();
 
 	useEffect(() => {
 		fetch('/api/settings/hero')
@@ -69,12 +67,6 @@ export default function Hero() {
 	}
 	function goNext() {
 		setSlideIndex((i) => (i + 1) % slides.length);
-	}
-
-	function handleSearch(e) {
-		e.preventDefault();
-		const trimmed = query.trim();
-		router.push(trimmed ? `/ofertas?q=${encodeURIComponent(trimmed)}` : '/ofertas');
 	}
 
 	return (
@@ -167,23 +159,7 @@ export default function Hero() {
 
 			{/* Card de búsqueda — superpuesta, se adapta al modo claro/oscuro via tokens del sitio */}
 			<div className="relative z-10 -mt-6 flex justify-center px-2">
-				<form
-					onSubmit={handleSearch}
-					className="w-full max-w-xl flex items-center gap-2 p-2 rounded-2xl bg-surface border border-default shadow-2xl shadow-black/20"
-				>
-					<LuSearch size={18} className="text-muted shrink-0 ml-2" />
-					<input
-						type="text"
-						value={query}
-						onChange={(e) => setQuery(e.target.value)}
-						placeholder="¿A dónde quieres viajar? Roma, Cancún, Bariloche…"
-						className="flex-1 h-11 min-w-0 outline-none text-sm text-foreground placeholder:text-muted bg-transparent"
-						aria-label="Buscar destino u oferta"
-					/>
-					<Button type="submit" color="primary" className="shrink-0 rounded-xl px-5 h-11 font-semibold">
-						{({ isPending }) => (isPending ? 'Buscando…' : 'Buscar')}
-					</Button>
-				</form>
+				<HeroSearchWidget />
 			</div>
 		</div>
 	);
