@@ -7,15 +7,15 @@ import { Modal } from '@heroui/react';
  * (short forms with no listing/preview context needed, e.g. novedades).
  * Pass `title` for a plain heading, or `header` for a custom block.
  */
-export default function Dialog({ isOpen, onClose, title, header, footer, children, size = 'md' }) {
+export default function Dialog({ isOpen, onClose, title, header, footer, children, size = 'md', dialogClassName = '' }) {
   return (
     <Modal isOpen={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <Modal.Backdrop variant='blur'>
         <Modal.Container placement='center' size={size}>
-          <Modal.Dialog className='relative'>
+          <Modal.Dialog className={`relative ${dialogClassName}`}>
             <Modal.CloseTrigger className='absolute right-4 top-4 z-10' />
             {header ? (
-              <div className='shrink-0 border-b border-default px-5 py-4 pr-12'>{header}</div>
+              <div className='shrink-0 px-6 pt-6 pb-2 pr-12'>{header}</div>
             ) : (
               <Modal.Header>
                 <Modal.Heading>{title}</Modal.Heading>

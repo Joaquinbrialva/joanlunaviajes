@@ -1,19 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Button, Checkbox, Spinner, toast } from '@heroui/react';
+import { useEffect, useMemo, useState } from 'react';
+import { Button, toast } from '@heroui/react';
 import { LuPlus, LuPencil, LuTrash2, LuSparkles, LuVideo } from 'react-icons/lu';
-import NovedadImagePicker from '@/components/admin/novedad-image-picker';
+import HeroSelect from '@/components/ui/hero-select';
+import NovedadStudio from '@/components/admin/novedad-studio';
 import { toastError, toastSuccess } from '@/lib/toast';
-import { PageHeader, Section, Dialog, ConfirmDialog, TextareaField, EmptyState, NovedadStatusChip } from '@/components/admin/kit';
-
-const EMPTY_FORM = { media: [], caption: '', status: 'published' };
-
-function itemToPayload(item) {
-  return item.type === 'video'
-    ? { url: item.url, type: 'video', trimStart: item.trimStart, trimEnd: item.trimEnd }
-    : { url: item.url, type: 'image' };
-}
+import { PageHeader, Section, ConfirmDialog, EmptyState, NovedadStatusChip, TableToolbar } from '@/components/admin/kit';
 
 function recordToMedia(item) {
   if (Array.isArray(item.media) && item.media.length > 0) return item.media;
@@ -25,9 +18,10 @@ export default function NovedadesPage() {
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [saving, setSaving] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
 
   useEffect(() => {
     fetch('/api/novedades')
@@ -39,60 +33,59 @@ export default function NovedadesPage() {
 
   function openCreate() {
     setEditing(null);
-    setForm(EMPTY_FORM);
     setDrawerOpen(true);
   }
 
   function openEdit(item) {
     setEditing(item);
-    setForm({ media: recordToMedia(item), caption: item.caption || '', status: item.status || 'published' });
     setDrawerOpen(true);
   }
 
   function closeDrawer() {
     setDrawerOpen(false);
     setEditing(null);
-    setForm(EMPTY_FORM);
   }
 
-  function update(key, value) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (form.media.length === 0) {
-      toastError('Agregá al menos una imagen o video.');
-      return;
-    }
-    setSaving(true);
-    try {
-      if (editing) {
-        const body = { media: [itemToPayload(form.media[0])], caption: form.caption, status: form.status };
-        const res = await fetch(`/api/novedades/${editing.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  async function handleStudioSubmit({ items, caption }) {
+    if (editing) {
+      const { media, status } = items[0];
+      const body = { media: [media], caption, status };
+      const res = await fetch(`/api/novedades/${editing.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al actualizar.');
+      setUpdates((prev) => prev.map((u) => (u.id === editing.id ? data : u)));
+      toastSuccess('Novedad actualizada');
+    } else {
+      // Cada imagen/video del lote se publica como una novedad independiente.
+      const created = [];
+      for (const { media, status } of items) {
+        const res = await fetch('/api/novedades', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ media: [media], caption, status }) });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Error al actualizar.');
-        setUpdates((prev) => prev.map((u) => (u.id === editing.id ? data : u)));
-        toastSuccess('Novedad actualizada');
-      } else {
-        // Cada imagen/video del lote se publica como una novedad independiente.
-        const created = [];
-        for (const item of form.media) {
-          const res = await fetch('/api/novedades', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ media: [itemToPayload(item)], caption: form.caption, status: form.status }) });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Error al crear.');
-          created.push(data);
-        }
-        setUpdates((prev) => [...created, ...prev]);
-        toastSuccess(created.length > 1 ? `${created.length} novedades creadas` : 'Novedad creada');
+        if (!res.ok) throw new Error(data.error || 'Error al crear.');
+        created.push(data);
       }
-      closeDrawer();
-    } catch (err) {
-      toastError(err, editing ? 'Error al actualizar' : 'Error al crear');
-    } finally {
-      setSaving(false);
+      setUpdates((prev) => [...created, ...prev]);
+      toastSuccess(created.length > 1 ? `${created.length} novedades creadas` : 'Novedad creada');
     }
+    closeDrawer();
   }
+
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return updates.filter((item) => {
+      const media = recordToMedia(item);
+      const type = media[0]?.type || 'image';
+      const matchesSearch = query.length === 0 || (item.caption || '').toLowerCase().includes(query);
+      const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
+      const matchesType = typeFilter === 'all' || type === typeFilter;
+      return matchesSearch && matchesStatus && matchesType;
+    });
+  }, [updates, search, statusFilter, typeFilter]);
+
+  const publishedCount = updates.filter((u) => u.status === 'published').length;
+  const description = updates.length === 0
+    ? 'Álbumes tipo Estados/Stories para mostrar en la home.'
+    : `${updates.length} novedad${updates.length === 1 ? '' : 'es'} · ${publishedCount} publicada${publishedCount === 1 ? '' : 's'}`;
 
   function executeDelete() {
     if (!pendingDelete) return;
@@ -112,42 +105,19 @@ export default function NovedadesPage() {
         Esta acción no se puede deshacer. La novedad dejará de mostrarse en el sitio.
       </ConfirmDialog>
 
-      <Dialog isOpen={drawerOpen} onClose={closeDrawer} title={editing ? 'Editar novedad' : 'Nueva novedad'} size='lg'>
-        <form onSubmit={handleSubmit} className='space-y-4 p-5'>
-          <div>
-            <label className='mb-1.5 block text-[13px] font-medium text-foreground'>
-              {editing ? 'Imagen o video' : 'Imágenes o videos'} <span className='text-accent'>*</span>
-            </label>
-            <NovedadImagePicker items={form.media} onChange={(arr) => update('media', arr)} maxImages={editing ? 1 : undefined} />
-          </div>
-
-          <TextareaField
-            label='Descripción'
-            hint='Opcional'
-            rows={3}
-            value={form.caption}
-            onChange={(e) => update('caption', e.target.value)}
-            placeholder='Un texto corto para acompañar las fotos...'
-          />
-
-          <Checkbox isSelected={form.status === 'published'} onChange={(checked) => update('status', checked ? 'published' : 'draft')}>
-            <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
-            <Checkbox.Content>Publicada (visible en el sitio)</Checkbox.Content>
-          </Checkbox>
-
-          <div className='flex gap-3 pt-2'>
-            <Button type='button' variant='tertiary' className='flex-1' onClick={closeDrawer}>Cancelar</Button>
-            <Button type='submit' className='flex-1' isDisabled={saving}>
-              {saving ? <Spinner color='current' size='sm' /> : null}
-              {saving ? 'Guardando...' : editing ? 'Guardar cambios' : 'Crear novedad'}
-            </Button>
-          </div>
-        </form>
-      </Dialog>
+      <NovedadStudio
+        isOpen={drawerOpen}
+        editing={editing}
+        initialMedia={editing ? recordToMedia(editing) : []}
+        initialCaption={editing?.caption || ''}
+        initialStatus={editing?.status || 'published'}
+        onClose={closeDrawer}
+        onSubmit={handleStudioSubmit}
+      />
 
       <PageHeader
         title='Novedades'
-        description='Álbumes tipo Estados/Stories para mostrar en la home.'
+        description={description}
         actions={
           <Button onClick={openCreate}>
             <LuPlus className='h-4 w-4' />
@@ -157,6 +127,30 @@ export default function NovedadesPage() {
       />
 
       <Section>
+        {!loading && updates.length > 0 && (
+          <TableToolbar search={search} onSearchChange={setSearch} placeholder='Buscar por descripción...'>
+            <HeroSelect
+              value={statusFilter}
+              onValueChange={setStatusFilter}
+              options={[
+                { value: 'all', label: 'Todos los estados' },
+                { value: 'published', label: 'Publicadas' },
+                { value: 'draft', label: 'Borrador' },
+              ]}
+              triggerClassName='h-9 min-w-[170px] rounded-xl border border-default bg-surface-secondary px-3 text-[13px]'
+            />
+            <HeroSelect
+              value={typeFilter}
+              onValueChange={setTypeFilter}
+              options={[
+                { value: 'all', label: 'Fotos y videos' },
+                { value: 'image', label: 'Solo fotos' },
+                { value: 'video', label: 'Solo videos' },
+              ]}
+              triggerClassName='h-9 min-w-[150px] rounded-xl border border-default bg-surface-secondary px-3 text-[13px]'
+            />
+          </TableToolbar>
+        )}
         <div className='p-4 md:p-5'>
           {loading ? (
             <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
@@ -169,9 +163,11 @@ export default function NovedadesPage() {
               description='Creá la primera para que aparezca en la home.'
               action={<Button onClick={openCreate}>Nueva novedad</Button>}
             />
+          ) : filtered.length === 0 ? (
+            <p className='py-10 text-center text-muted'>No hay novedades que coincidan con la búsqueda.</p>
           ) : (
             <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
-              {updates.map((item) => {
+              {filtered.map((item) => {
                 const media = recordToMedia(item);
                 const cover = media[0];
                 return (
@@ -182,7 +178,6 @@ export default function NovedadesPage() {
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={cover.url} alt={item.caption || 'Novedad'} className='h-full w-full object-cover' />
                     ))}
-                    <div className='absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/0' />
                     <div className='absolute left-3 top-3 flex items-center gap-1.5'>
                       <NovedadStatusChip status={item.status} solid />
                       {cover?.type === 'video' && (

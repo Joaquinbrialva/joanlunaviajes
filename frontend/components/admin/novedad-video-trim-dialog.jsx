@@ -5,7 +5,7 @@ import { Button } from '@heroui/react';
 import { LuCrop } from 'react-icons/lu';
 import Dialog from '@/components/admin/kit/dialog';
 
-function formatTime(seconds) {
+export function formatTime(seconds) {
   if (!Number.isFinite(seconds)) return '0:00';
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
@@ -16,7 +16,7 @@ function formatTime(seconds) {
 // Drag-to-crop estilo Instagram, igual al del Hero — arrastrar y hacer zoom
 // sobre el video dentro del frame 3:1 para elegir el encuadre.
 
-function VideoFrameEditor({ videoRef, natural, focalPoint, zoom, onZoomChange, onFocalPointChange }) {
+export function VideoFrameEditor({ videoRef, natural, focalPoint, zoom, onZoomChange, onFocalPointChange }) {
   const containerRef = useRef(null);
   const dragRef = useRef(null);
   const offsetRef = useRef({ x: 0, y: 0 });

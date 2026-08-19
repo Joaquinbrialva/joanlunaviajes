@@ -29,7 +29,7 @@ async function getCroppedBlob(imageSrc, cropPixels) {
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.92));
 }
 
-export { TARGET_ASPECT };
+export { TARGET_ASPECT, getCroppedBlob };
 
 export default function NovedadCropDialog({ isOpen, imageSrc, onCancel, onConfirm }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
