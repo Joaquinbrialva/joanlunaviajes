@@ -284,3 +284,27 @@ button {
 .animate-slide-up {
 	animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+@keyframes dropdownIn {
+	from {
+		opacity: 0;
+		transform: translateY(-6px) scale(0.98);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+.animate-dropdown-in {
+	animation: dropdownIn 0.16s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.search-widget,
+	.search-widget * {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}

@@ -164,7 +164,7 @@ export default function Hero() {
 			</section>
 
 			{/* Card de búsqueda — superpuesta, se adapta al modo claro/oscuro via tokens del sitio */}
-			<div className="relative z-10 -mt-6 flex justify-start pl-12 pr-2">
+			<div className="relative z-10 -mt-6 pl-12 pr-2">
 				<HeroSearchWidget loading={heroLoading || !mediaReady} />
 			</div>
 		</div>

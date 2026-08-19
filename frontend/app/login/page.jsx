@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Spinner } from '@heroui/react';
-import { LuEye, LuEyeOff, LuArrowLeft } from 'react-icons/lu';
+import { LuEye, LuEyeOff, LuArrowLeft, LuCheck } from 'react-icons/lu';
 import Logo from '@/components/ui/logo';
 
 const STAFF_ROLES = ['admin', 'agent', 'designer'];
@@ -22,6 +22,7 @@ export default function LoginPage() {
   const [showPwd, setShowPwd]   = useState(false);
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
+  const [success, setSuccess]   = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -46,10 +47,15 @@ export default function LoginPage() {
         return;
       }
       if (data.user.mustChangePassword) {
+        setLoading(false);
         window.location.href = '/cambiar-contrasena';
         return;
       }
-      window.location.href = STAFF_ROLES.includes(data.user.role) ? '/admin' : '/cuenta';
+      setLoading(false);
+      setSuccess(true);
+      const dest = STAFF_ROLES.includes(data.user.role) ? '/admin' : '/cuenta';
+      setTimeout(() => { window.location.href = dest; }, 700);
+      return;
     } catch {
       setError('No se pudo conectar con el servidor.');
     } finally {
@@ -154,12 +160,18 @@ export default function LoginPage() {
             </div>
 
             <button
-              type="submit" disabled={loading}
-              className="w-full h-11 mt-1 rounded-xl bg-brand-primary text-brand-primary-foreground text-[13px] font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-brand-primary/20 disabled:opacity-70 flex items-center justify-center gap-2"
+              type="submit" disabled={loading || success}
+              className={`w-full h-11 mt-1 rounded-xl text-[13px] font-semibold active:scale-[0.98] transition-all shadow-lg disabled:opacity-70 flex items-center justify-center gap-2 ${
+                success
+                  ? 'bg-success text-success-foreground shadow-success/20'
+                  : 'bg-brand-primary text-brand-primary-foreground hover:opacity-90 shadow-brand-primary/20'
+              }`}
             >
-              {loading
-                ? <><Spinner color="current" size="sm" /> Iniciando sesión...</>
-                : 'Iniciar sesión'
+              {success
+                ? <><LuCheck className="w-4 h-4" /> ¡Bienvenido!</>
+                : loading
+                  ? <><Spinner color="current" size="sm" /> Iniciando sesión...</>
+                  : 'Iniciar sesión'
               }
             </button>
           </form>
