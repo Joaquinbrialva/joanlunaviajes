@@ -35,7 +35,12 @@ export default function RootLayout({ children }) {
 			<body
 				className={`${jakarta.variable} ${fira.variable} font-sans antialiased`}
 			>
-				<ThemeProvider attribute='class' defaultTheme='light' enableSystem>
+				<ThemeProvider
+					attribute='class'
+					defaultTheme='light'
+					enableSystem
+					disableTransitionOnChange
+				>
 					<ErrorBoundary>
 						<RootShell>{children}</RootShell>
 					</ErrorBoundary>

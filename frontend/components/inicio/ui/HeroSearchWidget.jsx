@@ -58,13 +58,14 @@ export default function HeroSearchWidget({ loading = false }) {
 
 	if (loading) {
 		return (
-			<div className="search-widget w-full flex flex-col gap-4 p-5 rounded-2xl bg-surface border border-default shadow-2xl shadow-black/20">
-				<div className="h-9 w-52 rounded-xl bg-surface-secondary animate-pulse" />
-				<div className="grid grid-cols-1 md:grid-cols-6 gap-3">
-					{[0, 1, 2, 3, 4].map((i) => (
+			<div className="search-widget w-full flex flex-col [filter:drop-shadow(0_20px_40px_rgb(0_0_0/0.25))]">
+				<div className="relative z-10 -mb-px self-start rounded-t-2xl border border-b-0 border-default bg-surface px-3 pt-3 pb-2">
+					<div className="h-8 w-52 rounded-lg bg-surface-secondary animate-pulse" />
+				</div>
+				<div className="grid grid-cols-1 md:grid-cols-6 gap-3 rounded-b-2xl rounded-tr-2xl border border-default bg-surface p-5">
+					{[0, 1, 2, 3, 4, 5].map((i) => (
 						<div key={i} className="h-12 rounded-xl bg-surface-secondary animate-pulse" />
 					))}
-					<div className="h-12 rounded-xl bg-surface-secondary animate-pulse" />
 				</div>
 			</div>
 		);
@@ -73,13 +74,14 @@ export default function HeroSearchWidget({ loading = false }) {
 	return (
 		<form
 			onSubmit={handleSubmit}
-			className="search-widget animate-slide-up w-full flex flex-col gap-4 p-5 rounded-2xl bg-surface border border-default shadow-2xl shadow-black/20"
+			className="search-widget animate-slide-up w-full flex flex-col [filter:drop-shadow(0_20px_40px_rgb(0_0_0/0.25))]"
 		>
-			<div className="relative inline-grid grid-cols-2 self-start bg-background border border-default rounded-[11px] p-1 gap-1">
+			{/* Solapa: sobresale hacia arriba y se funde con el cuerpo */}
+			<div className="relative z-10 -mb-px inline-grid grid-cols-2 self-start rounded-t-2xl border border-b-0 border-default bg-surface px-3 pt-3 pb-2 gap-1">
 				<span
 					aria-hidden="true"
-					className="absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-lg bg-accent transition-transform duration-250 ease-[cubic-bezier(0.25,1,0.5,1)]"
-					style={{ transform: tripType === 'oneway' ? 'translateX(calc(100% + 4px))' : 'translateX(0)' }}
+					className="absolute top-3 bottom-2 left-3 w-[calc(50%-0.875rem)] rounded-lg bg-accent transition-transform duration-250 ease-[cubic-bezier(0.25,1,0.5,1)]"
+					style={{ transform: tripType === 'oneway' ? 'translateX(calc(100% + 0.25rem))' : 'translateX(0)' }}
 				/>
 				{[
 					{ id: 'roundtrip', label: 'Ida y vuelta' },
@@ -96,9 +98,16 @@ export default function HeroSearchWidget({ loading = false }) {
 						{t.label}
 					</button>
 				))}
+
+				{/* Curva cóncava que une la solapa con el cuerpo */}
+				<span
+					aria-hidden="true"
+					className="absolute left-full bottom-0 w-4 h-4 bg-[radial-gradient(circle_at_100%_0,transparent_0_1rem,var(--surface)_1rem)]"
+				/>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-[1.3fr_auto_1.3fr_1.3fr_1.15fr_auto] items-end gap-3">
+			{/* Cuerpo: esquina superior izquierda recta (bajo la solapa), resto redondeado */}
+			<div className="grid grid-cols-1 md:grid-cols-[1.3fr_auto_1.3fr_1.3fr_1.15fr_auto] items-end gap-3 rounded-b-2xl rounded-tr-2xl border border-default bg-surface p-5">
 				<SearchSelectField
 					label="Origen"
 					icon={<PlaneTakeoff size={16} />}
