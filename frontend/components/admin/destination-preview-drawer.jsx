@@ -38,10 +38,10 @@ export default function DestinationPreviewDrawer({ destination, isOpen, onClose 
         <PreviewHeader
           image={destination.featuredImage}
           fallbackIcon={LuGlobe}
-          title={destination.name}
+          title={destination.city}
           statusColor={destination.status === 'published' ? 'success' : 'default'}
           statusLabel={destination.status === 'published' ? 'Publicado' : 'Borrador'}
-          meta={[destination.country, destination.continent].filter(Boolean)}
+          meta={[destination.title, destination.country, destination.continent].filter(Boolean)}
           tags={tags}
         />
       }

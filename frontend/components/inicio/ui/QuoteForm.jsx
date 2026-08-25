@@ -99,8 +99,12 @@ export default function QuoteForm({ offer }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!name.trim() || !phone.trim()) {
-      toastError('Completa nombre y teléfono.');
+    if (!name.trim()) {
+      toastError('Completa tu nombre.');
+      return;
+    }
+    if (!phone.trim() && !email.trim()) {
+      toastError('Dejanos un teléfono o email para contactarte.');
       return;
     }
     setStatus('loading');
@@ -160,7 +164,7 @@ export default function QuoteForm({ offer }) {
 
   return (
     <aside className="xl:sticky xl:top-24">
-      <div className="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border bg-surface shadow-[0_1px_2px_rgba(18,36,59,.04),0_16px_36px_-16px_rgba(18,36,59,.22)] overflow-hidden">
 
         {/* Price header */}
         <div className="px-5 py-5 border-b border-border">
@@ -189,11 +193,6 @@ export default function QuoteForm({ offer }) {
                   </span>
                 )}
               </div>
-              {offer.availability?.limitedSpots && remainingSpots > 0 && (
-                <span className="text-xs text-rose-600 dark:text-rose-400 font-semibold bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/40 px-2.5 py-1 rounded-full">
-                  ⚡ Solo quedan {remainingSpots}
-                </span>
-              )}
             </div>
           ) : (
             <div>
@@ -267,7 +266,6 @@ export default function QuoteForm({ offer }) {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             type="tel"
-            required
             placeholder="+54 9 11 1234-5678"
             autoComplete="tel"
           />

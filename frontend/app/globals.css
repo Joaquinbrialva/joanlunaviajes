@@ -55,7 +55,7 @@
 	/* Radius + font */
 	--radius: 0.625rem;
 	--field-radius: 0.75rem;
-	--font-sans: var(--font-jakarta);
+	--font-sans: var(--font-hanken);
 
 	/* shadcn-compatible aliases — reference the brand primitives, never redefine the color */
 	--card: var(--surface);

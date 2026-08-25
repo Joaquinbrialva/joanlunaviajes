@@ -103,7 +103,6 @@ There is no `Notification` model and no `/api/notifications/*` route. `frontend/
 | `/ofertas/[slug]` | Offer detail |
 | `/destinos` | Public destination listing |
 | `/destinos/[slug]` | Destination detail |
-| `/cotizar` | Public quote wizard (posts to `POST /api/cotizaciones`) |
 | `/consulta` | Contact form |
 | `/contacto` | Contact page |
 | `/login` | Login (all roles) |
@@ -185,4 +184,4 @@ Use `normalizeList(value)` (defined in route files) when processing list fields 
 1. **Notificaciones en el admin** — `NotificationBell` en el frontend ya está construido y pollea `/api/notifications*`, pero ese backend nunca se migró de la era JSON-store a Prisma: no existe modelo `Notification` ni las rutas. Implementar (modelo + rutas + trigger al crear cotización) o remover el bell del admin layout — decisión pendiente.
 2. **Migraciones Prisma versionadas** — hoy se usa `prisma db push` sin `prisma/migrations`; considerar pasar a `prisma migrate` para tener historial de cambios de schema en producción.
 
-Cumplido: página `/cuenta`, formulario de cotización (`/cotizar`), registro de usuarios (`/registro`), galería de imágenes vía Supabase Storage.
+Cumplido: página `/cuenta`, registro de usuarios (`/registro`), galería de imágenes vía Supabase Storage.

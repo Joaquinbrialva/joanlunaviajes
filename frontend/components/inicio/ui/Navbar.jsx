@@ -1,7 +1,7 @@
 'use client'
 import ThemeToggle from "@/app/ThemeToggle";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { LuLayoutDashboard, LuLogOut, LuMenu, LuUser, LuX } from "react-icons/lu";
 import Logo from "@/components/ui/logo";
@@ -11,6 +11,7 @@ const ROLE_LABELS = { admin: 'Administrador', agent: 'Agente', designer: 'Diseñ
 
 const NAV_LINKS = [
   { name: "Ofertas", url: "/ofertas" },
+  { name: "Destinos", url: "/destinos" },
   { name: "Nosotros", url: "/nosotros" },
   { name: "Contacto", url: "/contacto" },
 ];
@@ -23,6 +24,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const userMenuRef = useRef(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -55,6 +57,21 @@ export default function Navbar() {
     setUserMenuOpen(false);
     router.push('/');
     router.refresh();
+  }
+
+  function handleCotizarClick(e) {
+    if (pathname === '/') {
+      e.preventDefault();
+      const el = document.getElementById('cotizar');
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const y = rect.top + window.scrollY - (window.innerHeight - rect.height) / 2;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+      setMobileOpen(false);
+    } else {
+      setMobileOpen(false);
+    }
   }
 
   const isStaff = user && STAFF_ROLES.includes(user.role);
@@ -122,10 +139,11 @@ export default function Navbar() {
 
             {!authLoading && !isStaff && (
               <Link
-                href="/cotizar"
+                href="/#cotizar"
+                onClick={handleCotizarClick}
                 className="h-9 px-4 rounded-full bg-brand-primary text-brand-primary-foreground text-[13px] font-bold hover:opacity-90 transition-all shadow-md shadow-brand-primary/25 flex items-center"
               >
-                Cotizar a medida
+                Cotizar
               </Link>
             )}
 
@@ -252,11 +270,11 @@ export default function Navbar() {
                     </Link>
                     {!isStaff && (
                       <Link
-                        href="/cotizar"
-                        onClick={() => setMobileOpen(false)}
+                        href="/#cotizar"
+                        onClick={handleCotizarClick}
                         className="flex items-center justify-center px-3 py-2.5 rounded-xl text-sm font-semibold bg-accent text-white"
                       >
-                        Cotizar a medida
+                        Cotizar
                       </Link>
                     )}
                   </>

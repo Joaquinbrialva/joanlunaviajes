@@ -1,105 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Button, TextField, Input, TextArea } from '@heroui/react';
 import {
-  RangeCalendar, Popover, Button, TextField, Input, TextArea, NumberField,
-} from '@heroui/react';
-import { parseDate } from '@internationalized/date';
-import {
-  CalendarDays, X, MapPin, PlaneTakeoff, User, Mail, Phone,
+  ArrowLeftRight, PlaneTakeoff, PlaneLanding, User, Mail, Phone,
   ArrowRight, Check, MessageSquare,
 } from 'lucide-react';
+import DateRangeField from '@/components/inicio/ui/DateRangeField';
+import PassengerPopover, { DEFAULT_PAX } from '@/components/inicio/ui/PassengerPopover';
+import DestinationCombobox from '@/components/inicio/ui/DestinationCombobox';
+
+const DATE_TRIGGER_CLASS = 'h-12 px-3.5 rounded-xl border border-border bg-field-background w-full flex items-center gap-2.5 text-left hover:border-accent/40 transition-colors';
+const PAX_TRIGGER_CLASS = 'h-12 w-full rounded-xl border border-border bg-field-background px-3.5 flex items-center gap-2.5 text-left hover:border-accent/40 active:scale-[0.98] transition-[border-color,transform] duration-150';
 
 function fmt(dateStr) {
   if (!dateStr) return null;
   return new Date(dateStr + 'T12:00:00').toLocaleDateString('es-AR', {
     day: 'numeric', month: 'short', year: 'numeric',
   });
-}
-
-/* ─── Fecha de viaje — popover con calendario de rango ────────── */
-
-function DateRangePicker({ startDate, endDate, onChange }) {
-  const [open, setOpen] = useState(false);
-
-  const value =
-    startDate && endDate
-      ? { start: parseDate(startDate), end: parseDate(endDate) }
-      : null;
-
-  function handleChange(range) {
-    onChange({ start: range.start.toString(), end: range.end.toString() });
-    if (range.start && range.end) setOpen(false);
-  }
-
-  function handleClear(e) {
-    e.stopPropagation();
-    onChange({ start: '', end: '' });
-  }
-
-  const hasDate = Boolean(startDate || endDate);
-  const label =
-    startDate && endDate
-      ? `${fmt(startDate)} → ${fmt(endDate)}`
-      : startDate
-      ? `${fmt(startDate)} → selecciona regreso…`
-      : null;
-
-  return (
-    <Popover isOpen={open} onOpenChange={setOpen} placement="top-start">
-      <Popover.Trigger>
-        <button
-          type="button"
-          className={`w-full h-12 flex items-center gap-3 px-4 rounded-xl text-sm text-left bg-field-background border transition-colors ${
-            open ? 'border-brand-primary/60' : 'border-border'
-          } ${hasDate ? 'text-foreground' : 'text-field-placeholder'}`}
-        >
-          <CalendarDays size={15} className="text-brand-primary shrink-0" />
-          <span className="flex-1 truncate">
-            {label ?? 'Fechas de viaje (opcional)'}
-          </span>
-          {hasDate ? (
-            <span
-              role="button"
-              tabIndex={0}
-              onClick={handleClear}
-              onKeyDown={(e) => e.key === 'Enter' && handleClear(e)}
-              className="p-1 rounded text-muted hover:bg-surface-tertiary transition-colors"
-            >
-              <X size={13} />
-            </span>
-          ) : (
-            <span className="text-muted text-[11px] shrink-0">opcional</span>
-          )}
-        </button>
-      </Popover.Trigger>
-
-      <Popover.Content>
-        <Popover.Dialog>
-          <RangeCalendar aria-label="Fechas de viaje" value={value} onChange={handleChange}>
-            <RangeCalendar.Header>
-              <RangeCalendar.Heading />
-              <RangeCalendar.NavButton slot="previous" />
-              <RangeCalendar.NavButton slot="next" />
-            </RangeCalendar.Header>
-            <RangeCalendar.Grid>
-              <RangeCalendar.GridHeader>
-                {(day) => <RangeCalendar.HeaderCell>{day}</RangeCalendar.HeaderCell>}
-              </RangeCalendar.GridHeader>
-              <RangeCalendar.GridBody>
-                {(date) => <RangeCalendar.Cell date={date} />}
-              </RangeCalendar.GridBody>
-            </RangeCalendar.Grid>
-            {startDate && !endDate && (
-              <p className="text-xs text-center pb-3 pt-1 text-muted">
-                Ahora selecciona la fecha de regreso
-              </p>
-            )}
-          </RangeCalendar>
-        </Popover.Dialog>
-      </Popover.Content>
-    </Popover>
-  );
 }
 
 /* ─── Campo con ícono — envuelve TextField/Input de HeroUI ─────── */
@@ -139,8 +57,9 @@ function SuccessCard() {
 
 const INITIAL = {
   origen: '', destino: '', nombre: '', email: '',
-  telefono: '', pasajeros: 1, mensaje: '',
-  startDate: '', endDate: '',
+  telefono: '', mensaje: '',
+  tripType: 'roundtrip', startDate: '', endDate: '',
+  pax: DEFAULT_PAX,
 };
 
 const BENEFITS = [
@@ -152,22 +71,63 @@ const BENEFITS = [
 
 export default function QuoteCTA() {
   const [form, setForm] = useState(INITIAL);
+  const [destinations, setDestinations] = useState([]);
+  const [swapSpins, setSwapSpins] = useState(0);
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [errMsg, setErrMsg] = useState('');
+
+  useEffect(() => {
+    fetch('/api/destinos')
+      .then((r) => r.json())
+      .then((data) => {
+        if (!Array.isArray(data)) return;
+        setDestinations(data);
+      })
+      .catch(() => {});
+
+    const params = new URLSearchParams(window.location.search);
+    const destino = params.get('destino');
+    if (destino) setForm((prev) => ({ ...prev, destino }));
+  }, []);
+
+  const destinoOptions = destinations.map((d) => ({ value: d.slug, label: `${d.city}, ${d.country}` }));
+
+  function swapOrigenDestino() {
+    setForm((prev) => ({ ...prev, origen: prev.destino, destino: prev.origen }));
+    setSwapSpins((s) => s + 1);
+  }
 
   const up = (key, val) => setForm((prev) => ({ ...prev, [key]: val }));
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.nombre.trim()) { setErrMsg('El nombre es requerido.'); return; }
+    if (!form.email.trim() && !form.telefono.trim()) {
+      setErrMsg('Dejanos un teléfono o email para contactarte.');
+      return;
+    }
     setStatus('loading');
     setErrMsg('');
 
+    const { adultos, adolescentes, ninos, infantes } = form.pax;
+    const passengers = adultos + adolescentes + ninos + infantes;
+
+    const paxParts = [];
+    if (adultos) paxParts.push(`${adultos} adulto${adultos === 1 ? '' : 's'}`);
+    if (adolescentes) paxParts.push(`${adolescentes} adolescente${adolescentes === 1 ? '' : 's'}`);
+    if (ninos) paxParts.push(`${ninos} niño${ninos === 1 ? '' : 's'}`);
+    if (infantes) paxParts.push(`${infantes} infante${infantes === 1 ? '' : 's'}`);
+
+    const origenNombre = destinations.find((d) => d.slug === form.origen)?.city || '';
+    const destinoNombre = destinations.find((d) => d.slug === form.destino)?.city || '';
+
     const lines = [];
-    if (form.origen) lines.push(`Origen: ${form.origen}`);
-    if (form.destino) lines.push(`Destino: ${form.destino}`);
-    if (form.startDate && form.endDate) lines.push(`Fechas: ${fmt(form.startDate)} → ${fmt(form.endDate)}`);
+    if (origenNombre) lines.push(`Origen: ${origenNombre}`);
+    if (destinoNombre) lines.push(`Destino: ${destinoNombre}`);
+    lines.push(`Tipo de viaje: ${form.tripType === 'oneway' ? 'Solo ida' : 'Ida y vuelta'}`);
+    if (form.tripType === 'roundtrip' && form.startDate && form.endDate) lines.push(`Fechas: ${fmt(form.startDate)} → ${fmt(form.endDate)}`);
     else if (form.startDate) lines.push(`Salida: ${fmt(form.startDate)}`);
+    if (paxParts.length) lines.push(`Pasajeros: ${paxParts.join(', ')}`);
     if (form.mensaje) lines.push('', form.mensaje);
 
     try {
@@ -178,13 +138,18 @@ export default function QuoteCTA() {
           name: form.nombre.trim(),
           email: form.email.trim(),
           phone: form.telefono.trim(),
-          passengers: form.pasajeros,
+          passengers,
           message: lines.join('\n'),
+          destinationSlug: form.destino || null,
           wizardData: {
-            origen: form.origen,
-            destino: form.destino,
+            origen: origenNombre,
+            origenSlug: form.origen,
+            destino: destinoNombre,
+            destinoSlug: form.destino,
+            tripType: form.tripType,
             startDate: form.startDate,
             endDate: form.endDate,
+            pax: form.pax,
           },
         }),
       });
@@ -200,92 +165,146 @@ export default function QuoteCTA() {
   }
 
   return (
-    <div id="cotizar" className="w-screen -mx-[calc((100vw-100%)/2)] relative overflow-hidden bg-gradient-to-b from-surface-secondary to-brand-primary/[0.06]">
-      <div className="relative py-24 max-w-7xl mx-auto px-6 sm:px-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-14 lg:gap-20 items-center">
+    <div id="cotizar" className="scroll-mt-24">
+      <div className="grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] items-stretch rounded-[28px] border border-border shadow-xl shadow-black/[0.06]">
 
-          {/* ── Editorial izquierdo ──────────────────────────── */}
-          <div>
-            <h2
-              className="font-extrabold text-foreground leading-[1.05] mb-6 tracking-tight"
-              style={{ fontSize: 'clamp(2.4rem, 4.5vw, 3.5rem)' }}
+        {/* ── Talón — stub del pasaje ──────────────────────── */}
+        <div className="relative overflow-hidden rounded-t-[28px] lg:rounded-t-none lg:rounded-l-[28px] bg-brand-primary px-8 py-12 sm:px-10 sm:py-14 flex flex-col justify-center text-brand-primary-foreground">
+          <PlaneTakeoff
+            className="absolute -right-10 -bottom-10 text-brand-primary-foreground/[0.08] pointer-events-none hidden sm:block"
+            size={220}
+            strokeWidth={1}
+            aria-hidden="true"
+          />
+
+          <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full bg-brand-primary-foreground/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] mb-5">
+            <MessageSquare size={12} strokeWidth={2.5} />
+            Pasaje de cotización
+          </span>
+          <h2
+            className="relative font-extrabold leading-[1.05] mb-5 tracking-tight"
+            style={{ fontSize: 'clamp(1.9rem, 3vw, 2.5rem)' }}
+          >
+            Tu próximo viaje empieza acá.
+          </h2>
+
+          <p className="relative leading-relaxed mb-8 text-[14px] opacity-80 max-w-[320px]">
+            Completá el pasaje y un asesor especializado te va a escribir con una propuesta
+            armada a tu medida — sin costo y sin compromiso.
+          </p>
+
+          <ul className="relative space-y-3.5">
+            {BENEFITS.map((b) => (
+              <li key={b} className="flex items-center gap-3">
+                <div className="w-[20px] h-[20px] rounded-full flex items-center justify-center shrink-0 bg-brand-primary-foreground/15">
+                  <Check size={10} strokeWidth={3} />
+                </div>
+                <span className="text-[13px] opacity-90">{b}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* ── Formulario ──────────────────────────────────── */}
+        <div className="relative bg-surface rounded-b-[28px] lg:rounded-b-none lg:rounded-r-[28px] flex items-center">
+          {/* Perforación del pasaje */}
+          <div className="hidden lg:block absolute inset-y-0 left-0 border-l border-dashed border-border" aria-hidden="true" />
+          <span className="hidden lg:block absolute -top-[9px] -left-[9px] w-[18px] h-[18px] rounded-full bg-background" aria-hidden="true" />
+          <span className="hidden lg:block absolute -bottom-[9px] -left-[9px] w-[18px] h-[18px] rounded-full bg-background" aria-hidden="true" />
+
+          {status === 'success' ? (
+            <div className="p-8 sm:p-12 w-full"><SuccessCard /></div>
+          ) : (
+            <form
+              onSubmit={handleSubmit}
+              className="w-full"
             >
-              Tu próximo viaje,{' '}
-              <span className="text-brand-primary">a tu medida.</span>
-            </h2>
+              {/* Sección viaje */}
+              <div className="px-7 sm:px-10 pt-9 pb-6 space-y-3">
+                <p className="text-[12px] font-bold mb-4 text-muted uppercase tracking-wide">
+                  Datos del viaje
+                </p>
 
-            <p className="leading-relaxed mb-10 text-[15px] text-muted max-w-[420px]">
-              Completa el formulario y un asesor especializado te contactará con una propuesta
-              totalmente personalizada — sin costo y sin compromiso.
-            </p>
-
-            <ul className="space-y-4">
-              {BENEFITS.map((b) => (
-                <li key={b} className="flex items-center gap-3.5">
-                  <div className="w-[22px] h-[22px] rounded-full flex items-center justify-center shrink-0 bg-brand-primary/12">
-                    <Check size={11} className="text-brand-primary" strokeWidth={2.5} />
-                  </div>
-                  <span className="text-[13px] text-foreground/80">{b}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* ── Formulario ──────────────────────────────────── */}
-          <div>
-            {status === 'success' ? (
-              <SuccessCard />
-            ) : (
-              <form
-                onSubmit={handleSubmit}
-                className="rounded-2xl overflow-hidden bg-surface border border-border shadow-xl shadow-black/[0.04]"
-              >
-                {/* Sección viaje */}
-                <div className="px-7 pt-7 pb-6 space-y-3">
-                  <p className="text-[12px] font-bold mb-4 text-muted uppercase tracking-wide">
-                    Datos del viaje
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <IconField icon={<MapPin size={14} />}>
-                      <TextField value={form.origen} onChange={(v) => up('origen', v)} aria-label="Origen" fullWidth>
-                        <Input placeholder="Origen" className={inputClass} />
-                      </TextField>
-                    </IconField>
-                    <IconField icon={<PlaneTakeoff size={14} />}>
-                      <TextField value={form.destino} onChange={(v) => up('destino', v)} aria-label="Destino" fullWidth>
-                        <Input placeholder="Destino" className={inputClass} />
-                      </TextField>
-                    </IconField>
+                  <div className="relative inline-grid grid-cols-2 rounded-xl bg-surface-secondary p-1 gap-1">
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-lg bg-accent transition-transform duration-250 ease-[cubic-bezier(0.25,1,0.5,1)]"
+                      style={{ transform: form.tripType === 'oneway' ? 'translateX(calc(100% + 0.25rem))' : 'translateX(0)' }}
+                    />
+                    {[
+                      { id: 'roundtrip', label: 'Ida y vuelta' },
+                      { id: 'oneway', label: 'Solo ida' },
+                    ].map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => up('tripType', t.id)}
+                        className={`relative z-10 rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors duration-200 ${
+                          form.tripType === t.id ? 'text-accent-foreground' : 'text-muted hover:text-foreground'
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
-                    <DateRangePicker
-                      startDate={form.startDate}
-                      endDate={form.endDate}
-                      onChange={({ start, end }) => setForm((prev) => ({ ...prev, startDate: start, endDate: end }))}
+                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-end gap-3">
+                    <DestinationCombobox
+                      label="Origen"
+                      icon={<PlaneTakeoff size={14} />}
+                      value={form.origen}
+                      options={destinoOptions}
+                      onChange={(v) => up('origen', v)}
+                      placeholder="Buscar origen..."
                     />
 
-                    <NumberField
-                      value={form.pasajeros}
-                      onChange={(v) => up('pasajeros', v)}
-                      minValue={1}
-                      maxValue={20}
-                      aria-label="Pasajeros"
-                    >
-                      <NumberField.Group className="h-12 rounded-xl w-[132px]">
-                        <NumberField.DecrementButton aria-label="Menos pasajeros" />
-                        <NumberField.Input className="text-sm text-center" />
-                        <NumberField.IncrementButton aria-label="Más pasajeros" />
-                      </NumberField.Group>
-                    </NumberField>
+                    <div className="hidden sm:flex justify-center pb-1">
+                      <button
+                        type="button"
+                        onClick={swapOrigenDestino}
+                        aria-label="Intercambiar origen y destino"
+                        className="w-9 h-9 rounded-full border border-default bg-surface-secondary text-muted flex items-center justify-center hover:text-accent hover:border-accent/40 active:scale-90 transition-[color,border-color,transform] duration-200"
+                      >
+                        <ArrowLeftRight
+                          size={15}
+                          className="transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]"
+                          style={{ transform: `rotate(${swapSpins * 180}deg)` }}
+                        />
+                      </button>
+                    </div>
+
+                    <DestinationCombobox
+                      label="Destino"
+                      icon={<PlaneLanding size={14} />}
+                      value={form.destino}
+                      options={destinoOptions}
+                      onChange={(v) => up('destino', v)}
+                      placeholder="Buscar destino..."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <DateRangeField
+                      label={form.tripType === 'roundtrip' ? 'Fechas de viaje' : 'Fecha ida'}
+                      mode={form.tripType === 'roundtrip' ? 'range' : 'single'}
+                      start={form.startDate}
+                      end={form.endDate}
+                      onApply={(start, end) => setForm((prev) => ({ ...prev, startDate: start || '', endDate: end || '' }))}
+                      triggerClassName={DATE_TRIGGER_CLASS}
+                    />
+
+                    <PassengerPopover value={form.pax} onChange={(pax) => up('pax', pax)} triggerClassName={PAX_TRIGGER_CLASS} />
                   </div>
                 </div>
 
-                <div className="h-px bg-border" />
+                <div className="relative h-0 mx-7 sm:mx-10">
+                  <div className="absolute inset-x-0 top-0 border-t border-dashed border-border" />
+                  <span className="absolute -left-[9px] -top-[9px] w-[18px] h-[18px] rounded-full bg-surface border border-border" aria-hidden="true" />
+                  <span className="absolute -right-[9px] -top-[9px] w-[18px] h-[18px] rounded-full bg-surface border border-border" aria-hidden="true" />
+                </div>
 
                 {/* Sección contacto */}
-                <div className="px-7 pt-6 pb-7 space-y-3">
+                <div className="px-7 sm:px-10 pt-8 pb-9 space-y-3">
                   <p className="text-[12px] font-bold mb-4 text-muted uppercase tracking-wide">
                     Tus datos de contacto
                   </p>
@@ -341,9 +360,8 @@ export default function QuoteCTA() {
                 </div>
               </form>
             )}
-          </div>
-
         </div>
+
       </div>
     </div>
   );

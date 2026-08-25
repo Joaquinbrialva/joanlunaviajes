@@ -46,7 +46,7 @@ export default function AdminDestinationsPage() {
   const rows = useMemo(() => {
     const query = search.trim().toLowerCase();
     return destinations.filter((d) => {
-      const searchMatch = query.length === 0 || d.name.toLowerCase().includes(query) || d.country.toLowerCase().includes(query);
+      const searchMatch = query.length === 0 || d.city.toLowerCase().includes(query) || d.title.toLowerCase().includes(query) || d.country.toLowerCase().includes(query);
       const continentMatch = continent === 'all' || d.continent === continent;
       return searchMatch && continentMatch;
     });
@@ -103,7 +103,7 @@ export default function AdminDestinationsPage() {
       />
 
       <Section>
-        <TableToolbar search={search} onSearchChange={setSearch} placeholder='Buscar por nombre o país...'>
+        <TableToolbar search={search} onSearchChange={setSearch} placeholder='Buscar por ciudad, título o país...'>
           <HeroSelect
             value={continent}
             onValueChange={setContinent}
@@ -159,8 +159,8 @@ export default function AdminDestinationsPage() {
                         </td>
                       )}
                       <td className='px-4 py-3'>
-                        <p className='font-semibold'>{destination.name}</p>
-                        <p className='text-xs text-muted'>{destination.id}</p>
+                        <p className='font-semibold'>{destination.city}</p>
+                        <p className='text-xs text-muted truncate max-w-[220px]'>{destination.title}</p>
                       </td>
                       <td className='px-4 py-3 text-muted'>{destination.country}</td>
                       <td className='px-4 py-3 text-muted'>{destination.continent}</td>

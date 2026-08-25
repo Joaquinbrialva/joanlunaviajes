@@ -46,7 +46,7 @@ const opcionesEstado = [
 /* ─── Estado inicial y conversor ─────────────────────────────────────── */
 
 const initialForm = {
-  name: '', slug: '', country: '', continent: 'América',
+  title: '', city: '', slug: '', country: '', continent: 'América',
   featuredImage: '', gallery: '',
   airport: '', language: '', currency: 'USD', timezone: '',
   recommendedStayDays: 7,
@@ -60,7 +60,8 @@ const initialForm = {
 
 function destinationToForm(d) {
   return {
-    name: d.name || '',
+    title: d.title || '',
+    city: d.city || '',
     slug: d.slug || '',
     country: d.country || '',
     continent: d.continent || 'América',
@@ -212,7 +213,7 @@ export default function EditDestinationPage() {
   const goBack = () => { setShowErrors(false); setPaso((p) => Math.max(1, p - 1)); };
 
   const canGoNext = useMemo(() => {
-    if (paso === 1) return Boolean(form.name && form.country);
+    if (paso === 1) return Boolean(form.city && form.country);
     if (paso === 2) return Boolean(form.airport && form.language);
     if (paso === 3) return Boolean(form.description && form.shortDescription);
     return true;
@@ -289,14 +290,14 @@ export default function EditDestinationPage() {
           <div className='space-y-5'>
             <div>
               <h3 className='text-lg font-bold'>Identidad del destino</h3>
-              <p className='text-sm text-muted mt-0.5'>Nombre, país y datos de identificación.</p>
+              <p className='text-sm text-muted mt-0.5'>Ciudad, país y datos de identificación.</p>
             </div>
             <div className='grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_2fr] gap-4 items-start'>
-              <FieldGroup title='Nombre'>
+              <FieldGroup title='Ciudad'>
                 <div>
-                  <FInput value={form.name} onChange={(e) => update('name', e.target.value)}
-                    error={showErrors && !form.name} className='text-base h-12 font-medium' />
-                  <FError>{showErrors && !form.name ? 'El nombre es obligatorio.' : null}</FError>
+                  <FInput value={form.city} onChange={(e) => update('city', e.target.value)}
+                    error={showErrors && !form.city} className='text-base h-12 font-medium' />
+                  <FError>{showErrors && !form.city ? 'La ciudad es obligatoria.' : null}</FError>
                 </div>
               </FieldGroup>
               <FieldGroup title='Ubicación'>
@@ -318,6 +319,12 @@ export default function EditDestinationPage() {
                 </div>
               </FieldGroup>
             </div>
+            <FieldGroup title='Título descriptivo'>
+              <div>
+                <FInput value={form.title} onChange={(e) => update('title', e.target.value)} placeholder='Ej: Escapada inolvidable a la Patagonia salvaje' />
+                <p className='text-xs text-muted mt-1.5'>Encabezado de la página del destino. Si lo dejás vacío se genera uno automático a partir de la ciudad.</p>
+              </div>
+            </FieldGroup>
             <FieldGroup title='Imagen destacada'>
               <CoverImageInput value={form.featuredImage} onChange={(url) => update('featuredImage', url)} />
             </FieldGroup>
@@ -429,7 +436,8 @@ export default function EditDestinationPage() {
               <p className='text-sm text-muted mt-0.5'>Revisa los datos antes de guardar.</p>
             </div>
             <div className='rounded-2xl bg-surface-secondary/50 overflow-hidden'>
-              <ReviewRow label='Nombre' value={form.name || '—'} />
+              <ReviewRow label='Ciudad' value={form.city || '—'} />
+              <ReviewRow label='Título' value={form.title || 'Automático'} />
               <ReviewRow label='País' value={`${form.country || '—'} · ${form.continent}`} />
               <ReviewRow label='Aeropuerto' value={form.airport || '—'} />
               <ReviewRow label='Idioma' value={form.language || '—'} />

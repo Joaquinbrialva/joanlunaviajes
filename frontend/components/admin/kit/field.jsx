@@ -20,10 +20,7 @@ export function TextInputField({
   return (
     <TextField isRequired={required} isInvalid={!!error} className={`flex flex-col gap-1.5 ${className}`}>
       {label && (
-        <Label className='text-[13px] font-medium text-foreground'>
-          {label}
-          {required && <span className='text-accent'> *</span>}
-        </Label>
+        <Label className='text-[13px] font-medium text-foreground'>{label}</Label>
       )}
       <Input {...inputProps} className={inputClassName} />
       {error ? (
@@ -48,10 +45,7 @@ export function TextareaField({
   return (
     <TextField isRequired={required} isInvalid={!!error} className={`flex flex-col gap-1.5 ${className}`}>
       {label && (
-        <Label className='text-[13px] font-medium text-foreground'>
-          {label}
-          {required && <span className='text-accent'> *</span>}
-        </Label>
+        <Label className='text-[13px] font-medium text-foreground'>{label}</Label>
       )}
       <TextArea rows={rows} {...inputProps} className={inputClassName} />
       {error ? (

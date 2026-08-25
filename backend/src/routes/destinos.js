@@ -43,31 +43,33 @@ router.get('/:slug', async (req, res) => {
 router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
     const body = req.body;
-    const name = String(body.name || '').trim();
+    const city = String(body.city || '').trim();
     const country = String(body.country || '').trim();
+    const title = String(body.title || '').trim() || `Descubrí ${city}`;
 
-    if (!name || !country) {
-      return res.status(400).json({ error: 'Completá nombre y país del destino.' });
+    if (!city || !country) {
+      return res.status(400).json({ error: 'Completá ciudad y país del destino.' });
     }
 
     const existingSlugRows = await prisma.destination.findMany({ select: { slug: true } });
     const existingSlugs = new Set(existingSlugRows.map((d) => d.slug));
-    const slug = uniqueSlug(body.slug || `${name}-${country}`, existingSlugs);
+    const slug = uniqueSlug(body.slug || `${city}-${country}`, existingSlugs);
     const coverSeed = slugify(`${slug}-${Date.now()}`);
     const isRecommended = Boolean(body.isRecommended);
     const coverImageUrl = String(body.featuredImage || '').trim();
 
     const data = {
       slug,
-      name,
+      title,
+      city,
       country,
       continent: String(body.continent || 'América'),
       description:
         String(body.description || '').trim() ||
-        `${name} es uno de los destinos más destacados de ${country}, reconocido por su riqueza cultural y experiencias inolvidables.`,
+        `${city} es uno de los destinos más destacados de ${country}, reconocido por su riqueza cultural y experiencias inolvidables.`,
       shortDescription:
         String(body.shortDescription || '').trim() ||
-        `Descubrí lo mejor de ${name} en tu próximo viaje.`,
+        `Descubrí lo mejor de ${city} en tu próximo viaje.`,
       travelInfo: {
         airport: String(body.airport || '').trim() || 'N/A',
         currency: String(body.currency || 'USD'),
@@ -91,10 +93,10 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
         averageDailyBudgetUSD: Math.max(1, Number(body.averageDailyBudgetUSD || 100)),
       },
       seo: {
-        metaTitle: String(body.metaTitle || '').trim() || `Viajes a ${name} | Guía y Ofertas`,
+        metaTitle: String(body.metaTitle || '').trim() || `Viajes a ${city} | Guía y Ofertas`,
         metaDescription:
           String(body.metaDescription || '').trim() ||
-          `Información completa sobre ${name}, consejos de viaje y las mejores ofertas disponibles.`,
+          `Información completa sobre ${city}, consejos de viaje y las mejores ofertas disponibles.`,
       },
       isPopular: Boolean(body.isPopular),
       isFeatured: Boolean(body.isFeatured),
@@ -128,7 +130,8 @@ router.patch('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
     const newFeaturedImage = String(body.featuredImage || existing.featuredImage).trim();
 
     const updateData = {
-      name: String(body.name || existing.name).trim(),
+      title: String(body.title || existing.title).trim(),
+      city: String(body.city || existing.city).trim(),
       country: String(body.country || existing.country).trim(),
       continent: String(body.continent || existing.continent),
       description: String(body.description || existing.description).trim(),

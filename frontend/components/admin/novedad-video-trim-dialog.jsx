@@ -13,8 +13,8 @@ export function formatTime(seconds) {
 }
 
 // ─── Frame Editor ──────────────────────────────────────────────────────────
-// Drag-to-crop estilo Instagram, igual al del Hero — arrastrar y hacer zoom
-// sobre el video dentro del frame 3:1 para elegir el encuadre.
+// Drag-to-crop estilo Instagram — arrastrar y hacer zoom sobre el video
+// dentro del frame 2.4:1 (mismo recorte que el cuadro de Novedades del home) para elegir el encuadre.
 
 export function VideoFrameEditor({ videoRef, natural, focalPoint, zoom, onZoomChange, onFocalPointChange }) {
   const containerRef = useRef(null);
@@ -107,7 +107,7 @@ export function VideoFrameEditor({ videoRef, natural, focalPoint, zoom, onZoomCh
     <div className='space-y-2.5'>
       <div
         ref={containerRef}
-        className='relative aspect-[3/1] w-full overflow-hidden rounded-xl select-none'
+        className='relative aspect-[12/5] w-full overflow-hidden rounded-xl select-none'
         style={{
           cursor: isDragging ? 'grabbing' : (natural ? 'grab' : 'default'),
           touchAction: 'none',

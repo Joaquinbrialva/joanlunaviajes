@@ -91,7 +91,7 @@ export default function ConsultaPage() {
   const selectionOptions = useMemo(() => {
     const opts = [{ value: 'general', label: 'Consulta general' }];
     offers.forEach((o) => opts.push({ value: `offer:${o.slug}:${o.title}`, label: `✈ ${o.title} — ${o.location?.city ?? ''}` }));
-    destinations.forEach((d) => opts.push({ value: `dest:${d.slug}`, label: `🌍 ${d.name}, ${d.country}` }));
+    destinations.forEach((d) => opts.push({ value: `dest:${d.slug}`, label: `🌍 ${d.city}, ${d.country}` }));
     return opts;
   }, [offers, destinations]);
 

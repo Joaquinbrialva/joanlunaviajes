@@ -40,7 +40,8 @@ model Offer {
 model Destination {
   id               String   @id @default(uuid())
   slug             String   @unique
-  name             String
+  title            String   @default("")
+  city             String
   country          String
   continent        String   @default("América")
   description      String   @default("")

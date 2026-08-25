@@ -46,6 +46,9 @@ router.post('/', optionalAuth, async (req, res) => {
     if (!name) {
       return res.status(400).json({ error: 'Completá tu nombre.' });
     }
+    if (!phone && !email) {
+      return res.status(400).json({ error: 'Dejanos un teléfono o email para contactarte.' });
+    }
     if (email && !EMAIL_RE.test(email)) {
       return res.status(400).json({ error: 'El email no tiene un formato válido.' });
     }

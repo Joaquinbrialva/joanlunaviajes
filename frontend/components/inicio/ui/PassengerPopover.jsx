@@ -36,7 +36,7 @@ function Stepper({ value, min, onChange }) {
 	);
 }
 
-export default function PassengerPopover({ value, onChange }) {
+export default function PassengerPopover({ value, onChange, triggerClassName }) {
 	const [open, setOpen] = useState(false);
 	const containerRef = useRef(null);
 
@@ -60,7 +60,7 @@ export default function PassengerPopover({ value, onChange }) {
 			<button
 				type="button"
 				onClick={() => setOpen((o) => !o)}
-				className="h-12 w-full rounded-xl border border-default bg-surface-secondary px-3.5 flex items-center gap-2.5 text-left hover:border-accent/40 active:scale-[0.98] transition-[border-color,transform] duration-150"
+				className={triggerClassName || 'h-12 w-full rounded-xl border border-default bg-surface-secondary px-3.5 flex items-center gap-2.5 text-left hover:border-accent/40 active:scale-[0.98] transition-[border-color,transform] duration-150'}
 			>
 				<Users size={16} className="text-muted shrink-0" />
 				<div className="flex-1 min-w-0">

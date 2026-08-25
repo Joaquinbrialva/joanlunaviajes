@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Cropper from 'react-easy-crop';
 import { Button, Switch, Spinner } from '@heroui/react';
 import { LuX, LuPlus } from 'react-icons/lu';
-import { TARGET_ASPECT, getCroppedBlob } from '@/components/admin/novedad-crop-dialog';
+import { TARGET_ASPECT, getCroppedBlob, getDefaultCroppedAreaPixels } from '@/components/admin/novedad-crop-dialog';
 import { VideoFrameEditor, formatTime } from '@/components/admin/novedad-video-trim-dialog';
 import { toastError } from '@/lib/toast';
 
@@ -175,12 +175,8 @@ export default function NovedadStudio({ isOpen, editing, initialMedia, initialCa
             result.push({ media: { url: item.url, type: 'image' }, status: item.status });
             continue;
           }
-          if (!item.croppedAreaPixels) {
-            toastError('Esperá a que se procese el recorte de la imagen.');
-            setSaving(false);
-            return;
-          }
-          const blob = await getCroppedBlob(item.url, item.croppedAreaPixels);
+          const cropPixels = item.croppedAreaPixels || await getDefaultCroppedAreaPixels(item.url);
+          const blob = await getCroppedBlob(item.url, cropPixels);
           const url = await uploadFile(blob, item.file?.name || 'novedad.jpg', '/api/upload');
           result.push({ media: { url, type: 'image' }, status: item.status });
         } else {
@@ -212,10 +208,11 @@ export default function NovedadStudio({ isOpen, editing, initialMedia, initialCa
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
             placeholder='Título interno (opcional, para buscarla después)'
-            className='h-9 min-w-0 flex-1 rounded-lg bg-surface-secondary px-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/40'
+            disabled={saving}
+            className='h-9 min-w-0 flex-1 rounded-lg bg-surface-secondary px-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:opacity-60'
           />
           <div className='flex shrink-0 items-center gap-3'>
-            <Button type='button' variant='tertiary' onClick={onClose}>Cancelar</Button>
+            <Button type='button' variant='tertiary' onClick={onClose} isDisabled={saving}>Cancelar</Button>
             <Button type='button' onClick={handlePublish} isDisabled={saving}>
               {saving ? <Spinner color='current' size='sm' /> : null}
               {saving ? 'Publicando...' : 'Publicar'}
@@ -223,9 +220,9 @@ export default function NovedadStudio({ isOpen, editing, initialMedia, initialCa
           </div>
         </div>
 
-        <div className='flex min-h-0 flex-col gap-4 overflow-y-auto p-6 pt-0'>
+        <div className={`flex min-h-0 flex-col gap-4 overflow-y-auto p-6 pt-0 ${saving ? 'pointer-events-none opacity-60' : ''}`}>
           <div
-            className='relative aspect-[3/1] w-full shrink-0 overflow-hidden rounded-2xl bg-black'
+            className='relative aspect-[12/5] w-full shrink-0 overflow-hidden rounded-2xl bg-black'
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={(e) => { e.preventDefault(); setDragOver(false); addFiles(e.dataTransfer.files); }}
@@ -237,7 +234,8 @@ export default function NovedadStudio({ isOpen, editing, initialMedia, initialCa
                 className={`flex h-full w-full flex-col items-center justify-center gap-2 border-2 border-dashed text-sm text-white/60 transition-colors ${dragOver ? 'border-accent text-white' : 'border-white/20'}`}
               >
                 <LuPlus className='h-6 w-6' />
-                Arrastrá o hacé clic para elegir una imagen o video
+                <span>Arrastrá o hacé clic para elegir una imagen o video</span>
+                <span className='text-xs text-white/40'>Tamaño recomendado: 1920×800px (relación 2.4:1)</span>
               </button>
             ) : activeItem.kind === 'image' ? (
               <Cropper
@@ -339,6 +337,7 @@ export default function NovedadStudio({ isOpen, editing, initialMedia, initialCa
           type='file'
           accept='image/*,video/*'
           multiple={!isSingle}
+          disabled={saving}
           className='sr-only'
           onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }}
         />

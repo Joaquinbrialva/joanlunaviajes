@@ -1,14 +1,14 @@
-import { Fira_Code, Instrument_Sans } from 'next/font/google';
+import { Fira_Code, Hanken_Grotesk } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import HeroUIToastProvider from '@/components/ui/heroui-toast-provider';
 import RootShell from '@/components/ui/root-shell';
 import ErrorBoundary from '@/components/ui/error-boundary';
 
-const jakarta = Instrument_Sans({
-	variable: '--font-jakarta',
+const hanken = Hanken_Grotesk({
+	variable: '--font-hanken',
 	subsets: ['latin'],
-	weight: ['400', '500', '600', '700'],
+	weight: ['500', '600', '700', '800'],
 	display: 'swap',
 });
 
@@ -33,7 +33,7 @@ export default function RootLayout({ children }) {
 	return (
 		<html lang='es' suppressHydrationWarning>
 			<body
-				className={`${jakarta.variable} ${fira.variable} font-sans antialiased`}
+				className={`${hanken.variable} ${fira.variable} font-sans antialiased`}
 			>
 				<ThemeProvider
 					attribute='class'

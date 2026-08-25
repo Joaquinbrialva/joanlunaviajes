@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import {
   Breadcrumbs,
@@ -5,25 +6,18 @@ import {
 } from '@heroui/react';
 import {
   LuMapPin,
-  LuClock,
-  LuPlane,
   LuCheck,
   LuX,
-  LuBedDouble,
-  LuCalendarDays,
   LuShieldCheck,
-  LuUsers,
-  LuZap,
-  LuInfo,
-  LuListChecks,
-  LuLuggage,
   LuSparkle,
+  LuTag,
+  LuArrowRight,
+  LuBedDouble,
 } from 'react-icons/lu';
 import { fetchOffer } from '@/lib/api';
 import AirlineLogo from '@/components/ui/airline-logo';
 import GalleryCollage from '@/components/inicio/ui/GalleryCollage';
 import QuoteForm from '@/components/inicio/ui/QuoteForm';
-import { formatCurrency } from '@/util/utils';
 
 function formatDate(d) {
   if (!d) return null;
@@ -33,6 +27,27 @@ function formatDate(d) {
     year: 'numeric',
     timeZone: 'UTC',
   }).format(new Date(d));
+}
+
+function dateParts(d) {
+  if (!d) return null;
+  const date = new Date(d);
+  return {
+    day: new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(date).replace('.', ''),
+    year: new Intl.DateTimeFormat('es-AR', { year: 'numeric', timeZone: 'UTC' }).format(date),
+  };
+}
+
+function Card({ children }) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-surface p-7 md:p-8 shadow-[0_1px_2px_rgba(18,36,59,.04),0_14px_30px_-18px_rgba(18,36,59,.16)]">
+      {children}
+    </div>
+  );
+}
+
+function CardTitle({ children }) {
+  return <h2 className="text-lg font-extrabold mb-5">{children}</h2>;
 }
 
 export async function generateMetadata({ params }) {
@@ -52,47 +67,10 @@ export async function generateMetadata({ params }) {
   };
 }
 
-/* ── Section heading — barra lateral + ícono + etiqueta ── */
-function SectionHeading({ icon: Icon, children }) {
-  return (
-    <div className="flex items-center gap-3 mb-6">
-      <div className="w-[3px] self-stretch rounded-full bg-accent shrink-0" />
-      <div className="flex items-center gap-2">
-        {Icon && <Icon size={15} className="text-accent shrink-0" />}
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-foreground/60">
-          {children}
-        </h2>
-      </div>
-    </div>
-  );
-}
-
-/* ── Separador visual entre secciones ── */
-function SectionDivider() {
-  return (
-    <div className="flex items-center gap-2 py-1">
-      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-      <div className="w-1 h-1 rounded-full bg-accent/25 shrink-0" />
-      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-    </div>
-  );
-}
-
 export default async function OfferDetailPage({ params }) {
   const { slug } = await params;
   const offer = await fetchOffer(slug);
   if (!offer) notFound();
-
-  const price =
-    offer.pricing?.price ||
-    offer.pricing?.finalPrice ||
-    offer.pricing?.originalPrice;
-  const originalPrice = offer.pricing?.originalPrice;
-  const hasDiscount =
-    offer.pricing?.discountPercentage > 0 &&
-    originalPrice &&
-    originalPrice > (price || 0);
-  const currency = offer.pricing?.currency || 'USD';
 
   const originLabel = [offer.origin?.city, offer.origin?.country]
     .filter(Boolean)
@@ -108,6 +86,9 @@ export default async function OfferDetailPage({ params }) {
     offer.luggage?.checked && 'Equipaje despachado',
   ].filter(Boolean);
 
+  const images = offer.images || [];
+  const hotelImage = images.length > 1 ? images[4] || images[1] : null;
+
   const hasIncludes = offer.includes?.length > 0;
   const hasNotIncludes = offer.notIncludes?.length > 0;
   const hasHighlights = offer.highlights?.length > 0;
@@ -118,9 +99,10 @@ export default async function OfferDetailPage({ params }) {
     offer.availability?.startDate || offer.availability?.availableMonths;
 
   return (
-    <div className="pb-20 md:pb-32">
+    <div className="pb-24 md:pb-32">
+
       {/* Breadcrumbs */}
-      <div className="mb-5">
+      <div className="pt-6 mb-5">
         <Breadcrumbs size="sm" className="text-muted">
           <BreadcrumbsItem href="/">Inicio</BreadcrumbsItem>
           <BreadcrumbsItem href="/ofertas">Ofertas</BreadcrumbsItem>
@@ -128,388 +110,248 @@ export default async function OfferDetailPage({ params }) {
         </Breadcrumbs>
       </div>
 
-      {/* ── Title block ── */}
-      <div className="mb-5 space-y-3">
-        <div className="flex gap-2 flex-wrap">
-          {offer.isFeatured && (
-            <span className="bg-foreground text-background text-[10px] font-bold px-3 py-1 rounded-full">
-              MÁS VENDIDA
-            </span>
-          )}
-          {offer.isSpecialOffer && (
-            <span className="bg-accent text-white text-[10px] font-bold px-3 py-1 rounded-full">
-              OFERTA ESPECIAL
-            </span>
-          )}
-          {hasDiscount && (
-            <span className="bg-accent text-white text-[10px] font-bold px-3 py-1 rounded-full">
-              -{offer.pricing.discountPercentage}% OFF
-            </span>
-          )}
-        </div>
+      {/* ============ HERO — photo mosaic ============ */}
+      <div className="relative">
+        {images.length > 0 ? (
+          <GalleryCollage images={images} title={offer.title} />
+        ) : (
+          <div className="w-full h-[320px] rounded-3xl bg-surface-tertiary" />
+        )}
 
-        <h1
-          className="font-bold text-foreground leading-tight"
-          style={{ fontSize: 'clamp(1.7rem, 4vw, 3rem)' }}
-        >
-          {offer.title}
-        </h1>
-
-        <div className="flex items-center gap-3 flex-wrap">
-          {(offer.location?.city || offer.location?.country) && (
-            <span className="flex items-center gap-1.5 text-sm text-muted">
-              <LuMapPin size={13} className="text-accent shrink-0" />
-              {[offer.location.city, offer.location.country]
-                .filter(Boolean)
-                .join(', ')}
-            </span>
-          )}
-        </div>
+        {(offer.isFeatured || offer.isSpecialOffer) && (
+          <div className="absolute right-4 top-4 flex flex-col items-end gap-2 pointer-events-none">
+            {offer.isFeatured && (
+              <span className="inline-flex items-center gap-1 bg-white text-foreground text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg">
+                <LuTag size={11} />
+                Más vendida
+              </span>
+            )}
+            {offer.isSpecialOffer && (
+              <span className="inline-flex items-center gap-1 bg-white text-foreground text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg">
+                <LuSparkle size={11} />
+                Oferta especial
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* ── Gallery collage ── */}
-      {offer.images?.length > 0 && (
-        <div className="mb-6">
-          <GalleryCollage images={offer.images} title={offer.title} />
-        </div>
-      )}
+      {/* ============ TITLE + FLOATING QUOTE CARD ============ */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-10 xl:gap-14 items-start mt-7">
 
-      {/* ── STATS STRIP — grid de píldoras ── */}
-      {(offer.duration?.days > 0 || hasRoute || offer.flight?.type || offer.availability?.remainingSpots > 0 || hasDiscount) && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-8">
-          {offer.duration?.days > 0 && offer.availability?.startDate && offer.availability?.endDate && (
-            <StatCard icon={<LuClock size={15} className="text-accent" />} label="Duración">
-              {offer.duration.days}d / {offer.duration.nights}n
-            </StatCard>
-          )}
-          {hasRoute && (
-            <StatCard icon={<LuPlane size={15} className="text-accent" />} label="Ruta" className="col-span-2 sm:col-span-1">
-              {originLabel} → {destLabel}
-            </StatCard>
-          )}
-          {offer.flight?.type && (
-            <StatCard icon={<LuZap size={15} className="text-accent" />} label="Vuelo">
-              {offer.flight.type === 'direct' ? 'Directo' : 'Con escala'}
-            </StatCard>
-          )}
-          {offer.availability?.remainingSpots > 0 && (
-            <StatCard icon={<LuUsers size={15} className="text-accent" />} label="Cupos">
-              Quedan {offer.availability.remainingSpots}
-            </StatCard>
-          )}
-          {hasDiscount && originalPrice && (
-            <StatCard icon={<span className="text-accent font-bold text-xs">%</span>} label="Precio original">
-              <span className="line-through text-muted">
-                {formatCurrency({ amount: originalPrice, currency })}
-              </span>
-            </StatCard>
+        <div className="min-w-0">
+          <p className="text-[13px] font-bold text-muted mb-2">
+            {[offer.category, offer.duration?.days > 0 && `${offer.duration.days} días / ${offer.duration.nights} noches`]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+          <h1 className="font-extrabold tracking-tight leading-[1.05] mb-3" style={{ fontSize: 'clamp(1.8rem, 3.4vw, 2.6rem)' }}>
+            {offer.title}
+          </h1>
+          {(offer.location?.city || offer.location?.country) && (
+            <div className="flex items-center gap-1.5 text-[15px] text-muted">
+              <LuMapPin size={15} className="shrink-0" />
+              {[offer.location.city, offer.location.country].filter(Boolean).join(', ')}
+            </div>
           )}
         </div>
-      )}
 
-      {/* ── MAIN LAYOUT ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_370px] gap-8 md:gap-12 items-start">
-        {/* LEFT — Content */}
-        <div className="space-y-2 min-w-0">
+        <div className="xl:-mt-16 xl:row-span-2">
+          <QuoteForm offer={offer} />
+        </div>
 
-          {/* Description */}
+        {/* ============ CONTENT CARDS ============ */}
+        <div className="flex flex-col gap-5 min-w-0">
+
           {offer.subtitle && (
-            <>
-              <ContentSection>
-                <SectionHeading icon={LuInfo}>Sobre la experiencia</SectionHeading>
-                <p className="text-muted leading-relaxed text-[15px]">
-                  {offer.subtitle}
-                </p>
-              </ContentSection>
-              <SectionDivider />
-            </>
+            <Card>
+              <p className="text-[17px] leading-relaxed">{offer.subtitle}</p>
+            </Card>
           )}
 
-          {/* Highlights */}
           {hasHighlights && (
-            <>
-              <ContentSection tinted>
-                <SectionHeading icon={LuSparkle}>Puntos destacados</SectionHeading>
-                <ul className="space-y-3">
-                  {offer.highlights.map((item, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <span
-                        className="shrink-0 mt-0.5 w-6 h-6 rounded-full bg-accent flex items-center justify-center text-white text-[10px] font-bold"
-                      >
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                      <span className="text-[15px] text-foreground pt-0.5 leading-snug">
-                        {item}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </ContentSection>
-              <SectionDivider />
-            </>
+            <Card>
+              <CardTitle>Lo más destacado</CardTitle>
+              <div>
+                {offer.highlights.map((item, i) => (
+                  <div key={i} className={`flex items-center gap-4 py-3.5 ${i === 0 ? '' : 'border-t border-border'}`}>
+                    <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                      <LuSparkle size={16} className="text-accent" />
+                    </div>
+                    <span className="text-[15px]">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
           )}
 
-          {/* Includes / Not includes */}
           {(hasIncludes || hasNotIncludes) && (
-            <>
-              <ContentSection>
-                <SectionHeading icon={LuListChecks}>Qué incluye</SectionHeading>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {hasIncludes && (
-                    <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-900/15 p-5">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
-                          <LuCheck size={12} className="text-white" strokeWidth={3} />
-                        </div>
-                        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
-                          Incluido
+            <Card>
+              <CardTitle>Qué incluye</CardTitle>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+                {hasIncludes && (
+                  <div>
+                    {offer.includes.map((item, i) => (
+                      <div key={i} className="flex items-center gap-3 py-2.5 text-[14.5px]">
+                        <span className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                          <LuCheck size={12} className="text-accent" strokeWidth={2.8} />
                         </span>
+                        {item}
                       </div>
-                      <ul className="space-y-2.5">
-                        {offer.includes.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-emerald-800 dark:text-emerald-200">
-                            <LuCheck size={13} className="text-emerald-500 shrink-0 mt-0.5" strokeWidth={2.5} />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {hasNotIncludes && (
-                    <div className="rounded-2xl border border-rose-200 dark:border-rose-800/50 bg-rose-50 dark:bg-rose-900/15 p-5">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="w-6 h-6 rounded-full bg-rose-400 flex items-center justify-center shrink-0">
-                          <LuX size={12} className="text-white" strokeWidth={3} />
-                        </div>
-                        <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
-                          No incluido
+                    ))}
+                  </div>
+                )}
+                {hasNotIncludes && (
+                  <div>
+                    {offer.notIncludes.map((item, i) => (
+                      <div key={i} className="flex items-center gap-3 py-2.5 text-[14.5px] text-muted">
+                        <span className="w-6 h-6 rounded-full bg-surface-tertiary flex items-center justify-center shrink-0">
+                          <LuX size={11} strokeWidth={2.8} />
                         </span>
+                        {item}
                       </div>
-                      <ul className="space-y-2.5">
-                        {offer.notIncludes.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-rose-800 dark:text-rose-200">
-                            <LuX size={13} className="text-rose-400 shrink-0 mt-0.5" strokeWidth={2.5} />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </ContentSection>
-              <SectionDivider />
-            </>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Card>
           )}
 
-          {/* Flight & Luggage */}
           {hasFlight && (
-            <>
-              <ContentSection tinted>
-                <SectionHeading icon={LuPlane}>Detalles del vuelo</SectionHeading>
-                <div className="rounded-2xl border border-border bg-surface divide-y divide-border">
-                  {hasAirline && (
-                    <div className="flex items-center justify-between gap-4 px-5 py-4">
-                      <span className="text-sm text-muted">Aerolínea</span>
-                      <div className="flex items-center gap-2">
-                        {offer.airline.iata && (
-                          <AirlineLogo iata={offer.airline.iata} name={offer.airline.name} />
-                        )}
-                        <span className="font-semibold text-sm">{offer.airline.name}</span>
-                        {offer.airline.iata && (
-                          <span className="text-xs text-muted font-mono border border-border rounded px-1.5 py-0.5">
-                            {offer.airline.iata}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  {offer.flight?.type && (
-                    <div className="flex items-center justify-between gap-4 px-5 py-4">
-                      <span className="text-sm text-muted">Tipo de vuelo</span>
-                      <span
-                        className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                          offer.flight.type === 'direct'
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                        }`}
-                      >
-                        {offer.flight.type === 'direct'
-                        ? '⚡ Directo'
-                        : offer.flight.layover
-                          ? `↩ Escala en ${offer.flight.layover}`
-                          : '↩ Con escala'}
-                      </span>
-                    </div>
-                  )}
-                  {luggageItems.length > 0 && (
-                    <div className="flex items-start justify-between gap-4 px-5 py-4">
-                      <span className="text-sm text-muted shrink-0">Equipaje</span>
-                      <div className="flex flex-wrap gap-1.5 justify-end">
-                        {luggageItems.map((item) => (
-                          <span
-                            key={item}
-                            className="text-xs bg-surface-secondary border border-border rounded-full px-2.5 py-1 font-medium"
-                          >
-                            {item}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </ContentSection>
-              <SectionDivider />
-            </>
-          )}
+            <Card>
+              <CardTitle>Vuelo y equipaje</CardTitle>
 
-          {/* Hotel */}
-          {hasHotel && (
-            <>
-              <ContentSection>
-                <SectionHeading icon={LuBedDouble}>Alojamiento</SectionHeading>
-                <div className="rounded-2xl border border-border bg-surface p-5">
-                  <div className="flex items-start gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                      <LuBedDouble size={20} className="text-accent" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold text-base text-foreground">
-                          {offer.hotel.name}
-                        </h3>
-                        {offer.hotel.stars > 0 && (
-                          <span className="text-amber-400 text-sm leading-none">
-                            {'★'.repeat(offer.hotel.stars)}
-                          </span>
-                        )}
-                      </div>
-                      {offer.hotel.address && (
-                        <a
-                          href={offer.hotel.mapsUrl || `https://www.google.com/maps/search/${encodeURIComponent(offer.hotel.address)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-muted hover:text-accent transition-colors mt-0.5"
-                        >
-                          <LuMapPin size={11} className="shrink-0" />
-                          {offer.hotel.address}
-                        </a>
-                      )}
-                      {offer.hotel.amenities?.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-3">
-                          {offer.hotel.amenities.map((a) => (
-                            <span
-                              key={a}
-                              className="text-xs bg-surface-secondary border border-border rounded-full px-2.5 py-1"
-                            >
-                              {a}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+              {hasRoute && (
+                <div className="flex items-center gap-4 bg-background rounded-2xl px-6 py-5 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-semibold text-muted mb-0.5">ORIGEN</p>
+                    <p className="text-[17px] font-extrabold truncate">{offer.origin?.city || originLabel}</p>
+                  </div>
+                  <LuArrowRight size={22} className="text-accent shrink-0" />
+                  <div className="flex-1 min-w-0 text-right">
+                    <p className="text-[11px] font-semibold text-muted mb-0.5">DESTINO</p>
+                    <p className="text-[17px] font-extrabold truncate">{offer.location?.city || destLabel}</p>
                   </div>
                 </div>
-              </ContentSection>
-              <SectionDivider />
-            </>
+              )}
+
+              {hasAirline && (
+                <div className="flex items-center justify-between gap-4 py-3 border-t border-border">
+                  <span className="text-sm text-muted">Aerolínea</span>
+                  <div className="flex items-center gap-2">
+                    {offer.airline.iata && (
+                      <AirlineLogo iata={offer.airline.iata} name={offer.airline.name} />
+                    )}
+                    <span className="font-semibold text-sm">{offer.airline.name}</span>
+                  </div>
+                </div>
+              )}
+              {offer.flight?.type && (
+                <div className="flex items-center justify-between gap-4 py-3 border-t border-border">
+                  <span className="text-sm text-muted">Tipo de vuelo</span>
+                  <span className="font-semibold text-sm">
+                    {offer.flight.type === 'direct' ? 'Directo' : offer.flight.layover ? `Escala en ${offer.flight.layover}` : 'Con escala'}
+                  </span>
+                </div>
+              )}
+              {luggageItems.length > 0 && (
+                <div className="flex items-start justify-between gap-4 py-3 border-t border-border">
+                  <span className="text-sm text-muted shrink-0">Equipaje</span>
+                  <span className="font-semibold text-sm text-right">{luggageItems.join(', ')}</span>
+                </div>
+              )}
+            </Card>
           )}
 
-          {/* Availability dates */}
-          {hasAvailability && (
-            <>
-              <ContentSection tinted>
-                <SectionHeading icon={LuCalendarDays}>Fechas del viaje</SectionHeading>
-                <div className="rounded-2xl border border-border bg-surface divide-y divide-border">
-                  {offer.availability.startDate && (
-                    <div className="flex items-center justify-between px-5 py-4">
-                      <span className="text-sm text-muted flex items-center gap-2">
-                        <LuCalendarDays size={14} className="text-accent" /> Salida
-                      </span>
-                      <span className="font-semibold text-sm">
-                        {formatDate(offer.availability.startDate)}
-                      </span>
-                    </div>
-                  )}
-                  {offer.availability.endDate && (
-                    <div className="flex items-center justify-between px-5 py-4">
-                      <span className="text-sm text-muted flex items-center gap-2">
-                        <LuCalendarDays size={14} className="text-accent" /> Regreso
-                      </span>
-                      <span className="font-semibold text-sm">
-                        {formatDate(offer.availability.endDate)}
-                      </span>
-                    </div>
-                  )}
-                  {offer.availability.availableMonths && !offer.availability.startDate && (
-                    <div className="flex items-center justify-between px-5 py-4">
-                      <span className="text-sm text-muted flex items-center gap-2">
-                        <LuCalendarDays size={14} className="text-accent" /> Disponible
-                      </span>
-                      <span className="font-semibold text-sm">
-                        {offer.availability.availableMonths}
-                      </span>
+          {hasHotel && (
+            <Card>
+              <CardTitle>Alojamiento</CardTitle>
+              <div className="grid grid-cols-1 sm:grid-cols-[170px_1fr] gap-6 items-center">
+                <div className="relative rounded-2xl overflow-hidden h-[130px]">
+                  {hotelImage?.url ? (
+                    <Image
+                      src={hotelImage.url}
+                      alt={hotelImage.alt || offer.hotel.name}
+                      fill
+                      className="object-cover"
+                      sizes="170px"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-accent/10 flex items-center justify-center">
+                      <LuBedDouble size={32} className="text-accent" />
                     </div>
                   )}
                 </div>
-              </ContentSection>
-              <SectionDivider />
-            </>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-extrabold text-[17px] truncate">{offer.hotel.name}</h3>
+                    {offer.hotel.stars > 0 && (
+                      <span className="text-accent text-[13px] shrink-0">{'★'.repeat(offer.hotel.stars)}</span>
+                    )}
+                  </div>
+                  {offer.hotel.address && (
+                    <a
+                      href={offer.hotel.mapsUrl || `https://www.google.com/maps/search/${encodeURIComponent(offer.hotel.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[13px] text-muted hover:text-accent transition-colors block mb-2"
+                    >
+                      {offer.hotel.address}
+                    </a>
+                  )}
+                  {offer.hotel.amenities?.length > 0 && (
+                    <p className="text-sm text-muted">{offer.hotel.amenities.join(' · ')}</p>
+                  )}
+                </div>
+              </div>
+            </Card>
           )}
 
-          {/* Cancellation policy */}
-          <div className="rounded-2xl border border-border bg-surface-secondary/50 px-5 py-4 flex items-center gap-3 mt-2">
-            <LuShieldCheck size={20} className="text-accent shrink-0" />
+          {hasAvailability && (
+            <Card>
+              <CardTitle>Fechas del viaje</CardTitle>
+              <div className="flex items-center gap-4">
+                {offer.availability.startDate && (
+                  <div className="flex-1 bg-background rounded-2xl px-5 py-4 text-center">
+                    <p className="text-[11px] font-bold text-muted mb-1.5">SALIDA</p>
+                    <p className="text-xl font-extrabold text-accent leading-none">{dateParts(offer.availability.startDate).day}</p>
+                    <p className="text-[12px] text-muted mt-1">{dateParts(offer.availability.startDate).year}</p>
+                  </div>
+                )}
+                {offer.availability.startDate && offer.availability.endDate && (
+                  <LuArrowRight size={18} className="text-border shrink-0" />
+                )}
+                {offer.availability.endDate && (
+                  <div className="flex-1 bg-background rounded-2xl px-5 py-4 text-center">
+                    <p className="text-[11px] font-bold text-muted mb-1.5">REGRESO</p>
+                    <p className="text-xl font-extrabold text-accent leading-none">{dateParts(offer.availability.endDate).day}</p>
+                    <p className="text-[12px] text-muted mt-1">{dateParts(offer.availability.endDate).year}</p>
+                  </div>
+                )}
+                {!offer.availability.startDate && offer.availability.availableMonths && (
+                  <div className="flex-1 bg-background rounded-2xl px-5 py-4 text-center">
+                    <p className="text-[11px] font-bold text-muted mb-1.5">DISPONIBLE</p>
+                    <p className="text-lg font-extrabold">{offer.availability.availableMonths}</p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
+          {/* cancellation footnote */}
+          <div className="flex items-start gap-2.5 px-1 text-muted text-[13px]">
+            <LuShieldCheck size={15} className="text-accent shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-foreground">
-                {offer.cancellationPolicy?.refundable
-                  ? 'Reserva reembolsable'
-                  : 'Reserva no reembolsable'}
-              </p>
-              <p className="text-xs text-muted mt-0.5">
-                Consulta las condiciones exactas al momento de la reserva.
-              </p>
+              <span className="font-semibold text-foreground">
+                {offer.cancellationPolicy?.refundable ? 'Reserva reembolsable' : 'Reserva no reembolsable'}.
+              </span>{' '}
+              Consultá las condiciones exactas al momento de la reserva.
             </div>
           </div>
 
         </div>
-
-        {/* RIGHT — Sticky quote form */}
-        <QuoteForm offer={offer} />
       </div>
-    </div>
-  );
-}
 
-/* ── Contenedor de sección con padding uniforme y fondo opcional ── */
-function ContentSection({ children, tinted = false }) {
-  return (
-    <div
-      className={`rounded-2xl px-5 py-6 ${
-        tinted
-          ? 'bg-surface-secondary/60 border border-border/50'
-          : ''
-      }`}
-    >
-      {children}
-    </div>
-  );
-}
-
-/* ── Stat card para el strip de estadísticas ── */
-function StatCard({ icon, label, children, className = '' }) {
-  return (
-    <div className={`flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 ${className}`}>
-      <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className="text-[10px] text-muted uppercase tracking-wide leading-none mb-0.5">
-          {label}
-        </p>
-        <p className="text-sm font-semibold text-foreground leading-tight truncate">
-          {children}
-        </p>
-      </div>
     </div>
   );
 }

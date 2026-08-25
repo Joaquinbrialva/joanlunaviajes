@@ -14,7 +14,7 @@ function formatDate(dateStr) {
   });
 }
 
-export default function RangeDatePickerField({ startDate, endDate, onChange, tripType }) {
+export default function RangeDatePickerField({ startDate, endDate, onChange, tripType, endLabel: endLabelProp, placeholder }) {
   const [open, setOpen] = useState(false);
 
   const value =
@@ -32,7 +32,7 @@ export default function RangeDatePickerField({ startDate, endDate, onChange, tri
     onChange({ start: '', end: '' });
   }
 
-  const endLabel = tripType === 'one-way' ? 'Llegada' : 'Regreso';
+  const endLabel = endLabelProp ?? (tripType === 'one-way' ? 'Llegada' : 'Regreso');
 
   const displayLabel =
     startDate && endDate ? (
@@ -40,7 +40,7 @@ export default function RangeDatePickerField({ startDate, endDate, onChange, tri
         <span className='font-medium'>{formatDate(startDate)}</span>
         <span className='text-muted'>→</span>
         <span className='font-medium'>{formatDate(endDate)}</span>
-        <span className='text-xs text-muted ml-1'>({endLabel})</span>
+        {endLabelProp !== null && <span className='text-xs text-muted ml-1'>({endLabel})</span>}
       </span>
     ) : startDate ? (
       <span>
@@ -48,7 +48,7 @@ export default function RangeDatePickerField({ startDate, endDate, onChange, tri
         <span className='text-muted ml-2'>→ seleccioná {endLabel.toLowerCase()}...</span>
       </span>
     ) : (
-      <span className='text-muted'>Seleccionar fechas de salida y {endLabel.toLowerCase()}</span>
+      <span className='text-muted'>{placeholder ?? `Seleccionar fechas de salida y ${endLabel.toLowerCase()}`}</span>
     );
 
   return (

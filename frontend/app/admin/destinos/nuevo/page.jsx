@@ -46,7 +46,8 @@ const opcionesEstado = [
 /* ─── Estado inicial ─────────────────────────────────────────────────── */
 
 const initialForm = {
-  name: '',
+  title: '',
+  city: '',
   slug: '',
   country: '',
   continent: '',
@@ -118,7 +119,7 @@ export default function AdminNewDestinationPage() {
   }
 
   const canGoNext = useMemo(() => {
-    if (paso === 1) return Boolean(form.name && form.country);
+    if (paso === 1) return Boolean(form.city && form.country);
     if (paso === 2) return Boolean(form.airport && form.language);
     if (paso === 3) return Boolean(form.description && form.shortDescription);
     return true;
@@ -163,20 +164,20 @@ export default function AdminNewDestinationPage() {
           <div className='space-y-5'>
             <div>
               <h3 className='text-lg font-bold'>Identidad del destino</h3>
-              <p className='text-sm text-muted mt-0.5'>Nombre, país y datos de identificación.</p>
+              <p className='text-sm text-muted mt-0.5'>Ciudad, país y datos de identificación.</p>
             </div>
 
             <div className='grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_2fr] gap-4 items-start'>
-              <FieldGroup title='Nombre'>
+              <FieldGroup title='Ciudad'>
                 <div>
                   <FInput
-                    value={form.name}
-                    onChange={(e) => update('name', e.target.value)}
-                    placeholder='Ej: Patagonia Argentina'
-                    error={showErrors && !form.name}
+                    value={form.city}
+                    onChange={(e) => update('city', e.target.value)}
+                    placeholder='Ej: Bariloche'
+                    error={showErrors && !form.city}
                     className='text-base h-12 font-medium'
                   />
-                  <FError>{showErrors && !form.name ? 'El nombre es obligatorio.' : null}</FError>
+                  <FError>{showErrors && !form.city ? 'La ciudad es obligatoria.' : null}</FError>
                 </div>
               </FieldGroup>
 
@@ -198,11 +199,22 @@ export default function AdminNewDestinationPage() {
                   </div>
                   <div>
                     <FL>Slug (se genera automáticamente)</FL>
-                    <FInput value={form.slug} onChange={(e) => update('slug', e.target.value)} placeholder='patagonia-argentina' className='font-mono text-xs' />
+                    <FInput value={form.slug} onChange={(e) => update('slug', e.target.value)} placeholder='bariloche-argentina' className='font-mono text-xs' />
                   </div>
                 </div>
               </FieldGroup>
             </div>
+
+            <FieldGroup title='Título descriptivo'>
+              <div>
+                <FInput
+                  value={form.title}
+                  onChange={(e) => update('title', e.target.value)}
+                  placeholder='Ej: Escapada inolvidable a la Patagonia salvaje'
+                />
+                <p className='text-xs text-muted mt-1.5'>Encabezado de la página del destino. Si lo dejás vacío se genera uno automático a partir de la ciudad.</p>
+              </div>
+            </FieldGroup>
 
             <FieldGroup title='Imagen destacada'>
               <CoverImageInput value={form.featuredImage} onChange={(url) => update('featuredImage', url)} />
@@ -344,7 +356,8 @@ export default function AdminNewDestinationPage() {
             </div>
 
             <div className='rounded-2xl bg-surface-secondary/50 overflow-hidden'>
-              <ReviewRow label='Nombre' value={form.name || '—'} />
+              <ReviewRow label='Ciudad' value={form.city || '—'} />
+              <ReviewRow label='Título' value={form.title || 'Automático'} />
               <ReviewRow label='País' value={`${form.country || '—'} · ${form.continent}`} />
               <ReviewRow label='Aeropuerto' value={form.airport || '—'} />
               <ReviewRow label='Idioma' value={form.language || '—'} />
