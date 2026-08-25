@@ -1,5 +1,5 @@
 // No 'use client' needed — hooks are imported by client components and inherit that context.
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export function usePagination(items, pageSize = 10) {
   const [page, setPage] = useState(1);
@@ -7,9 +7,13 @@ export function usePagination(items, pageSize = 10) {
   // Reset to page 1 whenever items reference changes (filter/search changed).
   // IMPORTANT: callers must pass a useMemo-derived array so reference only changes
   // when filters change — not on every render. All three current callers do this.
-  useEffect(() => {
+  // Adjusting during render (not in an effect) avoids rendering the stale page once
+  // before the reset lands.
+  const [prevItems, setPrevItems] = useState(items);
+  if (prevItems !== items) {
+    setPrevItems(items);
     setPage(1);
-  }, [items]);
+  }
 
   const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
   const safePage = Math.min(page, totalPages);

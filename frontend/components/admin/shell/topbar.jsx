@@ -1,19 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
+import { useMounted } from '@/hooks/use-mounted';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Dropdown, Menu, Tooltip } from '@heroui/react';
 import { LuMoon, LuSun, LuUser, LuSettings, LuLogOut, LuMenu } from 'react-icons/lu';
-import NotificationBell from '@/components/admin/notification-bell';
 import { InitialsAvatar } from '@/components/admin/kit';
 import { ROLE_LABELS } from './nav-config';
 
 function ThemeToggle() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const { resolvedTheme, setTheme } = useTheme();
-  useEffect(() => setMounted(true), []);
   if (!mounted) return <div className='h-9 w-9' />;
   const isDark = resolvedTheme === 'dark';
   return (
@@ -88,7 +86,6 @@ export default function Topbar({ user, onLogout, onOpenMobileNav }) {
       </Link>
       <div className='flex items-center gap-1'>
         <ThemeToggle />
-        <NotificationBell />
         <div className='mx-1 h-5 w-px bg-border' />
         <UserMenu user={user} onLogout={onLogout} />
       </div>

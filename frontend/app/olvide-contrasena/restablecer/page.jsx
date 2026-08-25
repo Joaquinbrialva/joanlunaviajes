@@ -1,9 +1,10 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Spinner } from '@heroui/react';
 import { LuArrowLeft, LuEye, LuEyeOff, LuCircleCheck, LuCircleX } from 'react-icons/lu';
+import { meetsPasswordReqs } from '@/lib/password-requirements';
 function RestablecerForm() {
   const params   = useSearchParams();
   const token    = params.get('token')  || '';
@@ -11,16 +12,18 @@ function RestablecerForm() {
   const [password,    setPassword]    = useState('');
   const [confirmPwd,  setConfirmPwd]  = useState('');
   const [showPwd,     setShowPwd]     = useState(false);
-  const [status,      setStatus]      = useState('idle'); // idle | loading | done | error
+  // Un enlace sin token o sin email ya nace inválido: se deriva del estado inicial
+  // en vez de corregirlo con un efecto después del primer render.
+  const [status,      setStatus]      = useState(token && email ? 'idle' : 'invalid'); // idle | loading | done | error | invalid
   const [error,       setError]       = useState('');
-  useEffect(() => {
-    if (!token || !email) setStatus('invalid');
-  }, [token, email]);
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    if (password !== confirmPwd) { setError('Las contraseñas no coinciden.'); return; }
-    if (password.length < 6)     { setError('La contraseña debe tener al menos 6 caracteres.'); return; }
+    if (password !== confirmPwd)      { setError('Las contraseñas no coinciden.'); return; }
+    if (!meetsPasswordReqs(password)) {
+      setError('La contraseña debe tener 8 caracteres, una mayúscula, un número y un carácter especial.');
+      return;
+    }
     setStatus('loading');
     try {
       const res  = await fetch('/api/auth/reset-password', {
@@ -106,7 +109,7 @@ function RestablecerForm() {
             <input
               type={showPwd ? 'text' : 'password'} required
               value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="Mín. 6 caracteres"
+              placeholder="8+ caracteres, mayúscula, número y símbolo"
               className="w-full h-11 px-4 pr-11 rounded-xl border border-border bg-surface text-foreground text-[13px] placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-brand-primary/25 focus:border-brand-primary/60 transition-all"
             />
             <button

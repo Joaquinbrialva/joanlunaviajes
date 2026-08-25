@@ -20,7 +20,14 @@ export default function AdminLayout({ children }) {
       .catch(() => {});
   }, []);
 
-  useEffect(() => setMobileNavOpen(false), [pathname]);
+  // Cerrar el menú móvil al navegar. Ajustar el estado durante el render (en vez
+  // de en un efecto) evita el frame intermedio en que la nueva página ya se pintó
+  // con el menú todavía abierto.
+  const [navPathname, setNavPathname] = useState(pathname);
+  if (navPathname !== pathname) {
+    setNavPathname(pathname);
+    setMobileNavOpen(false);
+  }
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });

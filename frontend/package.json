@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@faker-js/faker": "^10.3.0",
     "@heroui/react": "^3.0.0-rc.1",
     "@heroui/styles": "^3.0.3",
     "class-variance-authority": "^0.7.1",

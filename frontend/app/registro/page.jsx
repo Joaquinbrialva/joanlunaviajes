@@ -7,6 +7,7 @@ import { LuEye, LuEyeOff, LuArrowLeft, LuCheck } from 'react-icons/lu';
 import HeroSelect from '@/components/ui/hero-select';
 import Logo from '@/components/ui/logo';
 import { toastError } from '@/lib/toast';
+import { PASSWORD_REQS } from '@/lib/password-requirements';
 
 const inputClass = [
   'w-full h-11 px-4 rounded-xl border border-border bg-surface',
@@ -33,12 +34,6 @@ const PREFIX_OPTIONS = [
   { value: '+49', label: 'DE +49' },
 ];
 
-const REQS = [
-  { key: 'len',     label: 'Al menos 8 caracteres',           test: (p) => p.length >= 8 },
-  { key: 'upper',   label: 'Una letra mayúscula',              test: (p) => /[A-Z]/.test(p) },
-  { key: 'number',  label: 'Un número',                        test: (p) => /[0-9]/.test(p) },
-  { key: 'special', label: 'Un carácter especial (!@#$%...)',  test: (p) => /[^A-Za-z0-9]/.test(p) },
-];
 
 const PERKS = [
   'Sigue el estado de tus reservas en tiempo real',
@@ -56,7 +51,7 @@ export default function RegistroPage() {
   const [showPwd,       setShowPwd]       = useState(false);
   const [status,        setStatus]        = useState('idle');
 
-  const reqsMet    = useMemo(() => REQS.map((r) => ({ ...r, ok: r.test(password) })), [password]);
+  const reqsMet    = useMemo(() => PASSWORD_REQS.map((r) => ({ ...r, ok: r.test(password) })), [password]);
   const allReqsMet = reqsMet.every((r) => r.ok);
   const matchOk    = confirmPwd.length > 0 && password === confirmPwd;
   const matchFail  = confirmPwd.length > 0 && password !== confirmPwd;

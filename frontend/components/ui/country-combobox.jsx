@@ -36,9 +36,13 @@ export default function CountryCombobox({ value, onChange, placeholder = 'Selecc
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
+  // Sincronizar el input cuando el valor controlado cambia desde afuera. Se ajusta
+  // durante el render para no repintar primero con el texto viejo.
+  const [prevValue, setPrevValue] = useState(value);
+  if (prevValue !== value) {
+    setPrevValue(value);
     if (value !== query) setQuery(value || '');
-  }, [value]);
+  }
 
   return (
     <div ref={containerRef} className='relative w-full'>

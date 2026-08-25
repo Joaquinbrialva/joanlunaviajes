@@ -2,16 +2,11 @@
 
 import { useState, useMemo } from 'react';
 import { LuEye, LuEyeOff, LuShield, LuCircleCheck } from 'react-icons/lu';
+import { PASSWORD_REQS } from '@/lib/password-requirements';
 
-const REQS = [
-  { key: 'len',     label: 'Al menos 8 caracteres',          test: (p) => p.length >= 8 },
-  { key: 'upper',   label: 'Una letra mayúscula',             test: (p) => /[A-Z]/.test(p) },
-  { key: 'number',  label: 'Un número',                       test: (p) => /[0-9]/.test(p) },
-  { key: 'special', label: 'Un carácter especial (!@#$%...)', test: (p) => /[^A-Za-z0-9]/.test(p) },
-];
 
 function getStrength(pwd) {
-  const base = REQS.filter((r) => r.test(pwd)).length; // 0–4
+  const base = PASSWORD_REQS.filter((r) => r.test(pwd)).length; // 0–4
   const bonus = pwd.length >= 12 ? 1 : 0;              // +1 si es larga
   return Math.min(base + bonus, 5);
 }
@@ -30,7 +25,7 @@ export default function CambiarContrasenaPage() {
   const [error,      setError]      = useState('');
 
   const strength   = useMemo(() => getStrength(password), [password]);
-  const reqsMet    = useMemo(() => REQS.map((r) => ({ ...r, ok: r.test(password) })), [password]);
+  const reqsMet    = useMemo(() => PASSWORD_REQS.map((r) => ({ ...r, ok: r.test(password) })), [password]);
   const allReqsMet = reqsMet.every((r) => r.ok);
   const matchOk    = confirmPwd.length > 0 && password === confirmPwd;
   const matchFail  = confirmPwd.length > 0 && password !== confirmPwd;

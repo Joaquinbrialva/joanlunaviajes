@@ -70,7 +70,7 @@ export default function ItemListInput({ label, items = [], onChange, placeholder
       )}
 
       {items.length === 0 && (
-        <p className='text-xs text-muted'>Sin ítems. Escribí y presioná Enter o "Agregar".</p>
+        <p className='text-xs text-muted'>Sin ítems. Escribí y presioná Enter o &ldquo;Agregar&rdquo;.</p>
       )}
     </div>
   );
