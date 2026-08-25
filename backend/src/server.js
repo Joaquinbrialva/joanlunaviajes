@@ -47,6 +47,9 @@ const publicLimiter = rateLimit({
 
 const app = express();
 
+// Vercel / proxies: necesario para que express-rate-limit lea la IP real
+app.set('trust proxy', 1);
+
 app.use(morgan('combined'));
 app.use(helmet());
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', credentials: true }));
