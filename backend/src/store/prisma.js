@@ -14,9 +14,25 @@ function parsePostgresUrl(url) {
   };
 }
 
+// Supabase firma el certificado del pooler con su propia CA, así que la cadena
+// no valida contra las CAs del sistema. Con DATABASE_CA_CERT (el contenido PEM
+// del cert que se baja de Database Settings → SSL Configuration) verificamos de
+// verdad; sin él la conexión sigue cifrada, pero no autenticamos al servidor.
+function buildSslConfig() {
+  const ca = process.env.DATABASE_CA_CERT;
+  if (ca) {
+    return { ca: ca.replace(/\\n/g, '\n'), rejectUnauthorized: true };
+  }
+  console.warn(
+    '[db] DATABASE_CA_CERT no está configurada: la conexión va cifrada pero sin ' +
+    'verificar el certificado del servidor (vulnerable a man-in-the-middle).'
+  );
+  return { rejectUnauthorized: false };
+}
+
 const pool = new pg.Pool({
   ...parsePostgresUrl(process.env.DATABASE_URL),
-  ssl: { rejectUnauthorized: false },
+  ssl: buildSslConfig(),
   max: 5,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,

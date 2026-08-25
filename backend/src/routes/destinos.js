@@ -1,9 +1,15 @@
 import { Router } from 'express';
 import { prisma } from '../store/prisma.js';
 import { slugify, uniqueSlug } from '../store/slugify.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { optionalAuth, requireRole } from '../middleware/auth.js';
 
 const router = Router();
+
+// Solo el staff ve borradores; el público ve únicamente lo publicado.
+const STAFF_ROLES = ['admin', 'agent', 'designer'];
+const isStaff = (req) => STAFF_ROLES.includes(req.user?.role);
+
+const VALID_STATUS = ['draft', 'published'];
 
 function splitLines(value) {
   return String(value || '').split('\n').map((s) => s.trim()).filter(Boolean);
@@ -13,15 +19,23 @@ function splitComma(value) {
   return String(value || '').split(',').map((s) => s.trim()).filter(Boolean);
 }
 
+function normalizeCommaList(value) {
+  if (Array.isArray(value)) return value.map(String).filter(Boolean);
+  return splitComma(value);
+}
+
 function normalizeList(value) {
   if (Array.isArray(value)) return value.map(String).filter(Boolean);
   return splitLines(value);
 }
 
 // GET /api/destinos
-router.get('/', async (req, res) => {
+router.get('/', optionalAuth, async (req, res) => {
   try {
-    const destinations = await prisma.destination.findMany({ orderBy: { createdAt: 'desc' } });
+    const destinations = await prisma.destination.findMany({
+      where: isStaff(req) ? undefined : { status: 'published' },
+      orderBy: { createdAt: 'desc' },
+    });
     res.json(destinations);
   } catch {
     res.status(500).json({ error: 'No se pudieron obtener los destinos.' });
@@ -29,10 +43,14 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/destinos/:slug
-router.get('/:slug', async (req, res) => {
+router.get('/:slug', optionalAuth, async (req, res) => {
   try {
     const destination = await prisma.destination.findUnique({ where: { slug: req.params.slug } });
     if (!destination) return res.status(404).json({ error: 'Destino no encontrado.' });
+    // Un borrador no existe para el público: 404, no 403, para no delatar el slug.
+    if (destination.status !== 'published' && !isStaff(req)) {
+      return res.status(404).json({ error: 'Destino no encontrado.' });
+    }
     res.json(destination);
   } catch {
     res.status(500).json({ error: 'No se pudo obtener el destino.' });
@@ -81,10 +99,10 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       climate: {
         type: String(body.climateType || '').trim() || 'Templado',
         averageTemperatureC: Number(body.averageTemperatureC || 20),
-        bestMonthsToVisit: splitComma(body.bestMonthsToVisit),
+        bestMonthsToVisit: normalizeCommaList(body.bestMonthsToVisit),
       },
-      highlights: splitLines(body.highlights),
-      travelStyles: splitLines(body.travelStyles),
+      highlights: normalizeList(body.highlights),
+      travelStyles: normalizeList(body.travelStyles),
       featuredImage: coverImageUrl || `https://picsum.photos/seed/${coverSeed}/1200/800`,
       gallery: normalizeList(body.gallery),
       stats: {
@@ -101,7 +119,7 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
       isPopular: Boolean(body.isPopular),
       isFeatured: Boolean(body.isFeatured),
       isRecommended,
-      status: String(body.status || 'draft'),
+      status: VALID_STATUS.includes(body.status) ? body.status : 'draft',
     };
 
     let newDestination;
@@ -147,12 +165,12 @@ router.patch('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
       climate: {
         type: String(body.climateType || existing.climate.type).trim(),
         averageTemperatureC: Number(body.averageTemperatureC ?? existing.climate.averageTemperatureC),
-        bestMonthsToVisit: splitComma(body.bestMonthsToVisit).length > 0
-          ? splitComma(body.bestMonthsToVisit)
+        bestMonthsToVisit: normalizeCommaList(body.bestMonthsToVisit).length > 0
+          ? normalizeCommaList(body.bestMonthsToVisit)
           : existing.climate.bestMonthsToVisit,
       },
-      highlights: splitLines(body.highlights).length > 0 ? splitLines(body.highlights) : existing.highlights,
-      travelStyles: splitLines(body.travelStyles).length > 0 ? splitLines(body.travelStyles) : existing.travelStyles,
+      highlights: normalizeList(body.highlights).length > 0 ? normalizeList(body.highlights) : existing.highlights,
+      travelStyles: normalizeList(body.travelStyles).length > 0 ? normalizeList(body.travelStyles) : existing.travelStyles,
       featuredImage: newFeaturedImage,
       gallery: normalizeList(body.gallery).length > 0 ? normalizeList(body.gallery) : existing.gallery,
       stats: {
@@ -167,7 +185,7 @@ router.patch('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
       isPopular: Boolean(body.isPopular),
       isFeatured: Boolean(body.isFeatured),
       isRecommended,
-      status: String(body.status || existing.status),
+      status: VALID_STATUS.includes(body.status) ? body.status : (existing.status || 'draft'),
     };
 
     let updated;

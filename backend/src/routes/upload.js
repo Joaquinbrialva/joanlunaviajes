@@ -2,11 +2,26 @@ import { Router } from 'express';
 import multer from 'multer';
 import path from 'node:path';
 import sharp from 'sharp';
-import { requireAuth } from '../middleware/auth.js';
+import { requireRole } from '../middleware/auth.js';
 import { supabase } from '../store/supabase.js';
 
 const BUCKET = 'images';
 const MAX_IMAGE_DIMENSION = 1920;
+const ALLOWED_ROLES = ['admin', 'agent', 'designer'];
+
+// `folder` viene del cliente y termina siendo parte de la key en Storage: se
+// limita a un nombre simple para que no pueda escaparse a otra ruta del bucket.
+function sanitizeFolder(value, fallback = '') {
+  const cleaned = String(value || '')
+    .trim()
+    .replace(/\\/g, '/')
+    .split('/')
+    .map((part) => part.replace(/[^a-zA-Z0-9._-]/g, ''))
+    .filter((part) => part && part !== '.' && part !== '..')
+    .slice(0, 2)
+    .join('/');
+  return cleaned || fallback;
+}
 
 async function optimizeImage(buffer) {
   const optimized = await sharp(buffer)
@@ -17,10 +32,22 @@ async function optimizeImage(buffer) {
   return { buffer: optimized, contentType: 'image/webp', ext: '.webp' };
 }
 
+// El bucket se crea una sola vez por instancia: sin este cache, cada upload
+// pagaba un listBuckets() de ida y vuelta contra Supabase.
+let bucketReady = null;
+
 async function ensureBucket() {
-  const { data: buckets } = await supabase.storage.listBuckets();
-  if (buckets?.find((b) => b.name === BUCKET)) return;
-  await supabase.storage.createBucket(BUCKET, { public: true });
+  if (!bucketReady) {
+    bucketReady = (async () => {
+      const { data: buckets } = await supabase.storage.listBuckets();
+      if (buckets?.find((b) => b.name === BUCKET)) return;
+      await supabase.storage.createBucket(BUCKET, { public: true });
+    })().catch((err) => {
+      bucketReady = null; // que un fallo transitorio no deje el cache envenenado
+      throw err;
+    });
+  }
+  return bucketReady;
 }
 
 const upload = multer({
@@ -34,15 +61,15 @@ const upload = multer({
 
 const router = Router();
 
-// POST /api/upload  (requires auth)
-router.post('/', requireAuth, upload.single('file'), async (req, res) => {
+// POST /api/upload  (admin/agent/designer — sólo el panel sube imágenes)
+router.post('/', ...requireRole(...ALLOWED_ROLES), upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No se recibió ningún archivo.' });
 
   try {
     await ensureBucket();
     const { buffer, contentType, ext } = await optimizeImage(req.file.buffer);
     const baseName = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-    const folder = String(req.body.folder || req.query.folder || '').trim().replace(/^\/|\/$/g, '');
+    const folder = sanitizeFolder(req.body.folder || req.query.folder);
     const filename = folder ? `${folder}/${baseName}` : baseName;
 
     const { error } = await supabase.storage
@@ -74,11 +101,8 @@ const uploadMedia = multer({
   },
 });
 
-router.post('/media', requireAuth, uploadMedia.single('file'), async (req, res) => {
+router.post('/media', ...requireRole(...ALLOWED_ROLES), uploadMedia.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No se recibió ningún archivo.' });
-  if (!['admin', 'agent', 'designer'].includes(req.user.role)) {
-    return res.status(403).json({ error: 'No autorizado.' });
-  }
 
   try {
     await ensureBucket();
@@ -96,7 +120,7 @@ router.post('/media', requireAuth, uploadMedia.single('file'), async (req, res) 
     }
 
     const baseName = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-    const folder = String(req.body.folder || req.query.folder || 'hero').trim().replace(/^\/|\/$/g, '');
+    const folder = sanitizeFolder(req.body.folder || req.query.folder, 'hero');
     const filename = `${folder}/${baseName}`;
 
     const { error } = await supabase.storage

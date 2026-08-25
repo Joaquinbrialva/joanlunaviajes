@@ -57,15 +57,21 @@ Backend npm scripts of note: `db:generate`, `db:push`, `db:migrate` (prisma migr
 |---|---|---|
 | POST | `/api/auth/login` | Login → sets `auth_token` HttpOnly cookie |
 | POST | `/api/auth/logout` | Clears cookie |
+| POST | `/api/auth/register` | Public client sign-up → sends a 6-digit verification code |
+| POST | `/api/auth/verify` | Confirms the code, marks the account verified and opens the session |
+| POST | `/api/auth/resend-code` | Re-issues the verification code |
+| POST | `/api/auth/forgot-password` | Emails a one-time reset link (always answers `{ok:true}`) |
+| POST | `/api/auth/reset-password` | Consumes the reset token and sets the new password |
+| POST | `/api/auth/change-temp-password` | Clears `mustChangePassword` (requires auth) |
 | GET | `/api/auth/me` | Get current user (requires auth) |
 | PATCH | `/api/auth/me` | Update own profile / change password |
-| GET | `/api/ofertas` | List all offers |
-| GET | `/api/ofertas/:slug` | Get offer by slug |
+| GET | `/api/ofertas` | List offers (published only for the public, all for staff) |
+| GET | `/api/ofertas/:slug` | Get offer by slug (404 on drafts for the public) |
 | POST | `/api/ofertas` | Create offer (admin/agent) |
 | PATCH | `/api/ofertas/:id` | Update offer by id (admin/agent) |
 | DELETE | `/api/ofertas/:id` | Delete offer (admin/agent) |
-| GET | `/api/destinos` | List all destinations |
-| GET | `/api/destinos/:slug` | Get destination by slug |
+| GET | `/api/destinos` | List destinations (published only for the public, all for staff) |
+| GET | `/api/destinos/:slug` | Get destination by slug (404 on drafts for the public) |
 | POST | `/api/destinos` | Create destination (admin/agent) |
 | PATCH | `/api/destinos/:id` | Update destination by id (admin/agent) |
 | DELETE | `/api/destinos/:id` | Delete destination (admin/agent) |
@@ -80,7 +86,7 @@ Backend npm scripts of note: `db:generate`, `db:push`, `db:migrate` (prisma migr
 | PATCH | `/api/cotizaciones/:id` | Update inquiry status/notes (admin/agent only) |
 | DELETE | `/api/cotizaciones/:id` | Delete inquiry (admin/agent only) |
 | GET/POST/PATCH/DELETE | `/api/users` | Admin user management (admin only) |
-| POST | `/api/upload` | Upload a single image to Supabase Storage (any authed user) |
+| POST | `/api/upload` | Upload a single image to Supabase Storage (admin/agent/designer) |
 | POST | `/api/upload/media` | Upload image/video for novedades (admin/agent/designer) |
 | GET | `/health` | Health check |
 
@@ -88,7 +94,7 @@ Auth middleware (`backend/src/middleware/auth.js`): `requireAuth` (any logged-in
 
 Roles: `admin`, `agent`, `designer`, `client`. Keep the role list in sync across `backend/src/routes/users.js` (`VALID_ROLES`), `backend/src/routes/upload.js` (`ALLOWED_ROLES`), and `frontend/app/admin/usuarios/page.jsx` (`ROLES`) — they've drifted before.
 
-There is no `Notification` model and no `/api/notifications/*` route. `frontend/components/admin/notification-bell.jsx` still polls those endpoints and will silently no-op (this is known and intentionally left as-is for now, not a bug to "fix" reflexively).
+There is no `Notification` model and no `/api/notifications/*` route. The `NotificationBell` component that used to poll them was removed from the admin topbar (2026-08-25), so nothing calls those endpoints any more.
 
 ### Frontend → Backend proxy
 
@@ -124,7 +130,10 @@ There is no `Notification` model and no `/api/notifications/*` route. `frontend/
 | `/admin/perfil` | Own profile |
 | `/admin/ajustes` | Settings |
 
-Auth is enforced via `frontend/middleware.js` (cookie presence check on `/admin/*`).
+There is **no** `frontend/middleware.js`. Every admin page guards itself by fetching
+`/api/auth/me` on mount and redirecting when it fails, and the real enforcement is
+server-side: each `/api/*` route checks the JWT cookie via `requireAuth` /
+`requireRole`. A Next middleware would only add a faster redirect, not security.
 
 ### Frontend component structure
 
@@ -181,7 +190,29 @@ Use `normalizeList(value)` (defined in route files) when processing list fields 
 
 ## Backlog de mejoras pendientes
 
-1. **Notificaciones en el admin** — `NotificationBell` en el frontend ya está construido y pollea `/api/notifications*`, pero ese backend nunca se migró de la era JSON-store a Prisma: no existe modelo `Notification` ni las rutas. Implementar (modelo + rutas + trigger al crear cotización) o remover el bell del admin layout — decisión pendiente.
+1. **Notificaciones en el admin** — resuelto quitando `NotificationBell` del topbar. Si alguna vez se quieren notificaciones de verdad, hay que crear el modelo `Notification`, las rutas y el trigger al crear una cotización.
 2. **Migraciones Prisma versionadas** — hoy se usa `prisma db push` sin `prisma/migrations`; considerar pasar a `prisma migrate` para tener historial de cambios de schema en producción.
 
-Cumplido: página `/cuenta`, registro de usuarios (`/registro`), galería de imágenes vía Supabase Storage.
+Cumplido: página `/cuenta`, galería de imágenes vía Supabase Storage, y el flujo
+completo de cuentas de cliente (registro con verificación por código, recuperación
+de contraseña y cambio de contraseña temporal), implementado el 2026-08-25 junto
+con la auditoría de seguridad.
+
+### Reglas que la auditoría dejó asentadas
+
+- **Los borradores no salen de la API.** `GET /api/ofertas` y `/api/destinos` (lista y
+  detalle por slug) filtran `status: 'published'` salvo que `optionalAuth` reconozca a
+  un rol de staff. Un borrador pedido por slug devuelve 404, no 403, para no delatar
+  que existe. No confíes en filtrar por `status` en el cliente.
+- **Los requisitos de contraseña viven en un solo lugar por lado.** En el frontend,
+  `frontend/lib/password-requirements.js`; en el backend, `validatePassword` en
+  `backend/src/store/utils.js`. Tienen que coincidir: si el formulario pide menos que
+  el backend, el usuario recibe un error que no vio venir.
+- **Nada de `Math.random()` para secretos.** Contraseñas temporales, códigos y tokens
+  usan `node:crypto`. El token de reseteo se guarda hasheado con SHA-256; el código de
+  verificación va en claro porque su defensa es la expiración corta más el rate limit.
+- **El servidor falla al arrancar si falta `JWT_SECRET`, `DATABASE_URL`, `SUPABASE_URL`
+  o `SUPABASE_SERVICE_KEY`**, en vez de morir en la primera query. `FRONTEND_URL` y las
+  de mail sólo avisan.
+- **`DATABASE_URL` usa el pooler en modo transacción** con usuario
+  `postgres.<project-ref>`. Con `postgres` a secas, Supabase responde `P1000`.

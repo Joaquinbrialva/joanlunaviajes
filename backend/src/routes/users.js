@@ -1,13 +1,31 @@
 import { Router } from 'express';
+import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../store/prisma.js';
 import { requireRole } from '../middleware/auth.js';
 import { sendWelcomeWithPassword } from '../store/mailer.js';
 import { validatePassword } from '../store/utils.js';
 
-function generateTempPassword(length = 10) {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+// Math.random() no es criptográficamente seguro: una contraseña generada con él
+// es predecible a partir de otras salidas del mismo generador.
+function generateTempPassword(length = 12) {
+  const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const lower = 'abcdefghjkmnpqrstuvwxyz';
+  const digits = '23456789';
+  const symbols = '!@#$%&*';
+  const all = upper + lower + digits + symbols;
+  const pick = (set) => set[crypto.randomInt(set.length)];
+
+  // Un carácter de cada clase garantiza que pase validatePassword; el resto al azar.
+  const chars = [pick(upper), pick(lower), pick(digits), pick(symbols)];
+  while (chars.length < length) chars.push(pick(all));
+
+  // Fisher-Yates, para que las posiciones fijas no sean predecibles.
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = crypto.randomInt(i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+  return chars.join('');
 }
 
 const router = Router();

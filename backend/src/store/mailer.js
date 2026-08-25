@@ -237,3 +237,69 @@ export function sendWelcomeWithPassword({ email, name, password, loginUrl }) {
     text: `Hola ${name}, tu cuenta fue creada en Joanluna Viajes.\nEmail: ${email}\nContraseña temporal: ${password}\nIngresá en: ${loginUrl}\nSe te pedirá cambiar la contraseña al iniciar sesión.`,
   });
 }
+
+export function sendVerificationCode({ email, name, code }) {
+  const safeName = escapeHtml(name);
+  const safeCode = escapeHtml(code);
+
+  const html = baseTemplate({
+    title: 'Verificá tu cuenta',
+    preheader: `Tu código de verificación es: ${safeCode}`,
+    body: `
+      <h1 style="margin:0 0 6px;font-size:22px;color:#1c1917;font-weight:700;">Hola, ${safeName}</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#78716c;">
+        Para activar tu cuenta en <strong style="color:#1c1917;">Joanluna Viajes</strong>,
+        ingresá este código:
+      </p>
+      <div style="text-align:center;margin:28px 0;">
+        <p style="margin:0 0 6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#a8a29e;">Código de verificación</p>
+        <p style="margin:0;font-size:34px;font-weight:800;letter-spacing:0.35em;color:#ff7e2d;font-family:monospace;">${safeCode}</p>
+      </div>
+      <p style="margin:0;font-size:13px;color:#a8a29e;text-align:center;">
+        El código vence en 15 minutos.<br/>
+        Si no creaste esta cuenta, ignorá este mensaje.
+      </p>
+    `,
+  });
+
+  return sendMail({
+    to: email,
+    subject: 'Tu código de verificación — Joanluna Viajes',
+    html,
+    text: `Hola ${name}, tu código de verificación es: ${code}\nVence en 15 minutos.\nSi no creaste esta cuenta, ignorá este mensaje.`,
+  });
+}
+
+export function sendPasswordReset({ email, name, resetUrl }) {
+  const safeName = escapeHtml(name);
+  const safeUrl = escapeHtml(resetUrl);
+
+  const html = baseTemplate({
+    title: 'Restablecer tu contraseña',
+    preheader: 'Recibimos un pedido para restablecer tu contraseña.',
+    body: `
+      <h1 style="margin:0 0 6px;font-size:22px;color:#1c1917;font-weight:700;">Hola, ${safeName}</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#78716c;">
+        Recibimos un pedido para restablecer la contraseña de tu cuenta en
+        <strong style="color:#1c1917;">Joanluna Viajes</strong>.
+      </p>
+      <div style="text-align:center;margin:28px 0;">
+        <a href="${safeUrl}"
+          style="display:inline-block;background:#ff7e2d;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;">
+          Elegir una contraseña nueva
+        </a>
+      </div>
+      <p style="margin:0;font-size:13px;color:#a8a29e;text-align:center;">
+        El enlace vence en 1 hora y sirve una sola vez.<br/>
+        Si no pediste esto, ignorá el mensaje: tu contraseña no cambia.
+      </p>
+    `,
+  });
+
+  return sendMail({
+    to: email,
+    subject: 'Restablecer tu contraseña — Joanluna Viajes',
+    html,
+    text: `Hola ${name}, para elegir una contraseña nueva entrá en:\n${resetUrl}\nEl enlace vence en 1 hora y sirve una sola vez.\nSi no pediste esto, ignorá el mensaje.`,
+  });
+}

@@ -1,9 +1,13 @@
 import { Router } from 'express';
 import { prisma, withRetry } from '../store/prisma.js';
 import { slugify, uniqueSlug } from '../store/slugify.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { optionalAuth, requireRole } from '../middleware/auth.js';
 
 const router = Router();
+
+// Solo el staff ve borradores; el público ve únicamente lo publicado.
+const STAFF_ROLES = ['admin', 'agent', 'designer'];
+const isStaff = (req) => STAFF_ROLES.includes(req.user?.role);
 
 function splitLines(value) {
   return String(value || '').split('\n').map((s) => s.trim()).filter(Boolean);
@@ -15,9 +19,12 @@ function normalizeList(value) {
 }
 
 // GET /api/ofertas
-router.get('/', async (req, res) => {
+router.get('/', optionalAuth, async (req, res) => {
   try {
-    const offers = await prisma.offer.findMany({ orderBy: { createdAt: 'desc' } });
+    const offers = await prisma.offer.findMany({
+      where: isStaff(req) ? undefined : { status: 'published' },
+      orderBy: { createdAt: 'desc' },
+    });
     res.json(offers);
   } catch (err) {
     console.error('[GET /api/ofertas]', err);
@@ -26,10 +33,14 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/ofertas/:slug
-router.get('/:slug', async (req, res) => {
+router.get('/:slug', optionalAuth, async (req, res) => {
   try {
     const offer = await prisma.offer.findUnique({ where: { slug: req.params.slug } });
     if (!offer) return res.status(404).json({ error: 'Oferta no encontrada.' });
+    // Un borrador no existe para el público: 404, no 403, para no delatar el slug.
+    if (offer.status !== 'published' && !isStaff(req)) {
+      return res.status(404).json({ error: 'Oferta no encontrada.' });
+    }
     res.json(offer);
   } catch {
     res.status(500).json({ error: 'No se pudo obtener la oferta.' });
