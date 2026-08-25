@@ -68,7 +68,6 @@ router.post('/', ...requireRole('admin', 'agent'), async (req, res) => {
     const data = {
       slug,
       title,
-      mediaReady: Boolean(coverImageUrl),
       isSpecialOffer,
       subtitle: String(body.summary || '').trim() || `Experiencia destacada en ${body.destinationCity || destinationCountry}.`,
       location: {
@@ -196,7 +195,6 @@ router.patch('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
     const hasGalleryChange = Array.isArray(body.galleryImages);
 
     let images = existing.images;
-    let mediaReady = existing.mediaReady ?? false;
 
     if (hasCoverChange || hasGalleryChange) {
       const coverUrl = body.coverImage || existing.images?.[0]?.url || '';
@@ -220,8 +218,6 @@ router.patch('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
           order: i + 1,
         })),
       ];
-
-      if (hasCoverChange) mediaReady = true;
     }
 
     const updateData = {
@@ -289,7 +285,6 @@ router.patch('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
       },
       status: ['draft', 'published'].includes(body.status) ? body.status : (existing.status || 'draft'),
       isFeatured: Boolean(body.featured),
-      mediaReady,
       images,
     };
 

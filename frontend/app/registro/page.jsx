@@ -5,17 +5,13 @@ import Link from 'next/link';
 import { Spinner } from '@heroui/react';
 import { LuEye, LuEyeOff, LuArrowLeft, LuCheck } from 'react-icons/lu';
 import HeroSelect from '@/components/ui/hero-select';
+import Logo from '@/components/ui/logo';
 import { toastError } from '@/lib/toast';
-
-const C = { fontFamily: 'var(--font-cormorant)' };
-const S = { fontFamily: 'var(--font-syne)' };
-
-const grain = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")`;
 
 const inputClass = [
   'w-full h-11 px-4 rounded-xl border border-border bg-surface',
   'text-foreground text-[13px] placeholder:text-muted/50',
-  'focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/60',
+  'focus:outline-none focus:ring-2 focus:ring-brand-primary/25 focus:border-brand-primary/60',
   'transition-all',
 ].join(' ');
 
@@ -94,51 +90,29 @@ export default function RegistroPage() {
     <div className="w-screen -mx-[calc((100vw-100%)/2)] min-h-screen flex">
 
       {/* ── Panel izquierdo: atmosférico ── */}
-      <div
-        className="hidden lg:flex lg:w-[42%] relative flex-col justify-between p-12 overflow-hidden shrink-0"
-        style={{ background: '#080f16' }}
-      >
-        {/* Glow naranja */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: 'radial-gradient(ellipse at 80% 20%, rgba(255,126,45,0.15) 0%, transparent 55%), radial-gradient(ellipse at 10% 80%, rgba(255,126,45,0.12) 0%, transparent 50%)',
-        }} />
-        {/* Grain */}
-        <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{ backgroundImage: grain }} />
-        {/* Letra decorativa */}
-        <div
-          className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 text-white/[0.025] select-none pointer-events-none leading-none"
-          style={{ ...C, fontSize: '50vw', fontWeight: 300 }}
-        >
-          J
-        </div>
-
+      <div className="hidden lg:flex lg:w-[42%] relative flex-col justify-between p-12 overflow-hidden shrink-0 bg-gradient-to-br from-brand-primary/[0.10] to-surface-secondary">
         {/* Wordmark */}
-        <Link href="/" className="relative z-10 inline-flex items-baseline gap-0.5 select-none group">
-          <span className="text-white text-[14px] font-extrabold tracking-tight uppercase transition-opacity group-hover:opacity-80" style={S}>
-            JOANLUNA
-          </span>
-          <span className="text-accent ml-0.5" style={{ ...C, fontStyle: 'italic', fontSize: '17px', textShadow: '0 0 20px rgba(255,126,45,0.45)' }}>
-            viajes
-          </span>
+        <Link href="/" className="relative z-10 inline-flex items-center select-none group">
+          <Logo className="h-6 w-auto transition-opacity group-hover:opacity-80" />
         </Link>
 
         {/* Copy central */}
         <div className="relative z-10">
-          <div className="h-px w-10 bg-accent mb-7" />
-          <h2 className="font-light text-white leading-[1.05] mb-6" style={{ ...C, fontSize: 'clamp(2rem, 3vw, 2.8rem)' }}>
+          <div className="h-px w-10 bg-brand-primary mb-7" />
+          <h2 className="font-extrabold text-foreground leading-[1.1] mb-6 tracking-tight" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.6rem)' }}>
             Tu próxima aventura<br />
             empieza con un<br />
-            <em className="font-semibold" style={{ color: '#ff9a5c' }}>solo clic.</em>
+            <span className="text-brand-primary">solo clic.</span>
           </h2>
 
           {/* Perks */}
           <ul className="space-y-3.5">
             {PERKS.map((p, i) => (
               <li key={i} className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <LuCheck size={10} className="text-accent" />
+                <div className="w-5 h-5 rounded-full bg-brand-primary/15 flex items-center justify-center shrink-0 mt-0.5">
+                  <LuCheck size={10} className="text-brand-primary" />
                 </div>
-                <p className="text-[13px] text-white/55 leading-snug" style={S}>{p}</p>
+                <p className="text-[13px] text-muted leading-snug">{p}</p>
               </li>
             ))}
           </ul>
@@ -146,8 +120,8 @@ export default function RegistroPage() {
 
         {/* Footer panel */}
         <div className="relative z-10">
-          <p className="text-[10px] uppercase tracking-[0.22em] text-white/20 font-semibold" style={S}>
-            Agencia de viajes premium · Buenos Aires
+          <p className="text-[12px] text-muted font-semibold">
+            Joanluna Viajes · Buenos Aires
           </p>
         </div>
       </div>
@@ -157,7 +131,7 @@ export default function RegistroPage() {
 
         {/* Back — mobile */}
         <div className="w-full max-w-[440px] mb-6 lg:hidden">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-foreground transition-colors" style={S}>
+          <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-foreground transition-colors">
             <LuArrowLeft size={13} /> Volver al inicio
           </Link>
         </div>
@@ -166,16 +140,10 @@ export default function RegistroPage() {
 
           {/* Encabezado */}
           <div className="mb-7">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-px w-8 bg-accent" />
-              <p className="text-[10px] uppercase tracking-[0.28em] font-semibold text-accent" style={S}>
-                Nueva cuenta
-              </p>
-            </div>
-            <h1 className="font-light text-foreground leading-none mb-2" style={{ ...C, fontSize: 'clamp(2rem, 5vw, 2.8rem)' }}>
-              Regístrate <em className="font-semibold">gratis</em>
+            <h1 className="font-extrabold text-foreground leading-tight mb-2 tracking-tight" style={{ fontSize: 'clamp(1.9rem, 5vw, 2.6rem)' }}>
+              Regístrate gratis
             </h1>
-            <p className="text-[13px] text-muted" style={S}>
+            <p className="text-[13px] text-muted">
               Crea tu cuenta en segundos y empieza a planificar.
             </p>
           </div>
@@ -185,31 +153,31 @@ export default function RegistroPage() {
 
             {/* Nombre */}
             <div className="space-y-1.5">
-              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted" style={S}>
-                Nombre completo <span className="text-accent normal-case">*</span>
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted">
+                Nombre completo <span className="text-brand-primary normal-case">*</span>
               </label>
               <input
                 required value={name} onChange={e => setName(e.target.value)}
                 placeholder="Tu nombre completo"
-                className={inputClass} style={S}
+                className={inputClass}
               />
             </div>
 
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted" style={S}>
-                Email <span className="text-accent normal-case">*</span>
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted">
+                Email <span className="text-brand-primary normal-case">*</span>
               </label>
               <input
                 required type="email" value={email} onChange={e => setEmail(e.target.value)}
                 placeholder="tu@email.com"
-                className={inputClass} style={S}
+                className={inputClass}
               />
             </div>
 
             {/* Teléfono */}
             <div className="space-y-1.5">
-              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted" style={S}>
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted">
                 Teléfono / WhatsApp
               </label>
               <div className="flex gap-2">
@@ -221,23 +189,22 @@ export default function RegistroPage() {
                 <input
                   type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)}
                   placeholder="11 1234-5678"
-                  className="flex-1 h-11 px-4 rounded-xl border border-border bg-surface text-foreground text-[13px] placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/60 transition-all"
-                  style={S}
+                  className="flex-1 h-11 px-4 rounded-xl border border-border bg-surface text-foreground text-[13px] placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-brand-primary/25 focus:border-brand-primary/60 transition-all"
                 />
               </div>
             </div>
 
             {/* Contraseña */}
             <div className="space-y-1.5">
-              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted" style={S}>
-                Contraseña <span className="text-accent normal-case">*</span>
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted">
+                Contraseña <span className="text-brand-primary normal-case">*</span>
               </label>
               <div className="relative">
                 <input
                   required type={showPwd ? 'text' : 'password'}
                   value={password} onChange={e => setPassword(e.target.value)}
                   placeholder="Mín. 8 caracteres"
-                  className={`${inputClass} pr-11`} style={S}
+                  className={`${inputClass} pr-11`}
                 />
                 <button
                   type="button" onClick={() => setShowPwd(v => !v)}
@@ -252,10 +219,10 @@ export default function RegistroPage() {
                 <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 pt-1">
                   {reqsMet.map((r) => (
                     <div key={r.key} className="flex items-center gap-1.5">
-                      <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 transition-all ${r.ok ? 'bg-emerald-50 border border-emerald-300 dark:bg-emerald-900/20 dark:border-emerald-600/40' : 'bg-surface-secondary border border-default'}`}>
-                        {r.ok && <span className="text-emerald-600 dark:text-emerald-400" style={{ fontSize: 8, lineHeight: 1 }}>✓</span>}
+                      <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 transition-all ${r.ok ? 'bg-success/10 border border-success/40' : 'bg-surface-secondary border border-border'}`}>
+                        {r.ok && <span className="text-success" style={{ fontSize: 8, lineHeight: 1 }}>✓</span>}
                       </div>
-                      <span className={`text-[11px] transition-colors ${r.ok ? 'text-foreground/60' : 'text-muted/50'}`} style={S}>
+                      <span className={`text-[11px] transition-colors ${r.ok ? 'text-foreground/60' : 'text-muted/50'}`}>
                         {r.label}
                       </span>
                     </div>
@@ -266,24 +233,22 @@ export default function RegistroPage() {
 
             {/* Confirmar contraseña */}
             <div className="space-y-1.5">
-              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted" style={S}>
-                Confirmar contraseña <span className="text-accent normal-case">*</span>
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-muted">
+                Confirmar contraseña <span className="text-brand-primary normal-case">*</span>
               </label>
               <input
                 required type={showPwd ? 'text' : 'password'}
                 value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)}
                 placeholder="Repite tu contraseña"
-                className={`${inputClass} ${matchFail ? 'border-red-400 focus:border-red-400' : matchOk ? 'border-emerald-400 focus:border-emerald-400' : ''}`}
-                style={S}
+                className={`${inputClass} ${matchFail ? 'border-danger focus:border-danger' : matchOk ? 'border-success focus:border-success' : ''}`}
               />
-              {matchFail && <p className="text-[11px] text-red-500" style={S}>Las contraseñas no coinciden</p>}
-              {matchOk   && <p className="text-[11px] text-emerald-600 dark:text-emerald-400" style={S}>Las contraseñas coinciden</p>}
+              {matchFail && <p className="text-[11px] text-danger">Las contraseñas no coinciden</p>}
+              {matchOk   && <p className="text-[11px] text-success">Las contraseñas coinciden</p>}
             </div>
 
             <button
               type="submit" disabled={status === 'loading' || (password.length > 0 && (!allReqsMet || matchFail))}
-              className="w-full h-11 mt-1 rounded-xl bg-accent text-white text-[13px] font-semibold hover:bg-orange-500 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/20 disabled:opacity-70 flex items-center justify-center gap-2"
-              style={S}
+              className="w-full h-11 mt-1 rounded-xl bg-brand-primary text-brand-primary-foreground text-[13px] font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-brand-primary/20 disabled:opacity-70 flex items-center justify-center gap-2"
             >
               {status === 'loading'
                 ? <><Spinner color="current" size="sm" /> Creando cuenta...</>
@@ -294,13 +259,13 @@ export default function RegistroPage() {
 
           {/* Footer */}
           <div className="mt-7 pt-6 border-t border-border space-y-2 text-center">
-            <p className="text-[13px] text-muted" style={S}>
+            <p className="text-[13px] text-muted">
               ¿Ya tienes cuenta?{' '}
-              <Link href="/login" className="text-accent font-semibold hover:underline">
+              <Link href="/login" className="text-brand-primary font-semibold hover:underline">
                 Inicia sesión
               </Link>
             </p>
-            <Link href="/" className="hidden lg:block text-[13px] text-muted hover:text-foreground transition-colors" style={S}>
+            <Link href="/" className="hidden lg:block text-[13px] text-muted hover:text-foreground transition-colors">
               ← Volver al inicio
             </Link>
           </div>

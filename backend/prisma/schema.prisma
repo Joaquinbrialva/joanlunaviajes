@@ -16,7 +16,6 @@ model Offer {
   isSpecialOffer     Boolean  @default(false)
   isFeatured         Boolean  @default(false)
   isPopular          Boolean  @default(false)
-  mediaReady         Boolean  @default(false)
   category           String   @default("Internacional")
   tags               String[]
   location           Json
@@ -41,7 +40,8 @@ model Offer {
 model Destination {
   id               String   @id @default(uuid())
   slug             String   @unique
-  name             String
+  title            String   @default("")
+  city             String
   country          String
   continent        String   @default("América")
   description      String   @default("")
@@ -50,7 +50,6 @@ model Destination {
   isPopular        Boolean  @default(false)
   isFeatured       Boolean  @default(false)
   isRecommended    Boolean  @default(false)
-  mediaReady       Boolean  @default(false)
   status           String   @default("draft")
   travelInfo       Json
   climate          Json
@@ -104,4 +103,14 @@ model Subscriber {
   name      String   @default("")
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
+}
+
+model Update {
+  id        String   @id @default(uuid())
+  images    String[]
+  media     Json     @default("[]")
+  caption   String   @default("")
+  status    String   @default("published")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

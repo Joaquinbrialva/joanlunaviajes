@@ -5,9 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LuArrowLeft, LuUsers, LuPhone, LuCalendar, LuMessageSquare, LuMapPin, LuPackage, LuCheck } from 'react-icons/lu';
 
-const C = { fontFamily: 'var(--font-cormorant)' };
-const S = { fontFamily: 'var(--font-syne)' };
-
 const STEPS = [
   { key: 'pending',   label: 'Solicitud recibida',  sub: 'Tu consulta fue enviada correctamente' },
   { key: 'contacted', label: 'En contacto',          sub: 'Un agente está atendiendo tu caso'    },
@@ -33,7 +30,7 @@ function Skeleton() {
   return (
     <div className="max-w-2xl mx-auto py-8 space-y-6">
       <div className="h-4 w-32 rounded-lg bg-muted/20 animate-pulse" />
-      <div className="rounded-3xl border border-default bg-surface overflow-hidden">
+      <div className="rounded-3xl border border-border bg-surface overflow-hidden">
         <div className="p-8 space-y-4">
           <div className="h-3 w-24 rounded bg-muted/20 animate-pulse" />
           <div className="h-10 w-3/4 rounded-xl bg-muted/20 animate-pulse" />
@@ -74,9 +71,9 @@ export default function CotizacionDetailPage() {
   if (notFound) {
     return (
       <div className="max-w-2xl mx-auto py-20 text-center space-y-4">
-        <p className="text-5xl" style={C}>404</p>
-        <p className="text-muted text-sm" style={S}>Consulta no encontrada o sin acceso.</p>
-        <Link href="/cuenta" className="inline-flex items-center gap-2 text-accent text-sm font-semibold hover:underline" style={S}>
+        <p className="text-5xl font-extrabold text-foreground">404</p>
+        <p className="text-muted text-sm">Consulta no encontrada o sin acceso.</p>
+        <Link href="/cuenta" className="inline-flex items-center gap-2 text-brand-primary text-sm font-semibold hover:underline">
           <LuArrowLeft size={14} /> Volver a mi cuenta
         </Link>
       </div>
@@ -96,60 +93,46 @@ export default function CotizacionDetailPage() {
       <Link
         href="/cuenta"
         className="inline-flex items-center gap-1.5 text-[12px] text-muted hover:text-foreground transition-colors"
-        style={S}
       >
         <LuArrowLeft size={12} /> Mis consultas
       </Link>
 
       {/* Card principal */}
-      <div className="rounded-3xl border border-default bg-surface overflow-hidden shadow-sm">
+      <div className="rounded-3xl border border-border bg-surface overflow-hidden shadow-sm">
 
         {/* Header */}
-        <div
-          className="relative px-8 pt-8 pb-7 overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #080f16 0%, #111820 100%)' }}
-        >
-          {/* Glow */}
-          <div className="absolute -bottom-10 -right-10 w-48 h-48 rounded-full pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(255,126,45,0.18) 0%, transparent 70%)' }} />
-          {/* Grain */}
-          <div className="absolute inset-0 opacity-[0.035] pointer-events-none"
-            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
-
+        <div className="relative px-8 pt-8 pb-7 overflow-hidden bg-gradient-to-br from-brand-primary/[0.10] to-surface-secondary">
           {/* Type pill */}
           <div className="relative z-10 flex items-center gap-2 mb-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-[10px] font-semibold text-white/50 uppercase tracking-[0.18em]" style={S}>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-surface text-[10px] font-semibold text-muted uppercase tracking-[0.18em]">
               {isOffer ? <LuPackage size={10} /> : <LuMapPin size={10} />}
               {isOffer ? 'Oferta' : 'Destino'}
             </span>
           </div>
 
           {/* Title */}
-          <h1
-            className="relative z-10 text-white leading-[1.05] mb-3 capitalize"
-            style={{ ...C, fontSize: 'clamp(1.8rem, 5vw, 2.6rem)', fontWeight: 400 }}
-          >
+          <h1 className="relative z-10 text-foreground leading-tight mb-3 capitalize font-extrabold tracking-tight" style={{ fontSize: 'clamp(1.7rem, 5vw, 2.4rem)' }}>
             {title}
           </h1>
 
           {/* Meta */}
-          <div className="relative z-10 flex items-center gap-4 text-[11px] text-white/35" style={S}>
+          <div className="relative z-10 flex items-center gap-4 text-[11px] text-muted">
             <span className="flex items-center gap-1">
               <LuCalendar size={10} /> {formatDateShort(inq.createdAt)}
             </span>
-            <span className="text-white/15">·</span>
-            <span className="font-mono text-white/25 text-[10px]">#{inq.id.slice(0,8).toUpperCase()}</span>
+            <span className="text-muted/40">·</span>
+            <span className="font-mono text-muted/70 text-[10px]">#{inq.id.slice(0,8).toUpperCase()}</span>
           </div>
         </div>
 
         {/* Dotted separator */}
-        <div className="mx-8 border-t border-dashed border-default" />
+        <div className="mx-8 border-t border-dashed border-border" />
 
         <div className="px-8 py-7 space-y-7">
 
           {/* Status stepper */}
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted font-semibold mb-5" style={S}>Estado de tu consulta</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted font-semibold mb-5">Estado de tu consulta</p>
             <div className="flex items-start gap-0">
               {STEPS.map((step, i) => {
                 const done    = i < stepIdx;
@@ -159,25 +142,23 @@ export default function CotizacionDetailPage() {
                   <div key={step.key} className="flex-1 flex flex-col items-center relative">
                     {/* Connecting line left */}
                     {i > 0 && (
-                      <div className="absolute top-[13px] right-1/2 left-0 h-px"
-                        style={{ background: done || current ? '#ff7e2d' : 'var(--border)' }} />
+                      <div className={`absolute top-[13px] right-1/2 left-0 h-px ${done || current ? 'bg-brand-primary' : 'bg-border'}`} />
                     )}
                     {/* Connecting line right */}
                     {i < STEPS.length - 1 && (
-                      <div className="absolute top-[13px] left-1/2 right-0 h-px"
-                        style={{ background: done ? '#ff7e2d' : 'var(--border)' }} />
+                      <div className={`absolute top-[13px] left-1/2 right-0 h-px ${done ? 'bg-brand-primary' : 'bg-border'}`} />
                     )}
 
                     {/* Circle */}
                     <div className={[
                       'relative z-10 w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all',
-                      done    ? 'bg-accent border-accent text-white'           : '',
-                      current ? 'bg-background border-accent text-accent'      : '',
-                      future  ? 'bg-background border-border text-muted/40'   : '',
+                      done    ? 'bg-brand-primary border-brand-primary text-brand-primary-foreground' : '',
+                      current ? 'bg-background border-brand-primary text-brand-primary'                : '',
+                      future  ? 'bg-background border-border text-muted/40'                             : '',
                     ].join(' ')}>
                       {done
                         ? <LuCheck size={12} strokeWidth={2.5} />
-                        : <span className="w-1.5 h-1.5 rounded-full" style={{ background: current ? '#ff7e2d' : 'var(--muted-foreground, #a8a29e)', opacity: future ? 0.3 : 1 }} />
+                        : <span className={`w-1.5 h-1.5 rounded-full ${current ? 'bg-brand-primary' : 'bg-muted/40'}`} />
                       }
                     </div>
 
@@ -185,12 +166,12 @@ export default function CotizacionDetailPage() {
                     <div className="mt-2.5 text-center px-1">
                       <p className={[
                         'text-[11px] font-semibold leading-tight',
-                        future ? 'text-muted/40' : current ? 'text-accent' : 'text-foreground',
-                      ].join(' ')} style={S}>
+                        future ? 'text-muted/40' : current ? 'text-brand-primary' : 'text-foreground',
+                      ].join(' ')}>
                         {step.label}
                       </p>
                       {current && (
-                        <p className="text-[10px] text-muted mt-0.5 leading-tight" style={S}>
+                        <p className="text-[10px] text-muted mt-0.5 leading-tight">
                           {step.sub}
                         </p>
                       )}
@@ -202,11 +183,11 @@ export default function CotizacionDetailPage() {
           </div>
 
           {/* Divider */}
-          <div className="border-t border-default" />
+          <div className="border-t border-border" />
 
           {/* Details grid */}
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted font-semibold mb-4" style={S}>Detalles de la solicitud</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted font-semibold mb-4">Detalles de la solicitud</p>
             <div className="grid grid-cols-2 gap-3">
               <DetailCard icon={<LuUsers size={14} />} label="Pasajeros" value={`${inq.passengers} ${inq.passengers === 1 ? 'persona' : 'personas'}`} />
               <DetailCard icon={<LuPhone size={14} />} label="Teléfono" value={inq.phone || '—'} />
@@ -220,10 +201,10 @@ export default function CotizacionDetailPage() {
           {/* Notes from agency */}
           {inq.notes && (
             <>
-              <div className="border-t border-default" />
-              <div className="rounded-2xl px-5 py-4" style={{ background: 'rgba(255,126,45,0.05)', border: '1px solid rgba(255,126,45,0.15)' }}>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-accent font-semibold mb-1.5" style={S}>Mensaje del agente</p>
-                <p className="text-sm text-foreground leading-relaxed" style={S}>{inq.notes}</p>
+              <div className="border-t border-border" />
+              <div className="rounded-2xl px-5 py-4 bg-brand-primary/5 border border-brand-primary/15">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-brand-primary font-semibold mb-1.5">Mensaje del agente</p>
+                <p className="text-sm text-foreground leading-relaxed">{inq.notes}</p>
               </div>
             </>
           )}
@@ -231,18 +212,17 @@ export default function CotizacionDetailPage() {
           {/* CTA */}
           {inq.status !== 'closed' && (
             <>
-              <div className="border-t border-default" />
+              <div className="border-t border-border" />
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold" style={S}>¿Necesitás algo más?</p>
-                  <p className="text-xs text-muted mt-0.5" style={S}>Nuestros agentes están disponibles para ayudarte.</p>
+                  <p className="text-sm font-semibold">¿Necesitas algo más?</p>
+                  <p className="text-xs text-muted mt-0.5">Nuestros agentes están disponibles para ayudarte.</p>
                 </div>
                 <a
-                  href="https://wa.me/5491100000000"
+                  href="https://wa.me/541158139420"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="shrink-0 inline-flex items-center gap-2 px-4 h-9 rounded-xl bg-accent text-white text-[12px] font-semibold hover:bg-orange-500 active:scale-[0.97] transition-all shadow-md shadow-orange-500/20"
-                  style={S}
+                  className="shrink-0 inline-flex items-center gap-2 px-4 h-9 rounded-xl bg-brand-primary text-brand-primary-foreground text-[12px] font-semibold hover:opacity-90 active:scale-[0.97] transition-all shadow-md shadow-brand-primary/20"
                 >
                   Contactar agente
                 </a>
@@ -259,12 +239,12 @@ export default function CotizacionDetailPage() {
 
 function DetailCard({ icon, label, value, className = '', prose = false }) {
   return (
-    <div className={`rounded-2xl border border-default bg-background px-4 py-3.5 ${className}`}>
+    <div className={`rounded-2xl border border-border bg-background px-4 py-3.5 ${className}`}>
       <div className="flex items-center gap-1.5 text-muted mb-1.5">
         {icon}
-        <p className="text-[10px] uppercase tracking-[0.15em] font-semibold" style={S}>{label}</p>
+        <p className="text-[10px] uppercase tracking-[0.15em] font-semibold">{label}</p>
       </div>
-      <p className={`text-sm text-foreground ${prose ? 'leading-relaxed' : 'font-medium'}`} style={S}>{value}</p>
+      <p className={`text-sm text-foreground ${prose ? 'leading-relaxed' : 'font-medium'}`}>{value}</p>
     </div>
   );
 }

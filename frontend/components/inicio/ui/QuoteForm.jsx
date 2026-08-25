@@ -68,7 +68,7 @@ function FloatTextarea({ label, value, onChange }) {
         onChange={onChange}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        placeholder={floated ? 'Contanos qué necesitás...' : ''}
+        placeholder={floated ? 'Cuéntanos qué necesitas...' : ''}
         rows={3}
         className="w-full pt-7 pb-2 px-3.5 rounded-xl border border-border bg-surface text-sm text-foreground outline-none transition-colors focus:border-accent resize-none placeholder:text-muted/50"
       />
@@ -99,8 +99,12 @@ export default function QuoteForm({ offer }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!name.trim() || !phone.trim()) {
-      toastError('Completá nombre y teléfono.');
+    if (!name.trim()) {
+      toastError('Completa tu nombre.');
+      return;
+    }
+    if (!phone.trim() && !email.trim()) {
+      toastError('Dejanos un teléfono o email para contactarte.');
       return;
     }
     setStatus('loading');
@@ -160,7 +164,7 @@ export default function QuoteForm({ offer }) {
 
   return (
     <aside className="xl:sticky xl:top-24">
-      <div className="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border bg-surface shadow-[0_1px_2px_rgba(18,36,59,.04),0_16px_36px_-16px_rgba(18,36,59,.22)] overflow-hidden">
 
         {/* Price header */}
         <div className="px-5 py-5 border-b border-border">
@@ -189,17 +193,12 @@ export default function QuoteForm({ offer }) {
                   </span>
                 )}
               </div>
-              {offer.availability?.limitedSpots && remainingSpots > 0 && (
-                <span className="text-xs text-rose-600 dark:text-rose-400 font-semibold bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/40 px-2.5 py-1 rounded-full">
-                  ⚡ Solo quedan {remainingSpots}
-                </span>
-              )}
             </div>
           ) : (
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted font-medium mb-1">Precio</p>
               <p className="text-2xl font-bold text-accent">A consultar</p>
-              <p className="text-xs text-muted mt-1">Completá el formulario y te cotizamos.</p>
+              <p className="text-xs text-muted mt-1">Completa el formulario y te cotizamos.</p>
             </div>
           )}
         </div>
@@ -267,7 +266,6 @@ export default function QuoteForm({ offer }) {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             type="tel"
-            required
             placeholder="+54 9 11 1234-5678"
             autoComplete="tel"
           />
@@ -319,8 +317,7 @@ export default function QuoteForm({ offer }) {
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="group relative w-full h-12 rounded-xl text-white font-semibold text-sm overflow-hidden transition-all duration-300 hover:-translate-y-px active:translate-y-0 disabled:opacity-70 disabled:translate-y-0 shadow-md shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/35"
-            style={{ background: 'linear-gradient(135deg, #ff7e2d 0%, #ff9a5a 100%)' }}
+            className="group relative w-full h-12 rounded-xl bg-brand-primary text-brand-primary-foreground font-semibold text-sm overflow-hidden transition-all duration-300 hover:-translate-y-px active:translate-y-0 disabled:opacity-70 disabled:translate-y-0 shadow-md shadow-brand-primary/25 hover:shadow-xl hover:shadow-brand-primary/35"
           >
             {/* Shimmer on hover */}
             <span

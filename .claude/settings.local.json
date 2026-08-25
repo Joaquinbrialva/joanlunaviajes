@@ -29,11 +29,12 @@
       "Bash(find /c/Users/123/Documents/repos/joanlunaviajes/frontend/components -name *.jsx)",
       "Bash(C:\\\\Users\\\\123\\\\.claude\\\\plugins\\\\cache\\\\claude-plugins-official\\\\superpowers\\\\5.0.5\\\\scripts\\\\start-server.sh --project-dir C:\\\\Users\\\\123\\\\Documents\\\\repos\\\\joanlunaviajes)",
       "Bash(cat \"C:/Users/123/Documents/repos/joanlunaviajes/.superpowers/brainstorm/\"*\"/.server-info\")",
-      "Bash(bash \"C:/Users/123/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.5/skills/brainstorming/scripts/start-server.sh\" --project-dir \"C:/Users/123/Documents/repos/joanlunaviajes\")"
+      "Bash(bash \"C:/Users/123/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.5/skills/brainstorming/scripts/start-server.sh\" --project-dir \"C:/Users/123/Documents/repos/joanlunaviajes\")",
+      "Bash(git status *)"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "supabase"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

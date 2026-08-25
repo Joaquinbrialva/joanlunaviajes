@@ -1,22 +1,21 @@
 'use client';
-import Destinies from '@/components/inicio/sections/Destinations';
-import Hero from '@/components/inicio/sections/Hero';
+import SearchStrip from '@/components/inicio/sections/SearchStrip';
+import Novedades from '@/components/inicio/sections/Novedades';
 import Offers from '@/components/inicio/sections/Offers';
-import WhyChoose from '@/components/inicio/sections/WhyChoose';
+import Destinations from '@/components/inicio/sections/Destinations';
+import HowItWorks from '@/components/inicio/sections/HowItWorks';
 import QuoteCTA from '@/components/inicio/sections/QuoteCTA';
+import Reveal from '@/components/ui/reveal';
 
 export default function Home() {
 	return (
-		<>
-			<Hero />
-			<div className="pt-20 sm:pt-28 space-y-24">
-				<Offers />
-				<Destinies />
-				<div>
-					<WhyChoose />
-					<QuoteCTA />
-				</div>
-			</div>
-		</>
+		<div className="pt-6 sm:pt-8 pb-16 sm:pb-20 space-y-16 sm:space-y-20">
+			<Novedades />
+			<SearchStrip />
+			<Reveal><Offers /></Reveal>
+			<Reveal><Destinations /></Reveal>
+			<Reveal><HowItWorks /></Reveal>
+			<Reveal><QuoteCTA /></Reveal>
+		</div>
 	);
 }

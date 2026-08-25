@@ -19,15 +19,24 @@ npm run dev      # http://localhost:4000  (node --watch)
 npm start        # production
 ```
 
-Both must run simultaneously during development. There are no automated tests.
+Both must run simultaneously during development. There are no automated tests wired into `npm test` (an ad-hoc `backend/test-flows.js` script exists but isn't run by any npm script).
 
 ### Environment variables (backend)
 
-Create `backend/.env`:
+Create `backend/.env` (see `backend/.env.example`):
 ```
 JWT_SECRET=your-secret-here
 JWT_EXPIRES_IN=7d
 PORT=4000
+NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
+DATABASE_URL=postgresql://...        # Supabase Postgres, pooled connection
+SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SERVICE_KEY=...
+MAIL_USER=
+MAIL_APP_PASSWORD=
+MAIL_TO=
+WHATSAPP_NUMBER=
 ```
 
 ## Architecture
@@ -36,14 +45,11 @@ Two separate apps: a **Next.js frontend** (`frontend/`) and an **Express backend
 
 ### Data layer
 
-Data is persisted as JSON files in `backend/data/`. The module `backend/src/store/db.js` exposes async read/write helpers (using `node:fs`) and ID/slug utilities. **These files are the database** — no external DB is required.
+Data is persisted in **Postgres (hosted on Supabase)** via **Prisma**. `backend/prisma/schema.prisma` defines the models: `Offer`, `Destination`, `Inquiry`, `User`, `Subscriber`, `Update` (all UUID ids). `Update` is the "Novedades" feature — photo albums with an optional caption, publicly shown on the homepage below the Hero. `backend/src/store/prisma.js` exports the `prisma` client (plus a `withRetry` helper for transient connection errors). There is no `prisma/migrations` history — schema changes are applied with `npm run db:push` (Prisma db push), not versioned migrations.
 
-- `data/offers.json` — travel packages (`id` format: `of-XXXX`)
-- `data/destinations.json` — destinations (`id` format: `dest-XXX`)
-- `data/inquiries.json` — quote/contact requests (`id` format: `inq-XXXX`)
-- `data/users.json` — admin users (passwords hashed with bcryptjs)
+Uploaded images/video (offer/destination galleries, hero media) go to **Supabase Storage** (`images` bucket, public) via `backend/src/store/supabase.js` — not local disk.
 
-Key exports from `db.js`: `db.offers`, `db.destinations`, `db.inquiries`, `db.users` (each with `.read()` / `.write(data)`), plus `nextOfferId`, `nextDestinationId`, `nextInquiryId`, `slugify`, `uniqueSlug`.
+Backend npm scripts of note: `db:generate`, `db:push`, `db:migrate` (prisma migrate deploy), `db:seed` (`scripts/seed.js`), `db:studio`.
 
 ### API (Express — port 4000)
 
@@ -52,22 +58,37 @@ Key exports from `db.js`: `db.offers`, `db.destinations`, `db.inquiries`, `db.us
 | POST | `/api/auth/login` | Login → sets `auth_token` HttpOnly cookie |
 | POST | `/api/auth/logout` | Clears cookie |
 | GET | `/api/auth/me` | Get current user (requires auth) |
+| PATCH | `/api/auth/me` | Update own profile / change password |
 | GET | `/api/ofertas` | List all offers |
 | GET | `/api/ofertas/:slug` | Get offer by slug |
-| POST | `/api/ofertas` | Create offer |
-| PATCH | `/api/ofertas/:id` | Update offer by id |
-| DELETE | `/api/ofertas/:id` | Delete offer |
+| POST | `/api/ofertas` | Create offer (admin/agent) |
+| PATCH | `/api/ofertas/:id` | Update offer by id (admin/agent) |
+| DELETE | `/api/ofertas/:id` | Delete offer (admin/agent) |
 | GET | `/api/destinos` | List all destinations |
 | GET | `/api/destinos/:slug` | Get destination by slug |
-| POST | `/api/destinos` | Create destination |
-| PATCH | `/api/destinos/:id` | Update destination by id |
-| DELETE | `/api/destinos/:id` | Delete destination |
-| GET | `/api/cotizaciones` | List inquiries |
-| POST | `/api/cotizaciones` | Create inquiry |
-| PATCH | `/api/cotizaciones/:id` | Update inquiry status (`pending`/`contacted`/`closed`) |
+| POST | `/api/destinos` | Create destination (admin/agent) |
+| PATCH | `/api/destinos/:id` | Update destination by id (admin/agent) |
+| DELETE | `/api/destinos/:id` | Delete destination (admin/agent) |
+| GET | `/api/novedades` | List novedades (all for staff, published-only for public) |
+| POST | `/api/novedades` | Create novedad (admin/agent/designer) |
+| PATCH | `/api/novedades/:id` | Update novedad by id (admin/agent/designer) |
+| DELETE | `/api/novedades/:id` | Delete novedad by id (admin/agent/designer) |
+| GET | `/api/cotizaciones` | List inquiries (admin/agent) |
+| GET | `/api/cotizaciones/mis` | Inquiries for the logged-in user |
+| GET | `/api/cotizaciones/:id` | Get one inquiry (staff, or owner by userId/email) |
+| POST | `/api/cotizaciones` | Create inquiry (public, rate-limited) |
+| PATCH | `/api/cotizaciones/:id` | Update inquiry status/notes (admin/agent only) |
+| DELETE | `/api/cotizaciones/:id` | Delete inquiry (admin/agent only) |
+| GET/POST/PATCH/DELETE | `/api/users` | Admin user management (admin only) |
+| POST | `/api/upload` | Upload a single image to Supabase Storage (any authed user) |
+| POST | `/api/upload/media` | Upload image/video for novedades (admin/agent/designer) |
 | GET | `/health` | Health check |
 
-Auth middleware (`backend/src/middleware/auth.js`) verifies the `auth_token` JWT cookie via `requireAuth`.
+Auth middleware (`backend/src/middleware/auth.js`): `requireAuth` (any logged-in user), `optionalAuth` (attaches `req.user` if present, doesn't block), `requireRole(...roles)` (returns a `[requireAuth, checker]` array — mount with `...requireRole(...)` in route definitions).
+
+Roles: `admin`, `agent`, `designer`, `client`. Keep the role list in sync across `backend/src/routes/users.js` (`VALID_ROLES`), `backend/src/routes/upload.js` (`ALLOWED_ROLES`), and `frontend/app/admin/usuarios/page.jsx` (`ROLES`) — they've drifted before.
+
+There is no `Notification` model and no `/api/notifications/*` route. `frontend/components/admin/notification-bell.jsx` still polls those endpoints and will silently no-op (this is known and intentionally left as-is for now, not a bug to "fix" reflexively).
 
 ### Frontend → Backend proxy
 
@@ -82,7 +103,14 @@ Auth middleware (`backend/src/middleware/auth.js`) verifies the `auth_token` JWT
 | `/ofertas/[slug]` | Offer detail |
 | `/destinos` | Public destination listing |
 | `/destinos/[slug]` | Destination detail |
-| `/login` | Admin login |
+| `/consulta` | Contact form |
+| `/contacto` | Contact page |
+| `/login` | Login (all roles) |
+| `/registro`, `/registro/verificar` | Client sign-up + email verification |
+| `/olvide-contrasena`, `/olvide-contrasena/restablecer` | Password reset flow |
+| `/cambiar-contrasena` | Forced password change (`mustChangePassword`) |
+| `/cuenta` | Client account — profile + own inquiries |
+| `/cuenta/cotizaciones/[id]` | Client view of a single inquiry |
 | `/admin` | Admin dashboard |
 | `/admin/ofertas` | Admin offer management |
 | `/admin/ofertas/nueva` | Create offer (multi-step form) |
@@ -90,7 +118,11 @@ Auth middleware (`backend/src/middleware/auth.js`) verifies the `auth_token` JWT
 | `/admin/destinos` | Admin destination management |
 | `/admin/destinos/nuevo` | Create destination form |
 | `/admin/destinos/[slug]/editar` | Edit destination form |
+| `/admin/novedades` | Admin novedades management (photo albums shown on homepage) |
 | `/admin/cotizaciones` | Quote inbox |
+| `/admin/usuarios` | User management (admin only) |
+| `/admin/perfil` | Own profile |
+| `/admin/ajustes` | Settings |
 
 Auth is enforced via `frontend/middleware.js` (cookie presence check on `/admin/*`).
 
@@ -149,10 +181,7 @@ Use `normalizeList(value)` (defined in route files) when processing list fields 
 
 ## Backlog de mejoras pendientes
 
-Funcionalidades acordadas para implementar más adelante:
+1. **Notificaciones en el admin** — `NotificationBell` en el frontend ya está construido y pollea `/api/notifications*`, pero ese backend nunca se migró de la era JSON-store a Prisma: no existe modelo `Notification` ni las rutas. Implementar (modelo + rutas + trigger al crear cotización) o remover el bell del admin layout — decisión pendiente.
+2. **Migraciones Prisma versionadas** — hoy se usa `prisma db push` sin `prisma/migrations`; considerar pasar a `prisma migrate` para tener historial de cambios de schema en producción.
 
-1. **Página `/cuenta` para clientes** — historial de cotizaciones, datos personales, cambio de contraseña.
-2. **Formulario de cotización funcional** — desde la página pública de oferta (`/ofertas/[slug]`), que envíe al endpoint `POST /api/cotizaciones` y confirme al usuario.
-3. **Galería real de imágenes** — subida de imágenes para ofertas y destinos (multer en backend + almacenamiento local o servicio externo).
-4. **Notificaciones en el admin** — badge en el sidebar cuando llegan nuevas cotizaciones (polling o websocket).
-5. **Registro de nuevos usuarios** — página `/registro` para que clientes se creen una cuenta (validación de email único, hash de contraseña).
+Cumplido: página `/cuenta`, registro de usuarios (`/registro`), galería de imágenes vía Supabase Storage.

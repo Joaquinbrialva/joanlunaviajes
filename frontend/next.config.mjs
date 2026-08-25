@@ -3,6 +3,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:4000';
 
 const nextConfig = {
 	images: {
+		qualities: [75, 85],
 		remotePatterns: [
 			{
 				protocol: 'https',

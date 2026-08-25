@@ -6,11 +6,7 @@ import Link from 'next/link';
 import { InputOTP, Spinner } from '@heroui/react';
 import { LuMailCheck, LuArrowLeft, LuRefreshCw, LuShieldCheck } from 'react-icons/lu';
 import { toastError, toastSuccess } from '@/lib/toast';
-
-const C = { fontFamily: 'var(--font-cormorant)' };
-const S = { fontFamily: 'var(--font-syne)' };
-
-const grain = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")`;
+import Logo from '@/components/ui/logo';
 
 const EXPIRY_SECONDS = 15 * 60;
 const RESEND_COOLDOWN = 60;
@@ -83,7 +79,7 @@ function VerificarContent() {
       setCode('');
       setErrorMsg('');
       setStatus('idle');
-      toastSuccess('Código reenviado. Revisá tu bandeja de entrada.');
+      toastSuccess('Código reenviado. Revisa tu bandeja de entrada.');
     } catch (err) {
       toastError(err, 'Error al reenviar');
     } finally {
@@ -99,59 +95,35 @@ function VerificarContent() {
     <div className="w-screen -mx-[calc((100vw-100%)/2)] min-h-screen flex">
 
       {/* ── Panel izquierdo ── */}
-      <div
-        className="hidden lg:flex lg:w-[42%] relative flex-col justify-between p-12 overflow-hidden shrink-0"
-        style={{ background: '#080f16' }}
-      >
-        {/* Glow naranja */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: 'radial-gradient(ellipse at 25% 75%, rgba(255,126,45,0.18) 0%, transparent 55%), radial-gradient(ellipse at 85% 15%, rgba(255,126,45,0.07) 0%, transparent 50%)',
-        }} />
-        {/* Grain */}
-        <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{ backgroundImage: grain }} />
-        {/* Número decorativo */}
-        <div
-          className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 text-white/[0.025] select-none pointer-events-none leading-none"
-          style={{ ...C, fontSize: '40vw', fontWeight: 300 }}
-        >
-          6
-        </div>
-
+      <div className="hidden lg:flex lg:w-[42%] relative flex-col justify-between p-12 overflow-hidden shrink-0 bg-gradient-to-br from-brand-primary/[0.10] to-surface-secondary">
         {/* Wordmark */}
-        <Link href="/" className="relative z-10 inline-flex items-baseline gap-0.5 select-none group">
-          <span className="text-white text-[14px] font-extrabold tracking-tight uppercase transition-opacity group-hover:opacity-80" style={S}>
-            JOANLUNA
-          </span>
-          <span className="text-accent ml-0.5" style={{ ...C, fontStyle: 'italic', fontSize: '17px', textShadow: '0 0 20px rgba(255,126,45,0.45)' }}>
-            viajes
-          </span>
+        <Link href="/" className="relative z-10 inline-flex items-center select-none group">
+          <Logo className="h-6 w-auto transition-opacity group-hover:opacity-80" />
         </Link>
 
         {/* Copy central */}
         <div className="relative z-10">
-          <div className="h-px w-10 bg-accent mb-7" />
-          <h2 className="font-light text-white leading-[1.05] mb-6" style={{ ...C, fontSize: 'clamp(2rem, 3vw, 2.8rem)' }}>
-            Casi listo.<br />
-            Solo falta<br />
-            <em className="font-semibold" style={{ color: '#ff9a5c' }}>un código.</em>
+          <div className="h-px w-10 bg-brand-primary mb-7" />
+          <h2 className="font-extrabold text-foreground leading-[1.1] mb-6 tracking-tight" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.6rem)' }}>
+            Casi listo. Solo falta <span className="text-brand-primary">un código.</span>
           </h2>
-          <p className="text-[13px] text-white/40 leading-relaxed" style={S}>
-            Revisá tu bandeja de entrada. Si no ves el email, mirá en spam o solicitá un nuevo código.
+          <p className="text-[13px] text-muted leading-relaxed">
+            Revisa tu bandeja de entrada. Si no ves el email, mira en spam o solicita un nuevo código.
           </p>
 
           {/* Security note */}
-          <div className="mt-8 flex items-start gap-3 p-4 rounded-xl border border-white/[0.06] bg-white/[0.03]">
-            <LuShieldCheck size={15} className="text-accent shrink-0 mt-0.5" />
-            <p className="text-[12px] text-white/35 leading-relaxed" style={S}>
-              El código tiene validez de <strong className="text-white/50">15 minutos</strong>. No lo compartas con nadie.
+          <div className="mt-8 flex items-start gap-3 p-4 rounded-xl border border-border bg-surface">
+            <LuShieldCheck size={15} className="text-brand-primary shrink-0 mt-0.5" />
+            <p className="text-[12px] text-muted leading-relaxed">
+              El código tiene validez de <strong className="text-foreground">15 minutos</strong>. No lo compartas con nadie.
             </p>
           </div>
         </div>
 
         {/* Footer panel */}
         <div className="relative z-10">
-          <p className="text-[10px] uppercase tracking-[0.22em] text-white/20 font-semibold" style={S}>
-            Agencia de viajes premium · Buenos Aires
+          <p className="text-[12px] text-muted font-semibold">
+            Joanluna Viajes · Buenos Aires
           </p>
         </div>
       </div>
@@ -161,7 +133,7 @@ function VerificarContent() {
 
         {/* Back — mobile */}
         <div className="w-full max-w-[420px] mb-6 lg:hidden">
-          <Link href="/registro" className="inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-foreground transition-colors" style={S}>
+          <Link href="/registro" className="inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-foreground transition-colors">
             <LuArrowLeft size={13} /> Volver al registro
           </Link>
         </div>
@@ -170,16 +142,10 @@ function VerificarContent() {
 
           {/* Encabezado */}
           <div className="mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-px w-8 bg-accent" />
-              <p className="text-[10px] uppercase tracking-[0.28em] font-semibold text-accent" style={S}>
-                Verificación
-              </p>
-            </div>
-            <h1 className="font-light text-foreground leading-none mb-3" style={{ ...C, fontSize: 'clamp(2rem, 5vw, 2.8rem)' }}>
-              Verificá tu <em className="font-semibold">email</em>
+            <h1 className="font-extrabold text-foreground leading-tight mb-3 tracking-tight" style={{ fontSize: 'clamp(1.9rem, 5vw, 2.5rem)' }}>
+              Verifica tu email
             </h1>
-            <p className="text-[13px] text-muted leading-relaxed" style={S}>
+            <p className="text-[13px] text-muted leading-relaxed">
               Enviamos un código de 6 dígitos a{' '}
               {email
                 ? <strong className="text-foreground font-semibold">{email}</strong>
@@ -191,12 +157,12 @@ function VerificarContent() {
           {/* Estado: éxito */}
           {status === 'success' ? (
             <div className="flex flex-col items-center gap-5 py-10" style={{ animation: 'fadeUp 0.35s ease both' }}>
-              <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                <LuMailCheck size={32} className="text-emerald-500" />
+              <div className="w-20 h-20 rounded-full bg-success/10 border border-success/20 flex items-center justify-center">
+                <LuMailCheck size={32} className="text-success" />
               </div>
               <div className="text-center">
-                <p className="text-[17px] font-semibold text-foreground mb-1" style={S}>¡Cuenta verificada!</p>
-                <p className="text-[13px] text-muted" style={S}>Redirigiendo a tu cuenta…</p>
+                <p className="text-[17px] font-semibold text-foreground mb-1">¡Cuenta verificada!</p>
+                <p className="text-[13px] text-muted">Redirigiendo a tu cuenta…</p>
               </div>
             </div>
           ) : (
@@ -227,24 +193,21 @@ function VerificarContent() {
 
                 {/* Temporizador */}
                 {!isExpired ? (
-                  <p className="text-[12px] text-muted" style={S}>
+                  <p className="text-[12px] text-muted">
                     Expira en{' '}
-                    <span className={`font-semibold tabular-nums ${secondsLeft < 60 ? 'text-rose-500' : 'text-foreground'}`}>
+                    <span className={`font-semibold tabular-nums ${secondsLeft < 60 ? 'text-danger' : 'text-foreground'}`}>
                       {formatTime(secondsLeft)}
                     </span>
                   </p>
                 ) : (
-                  <p className="text-[12px] text-rose-500 font-semibold" style={S}>
-                    El código expiró. Solicitá uno nuevo.
+                  <p className="text-[12px] text-danger font-semibold">
+                    El código expiró. Solicita uno nuevo.
                   </p>
                 )}
 
                 {/* Error inline */}
                 {errorMsg && (
-                  <p
-                    className="text-[13px] text-rose-500 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 px-4 py-2.5 rounded-xl w-full text-center"
-                    style={S}
-                  >
+                  <p className="text-[13px] text-danger bg-danger/10 border border-danger/20 px-4 py-2.5 rounded-xl w-full text-center">
                     {errorMsg}
                   </p>
                 )}
@@ -255,8 +218,7 @@ function VerificarContent() {
                 <button
                   onClick={() => handleVerify(undefined)}
                   disabled={code.length < 6 || isVerifying}
-                  className="w-full h-11 rounded-xl bg-accent text-white text-[13px] font-semibold hover:bg-orange-500 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/20 disabled:opacity-40 flex items-center justify-center gap-2 mb-3"
-                  style={S}
+                  className="w-full h-11 rounded-xl bg-brand-primary text-brand-primary-foreground text-[13px] font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-brand-primary/20 disabled:opacity-40 flex items-center justify-center gap-2 mb-3"
                 >
                   {isVerifying
                     ? <><Spinner color="current" size="sm" /> Verificando…</>
@@ -270,7 +232,6 @@ function VerificarContent() {
                 onClick={handleResend}
                 disabled={!canResend}
                 className="w-full h-11 rounded-xl border border-border text-[13px] text-muted hover:text-foreground hover:border-foreground/30 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
-                style={S}
               >
                 {resending
                   ? <><Spinner size="sm" /> Reenviando…</>
@@ -284,13 +245,13 @@ function VerificarContent() {
 
           {/* Footer */}
           <div className="mt-8 pt-6 border-t border-border text-center space-y-2">
-            <p className="text-[13px] text-muted" style={S}>
+            <p className="text-[13px] text-muted">
               ¿Te equivocaste de email?{' '}
-              <Link href="/registro" className="text-accent font-semibold hover:underline">
-                Volvé al registro
+              <Link href="/registro" className="text-brand-primary font-semibold hover:underline">
+                Vuelve al registro
               </Link>
             </p>
-            <Link href="/" className="hidden lg:block text-[13px] text-muted hover:text-foreground transition-colors" style={S}>
+            <Link href="/" className="hidden lg:block text-[13px] text-muted hover:text-foreground transition-colors">
               ← Volver al inicio
             </Link>
           </div>

@@ -17,7 +17,7 @@ export default function RootShell({ children }) {
   return (
     <div>
       <Navbar />
-      <div className={`mx-auto max-w-7xl px-4 ${['/contacto', '/nosotros'].includes(pathname) ? 'pt-0' : pathname === '/' ? 'pt-4' : 'pt-[92px]'}`}>{children}</div>
+      <div className={`mx-auto max-w-[1440px] px-4 ${['/contacto', '/nosotros'].includes(pathname) ? 'pt-0' : 'pt-[92px]'}`}>{children}</div>
       <Footer />
       <ScrollToTop />
     </div>

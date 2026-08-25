@@ -12,7 +12,7 @@ function generateTempPassword(length = 10) {
 
 const router = Router();
 
-const VALID_ROLES = ['admin', 'agent', 'client'];
+const VALID_ROLES = ['admin', 'agent', 'designer', 'client'];
 
 function sanitizeUser(user) {
   const { password: _, ...safe } = user;

@@ -8,9 +8,9 @@ import morgan from 'morgan';
 import authRouter from './routes/auth.js';
 import ofertasRouter from './routes/ofertas.js';
 import destinosRouter from './routes/destinos.js';
+import novedadesRouter from './routes/novedades.js';
 import cotizacionesRouter from './routes/cotizaciones.js';
 import uploadRouter from './routes/upload.js';
-import settingsRouter from './routes/settings.js';
 import usersRouter from './routes/users.js';
 
 const REQUIRED_ENV = ['JWT_SECRET'];
@@ -57,10 +57,10 @@ app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth', authRouter);
 app.use('/api/ofertas', ofertasRouter);
 app.use('/api/destinos', destinosRouter);
+app.use('/api/novedades', novedadesRouter);
 app.post('/api/cotizaciones', publicLimiter);
 app.use('/api/cotizaciones', cotizacionesRouter);
 app.use('/api/upload', uploadRouter);
-app.use('/api/settings', settingsRouter);
 app.use('/api/users', usersRouter);
 
 app.get('/health', (_, res) => res.json({ status: 'ok' }));

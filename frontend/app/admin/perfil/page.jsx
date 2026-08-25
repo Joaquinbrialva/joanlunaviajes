@@ -1,15 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { LuUser, LuMail, LuLock, LuSave } from 'react-icons/lu';
+import { Button, Spinner } from '@heroui/react';
+import { LuUser, LuLock, LuSave } from 'react-icons/lu';
 import { toastError, toastSuccess } from '@/lib/toast';
-
-const ROLE_LABELS = {
-  admin: 'Administrador',
-  agent: 'Agente',
-  designer: 'Diseñador',
-};
+import { PageHeader, Section, TextInputField, InitialsAvatar, RoleStatusChip } from '@/components/admin/kit';
 
 export default function PerfilPage() {
   const [user, setUser] = useState(null);
@@ -35,10 +30,6 @@ export default function PerfilPage() {
       })
       .catch(() => {});
   }, []);
-
-  const initials = user?.name
-    ? user.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
-    : 'A';
 
   async function handleSaveInfo(e) {
     e.preventDefault();
@@ -93,150 +84,61 @@ export default function PerfilPage() {
   if (!user) {
     return (
       <div className='flex items-center justify-center py-20'>
-        <div className='h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent' />
+        <Spinner size='lg' />
       </div>
     );
   }
 
   return (
-    <div className='space-y-6 max-w-2xl'>
-      <section>
-        <p className='text-sm text-muted mb-1'>
-          <Link href='/admin' className='hover:underline'>Panel</Link> / Mi perfil
-        </p>
-        <h2 className='text-4xl font-bold'>Mi perfil</h2>
-        <p className='text-muted'>Gestiona tu información personal y contraseña.</p>
-      </section>
+    <div className='mx-auto max-w-2xl space-y-6'>
+      <PageHeader crumbs={[{ label: 'Panel', href: '/admin' }, { label: 'Mi perfil' }]} title='Mi perfil' description='Gestiona tu información personal y contraseña.' />
 
-      {/* Avatar + role */}
-      <div className='flex items-center gap-4 rounded-2xl border border-default bg-surface p-5'>
-        <div className='grid h-16 w-16 shrink-0 place-content-center rounded-full bg-accent/10 text-2xl font-bold text-accent'>
-          {initials}
-        </div>
-        <div>
-          <p className='text-lg font-semibold'>{user.name}</p>
-          <p className='text-sm text-muted'>{ROLE_LABELS[user.role] || user.role}</p>
-          <p className='text-sm text-muted'>{user.email}</p>
-        </div>
-      </div>
-
-      {/* Info form */}
-      <form onSubmit={handleSaveInfo} className='rounded-2xl border border-default bg-surface p-5 space-y-4'>
-        <h3 className='text-lg font-semibold flex items-center gap-2'>
-          <LuUser className='h-4 w-4 text-accent' />
-          Información personal
-        </h3>
-
-        <div className='space-y-1'>
-          <label className='text-sm font-medium text-foreground'>Nombre completo</label>
-          <div className='relative'>
-            <LuUser className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted' />
-            <input
-              type='text'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className='w-full rounded-xl border border-default bg-surface-secondary pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40'
-              placeholder='Tu nombre'
-              required
-            />
+      <Section bodyClassName='relative overflow-hidden'>
+        <div className='h-16 bg-gradient-to-r from-accent/15 via-accent/5 to-transparent' />
+        <div className='flex items-center gap-4 px-5 pb-5 -mt-8'>
+          <InitialsAvatar name={user.name} role={user.role} size='lg' className='h-16 w-16 shrink-0 ring-4 ring-[var(--surface)] text-base' />
+          <div className='min-w-0 pt-8'>
+            <p className='truncate text-lg font-semibold'>{user.name}</p>
+            <p className='truncate text-sm text-muted'>{user.email}</p>
+          </div>
+          <div className='ml-auto self-end'>
+            <RoleStatusChip role={user.role} />
           </div>
         </div>
+      </Section>
 
-        <div className='space-y-1'>
-          <label className='text-sm font-medium text-foreground'>Email</label>
-          <div className='relative'>
-            <LuMail className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted' />
-            <input
-              type='email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className='w-full rounded-xl border border-default bg-surface-secondary pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40'
-              placeholder='tu@email.com'
-              required
-            />
+      <Section
+        title={<span className='inline-flex items-center gap-2'><LuUser className='h-4 w-4 text-muted' />Información personal</span>}
+        bodyClassName='space-y-4 p-5'
+      >
+        <form onSubmit={handleSaveInfo} className='space-y-4'>
+          <TextInputField label='Nombre completo' value={name} onChange={(e) => setName(e.target.value)} placeholder='Tu nombre' required />
+          <TextInputField label='Email' type='email' value={email} onChange={(e) => setEmail(e.target.value)} placeholder='tu@email.com' required />
+          <div className='flex justify-end'>
+            <Button type='submit' isDisabled={savingInfo}>
+              {savingInfo ? <Spinner size='sm' color='current' /> : <LuSave className='h-4 w-4' />}
+              Guardar cambios
+            </Button>
           </div>
-        </div>
+        </form>
+      </Section>
 
-        <div className='flex justify-end'>
-          <button
-            type='submit'
-            disabled={savingInfo}
-            className='inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60'
-          >
-            {savingInfo ? (
-              <span className='h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent' />
-            ) : (
-              <LuSave className='h-4 w-4' />
-            )}
-            Guardar cambios
-          </button>
-        </div>
-      </form>
-
-      {/* Password form */}
-      <form onSubmit={handleSavePassword} className='rounded-2xl border border-default bg-surface p-5 space-y-4'>
-        <h3 className='text-lg font-semibold flex items-center gap-2'>
-          <LuLock className='h-4 w-4 text-accent' />
-          Cambiar contraseña
-        </h3>
-
-        <div className='space-y-1'>
-          <label className='text-sm font-medium text-foreground'>Contraseña actual</label>
-          <div className='relative'>
-            <LuLock className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted' />
-            <input
-              type='password'
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              className='w-full rounded-xl border border-default bg-surface-secondary pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40'
-              placeholder='••••••••'
-            />
+      <Section
+        title={<span className='inline-flex items-center gap-2'><LuLock className='h-4 w-4 text-muted' />Cambiar contraseña</span>}
+        bodyClassName='space-y-4 p-5'
+      >
+        <form onSubmit={handleSavePassword} className='space-y-4'>
+          <TextInputField label='Contraseña actual' type='password' value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder='••••••••' />
+          <TextInputField label='Nueva contraseña' type='password' value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder='••••••••' hint='Mínimo 6 caracteres' />
+          <TextInputField label='Confirmar nueva contraseña' type='password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder='••••••••' />
+          <div className='flex justify-end'>
+            <Button type='submit' isDisabled={savingPassword}>
+              {savingPassword ? <Spinner size='sm' color='current' /> : <LuLock className='h-4 w-4' />}
+              Cambiar contraseña
+            </Button>
           </div>
-        </div>
-
-        <div className='space-y-1'>
-          <label className='text-sm font-medium text-foreground'>Nueva contraseña</label>
-          <div className='relative'>
-            <LuLock className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted' />
-            <input
-              type='password'
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className='w-full rounded-xl border border-default bg-surface-secondary pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40'
-              placeholder='Mínimo 6 caracteres'
-            />
-          </div>
-        </div>
-
-        <div className='space-y-1'>
-          <label className='text-sm font-medium text-foreground'>Confirmar nueva contraseña</label>
-          <div className='relative'>
-            <LuLock className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted' />
-            <input
-              type='password'
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className='w-full rounded-xl border border-default bg-surface-secondary pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40'
-              placeholder='Repite la nueva contraseña'
-            />
-          </div>
-        </div>
-
-        <div className='flex justify-end'>
-          <button
-            type='submit'
-            disabled={savingPassword}
-            className='inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60'
-          >
-            {savingPassword ? (
-              <span className='h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent' />
-            ) : (
-              <LuLock className='h-4 w-4' />
-            )}
-            Cambiar contraseña
-          </button>
-        </div>
-      </form>
+        </form>
+      </Section>
     </div>
   );
 }

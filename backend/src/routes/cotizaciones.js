@@ -46,6 +46,9 @@ router.post('/', optionalAuth, async (req, res) => {
     if (!name) {
       return res.status(400).json({ error: 'Completá tu nombre.' });
     }
+    if (!phone && !email) {
+      return res.status(400).json({ error: 'Dejanos un teléfono o email para contactarte.' });
+    }
     if (email && !EMAIL_RE.test(email)) {
       return res.status(400).json({ error: 'El email no tiene un formato válido.' });
     }
@@ -94,7 +97,7 @@ router.get('/:id', requireAuth, async (req, res) => {
 });
 
 // PATCH /api/cotizaciones/:id
-router.patch('/:id', requireAuth, async (req, res) => {
+router.patch('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
     const allowed = ['pending', 'contacted', 'closed'];
     const status = String(req.body.status || '').trim();
@@ -119,7 +122,7 @@ router.patch('/:id', requireAuth, async (req, res) => {
 });
 
 // DELETE /api/cotizaciones/:id
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', ...requireRole('admin', 'agent'), async (req, res) => {
   try {
     await prisma.inquiry.delete({ where: { id: req.params.id } });
     res.status(204).send();

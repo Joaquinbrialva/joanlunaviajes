@@ -1,22 +1,20 @@
 'use client'
 import ThemeToggle from "@/app/ThemeToggle";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { LuLayoutDashboard, LuLogOut, LuMenu, LuUser, LuX } from "react-icons/lu";
+import Logo from "@/components/ui/logo";
 
 const STAFF_ROLES = ['admin', 'agent', 'designer'];
 const ROLE_LABELS = { admin: 'Administrador', agent: 'Agente', designer: 'Diseñador', client: 'Cliente' };
 
 const NAV_LINKS = [
-  { name: "Destinos", url: "/destinos" },
   { name: "Ofertas", url: "/ofertas" },
+  { name: "Destinos", url: "/destinos" },
   { name: "Nosotros", url: "/nosotros" },
   { name: "Contacto", url: "/contacto" },
 ];
-
-const syneStyle = { fontFamily: 'var(--font-syne)' };
-const cormorantStyle = { fontFamily: 'var(--font-cormorant)', fontStyle: 'italic' };
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -27,7 +25,6 @@ export default function Navbar() {
   const userMenuRef = useRef(null);
   const router = useRouter();
   const pathname = usePathname();
-  const isHome = pathname === '/';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -62,17 +59,29 @@ export default function Navbar() {
     router.refresh();
   }
 
+  function handleCotizarClick(e) {
+    if (pathname === '/') {
+      e.preventDefault();
+      const el = document.getElementById('cotizar');
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const y = rect.top + window.scrollY - (window.innerHeight - rect.height) / 2;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+      setMobileOpen(false);
+    } else {
+      setMobileOpen(false);
+    }
+  }
+
   const isStaff = user && STAFF_ROLES.includes(user.role);
   const initials = user?.name
     ? user.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
     : '';
 
-  // isIsland: forma island (padding + bordes redondeados + max-width) — solo al scrollear
+  // isIsland: forma island (padding + bordes redondeados + max-width) — solo al scrollear.
+  // Efecto de scroll independiente del tema claro/oscuro de la barra — se mantiene en toda ruta.
   const isIsland = scrolled;
-  // showBg: fondo visible — en non-home siempre, en home solo al scrollear o con menú abierto
-  const showBg = scrolled || !isHome || (mobileOpen && !scrolled);
-  // darkColors: texto oscuro — en non-home siempre, en home solo al scrollear
-  const active = scrolled || !isHome;
 
   const ease = 'cubic-bezier(0.4, 0, 0.2, 1)';
   const dur = '420ms';
@@ -82,75 +91,59 @@ export default function Navbar() {
     <header
       className="fixed inset-x-0 top-0 z-50"
       style={{
-        paddingTop: isIsland ? '12px' : '0px',
-        paddingLeft: isIsland ? '12px' : '0px',
-        paddingRight: isIsland ? '12px' : '0px',
+        paddingTop: isIsland ? '14px' : '0px',
+        paddingLeft: isIsland ? '14px' : '0px',
+        paddingRight: isIsland ? '14px' : '0px',
         transition,
       }}
     >
-      {/* Island / full-width container */}
+      {/* Island / full-width container — fondo sólido siempre, en toda ruta */}
       <div
-        className={`mx-auto backdrop-blur-2xl border ${
-          showBg
-            ? 'bg-white/90 dark:bg-slate-950/90 border-slate-200/70 dark:border-white/[0.07] shadow-xl shadow-black/[0.07] dark:shadow-black/40'
-            : 'bg-transparent border-transparent shadow-none'
-        }`}
+        className="mx-auto backdrop-blur-2xl border bg-white/85 dark:bg-slate-950/85 border-slate-200/70 dark:border-white/[0.08] shadow-lg shadow-black/[0.06] dark:shadow-black/40"
         style={{
-          maxWidth: isIsland ? '80rem' : '100vw',
-          borderRadius: isIsland ? '1rem' : '0rem',
+          maxWidth: isIsland ? '92rem' : '100vw',
+          borderRadius: isIsland ? '1.25rem' : '0rem',
           transition,
         }}
       >
 
-        {/* Main bar — 3 columnas para centrar los links */}
-        <div className="px-5 sm:px-8 flex items-center h-[68px] gap-4">
+        {/* Main bar — logo a la izquierda, links, acciones a la derecha */}
+        <div className="mx-auto max-w-6xl px-4 flex items-center h-[72px] gap-4">
 
-          {/* Columna izquierda — Wordmark */}
-          <div className="flex-1 flex items-center">
-            <Link href="/" className="shrink-0 flex items-baseline select-none">
-              <span
-                className={`text-[16px] font-extrabold tracking-tight uppercase leading-none transition-colors duration-300 ${
-                  active ? 'text-slate-900 dark:text-white' : 'text-white'
-                }`}
-                style={syneStyle}
-              >
-                JOANLUNA
-              </span>
-              <span
-                className="text-accent leading-none ml-0.5"
-                style={{ ...cormorantStyle, fontSize: '19px', textShadow: '0 0 18px rgba(255,126,45,0.4)' }}
-              >
-                viajes
-              </span>
-            </Link>
-          </div>
+          {/* Logo */}
+          <Link href="/" className="shrink-0 flex items-center select-none">
+            <Logo className="h-12 w-auto" />
+          </Link>
 
-          {/* Columna central — Nav links */}
-          <nav className="hidden md:flex items-center gap-0.5">
+          {/* Nav links */}
+          <nav className="flex-1 hidden md:flex items-center gap-1">
             {NAV_LINKS.map((item) => (
               <Link
                 key={item.name}
                 href={item.url}
-                className={`relative px-3.5 py-2 text-[13px] font-medium tracking-wide rounded-xl hover:text-accent transition-colors duration-300 group ${
-                  active ? 'text-slate-600 dark:text-slate-300' : 'text-white/85 hover:text-white'
-                }`}
-                style={syneStyle}
+                className="relative px-4 py-2 text-[13px] font-semibold tracking-wide rounded-full transition-colors duration-300 text-slate-600 dark:text-slate-300 hover:text-brand-primary hover:bg-brand-primary/[0.06]"
               >
                 {item.name}
-                <span className="absolute bottom-[5px] left-3.5 right-3.5 h-px bg-accent rounded-full scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
               </Link>
             ))}
           </nav>
 
           {/* Columna derecha — Actions + ThemeToggle al final */}
           <div className="flex-1 hidden md:flex items-center justify-end gap-2">
+            {authLoading && (
+              <>
+                <span className="h-9 w-32 rounded-full bg-slate-200/70 dark:bg-white/10 animate-pulse" />
+                <span className="h-9 w-24 rounded-full bg-slate-200/70 dark:bg-white/10 animate-pulse" />
+              </>
+            )}
+
             {!authLoading && !isStaff && (
               <Link
-                href="/cotizar"
-                className="h-8 px-4 rounded-full bg-accent text-white text-[13px] font-semibold hover:bg-orange-600 transition-all shadow-md shadow-orange-500/25 flex items-center"
-                style={syneStyle}
+                href="/#cotizar"
+                onClick={handleCotizarClick}
+                className="h-9 px-4 rounded-full bg-brand-primary text-brand-primary-foreground text-[13px] font-bold hover:opacity-90 transition-all shadow-md shadow-brand-primary/25 flex items-center"
               >
-                Cotizar a medida
+                Cotizar
               </Link>
             )}
 
@@ -159,16 +152,12 @@ export default function Navbar() {
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen((v) => !v)}
-                    className={`flex items-center gap-2 h-8 pl-1 pr-3 rounded-full border transition-all shadow-sm cursor-pointer ${
-                      active
-                        ? 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10'
-                        : 'border-white/25 bg-white/10 hover:bg-white/20'
-                    }`}
+                    className="flex items-center gap-2 h-9 pl-1 pr-3 rounded-full border transition-all shadow-sm cursor-pointer border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10"
                   >
-                    <span className="h-6 w-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center text-[10px] font-bold">
+                    <span className="h-7 w-7 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary text-white flex items-center justify-center text-[10px] font-bold">
                       {initials}
                     </span>
-                    <span className={`text-[13px] font-medium transition-colors duration-300 ${active ? 'text-slate-700 dark:text-slate-200' : 'text-white'}`}>
+                    <span className="text-[13px] font-semibold transition-colors duration-300 text-slate-700 dark:text-slate-200">
                       {user.name.split(' ')[0]}
                     </span>
                   </button>
@@ -185,7 +174,7 @@ export default function Navbar() {
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                         >
-                          <LuLayoutDashboard className="w-4 h-4 text-orange-500" />
+                          <LuLayoutDashboard className="w-4 h-4 text-brand-primary" />
                           {isStaff ? 'Panel de administración' : 'Mi cuenta'}
                         </Link>
                         <button
@@ -202,11 +191,7 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  className={`flex items-center gap-1.5 h-8 px-3 rounded-full border text-[13px] font-medium transition-all shadow-sm ${
-                    active
-                      ? 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/10'
-                      : 'border-white/25 bg-white/10 text-white hover:bg-white/20'
-                  }`}
+                  className="flex items-center gap-1.5 h-9 px-3.5 rounded-full border text-[13px] font-semibold transition-all shadow-sm border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/10"
                 >
                   <LuUser className="w-3.5 h-3.5" />
                   Iniciar sesión
@@ -222,11 +207,7 @@ export default function Navbar() {
             <ThemeToggle />
             <button
               onClick={() => setMobileOpen((v) => !v)}
-              className={`p-2 rounded-xl transition-colors ${
-                active
-                  ? 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
-                  : 'text-white hover:bg-white/10'
-              }`}
+              className="p-2 rounded-xl transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
               aria-label="Menú"
             >
               {mobileOpen ? <LuX className="w-5 h-5" /> : <LuMenu className="w-5 h-5" />}
@@ -253,7 +234,7 @@ export default function Navbar() {
                 user ? (
                   <>
                     <div className="px-3 py-2 flex items-center gap-2">
-                      <span className="h-7 w-7 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                      <span className="h-7 w-7 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary text-white flex items-center justify-center text-xs font-bold shrink-0">
                         {initials}
                       </span>
                       <div>
@@ -266,7 +247,7 @@ export default function Navbar() {
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                     >
-                      <LuLayoutDashboard className="w-4 h-4 text-orange-500" />
+                      <LuLayoutDashboard className="w-4 h-4 text-brand-primary" />
                       {isStaff ? 'Panel de administración' : 'Mi cuenta'}
                     </Link>
                     <button
@@ -289,11 +270,11 @@ export default function Navbar() {
                     </Link>
                     {!isStaff && (
                       <Link
-                        href="/cotizar"
-                        onClick={() => setMobileOpen(false)}
+                        href="/#cotizar"
+                        onClick={handleCotizarClick}
                         className="flex items-center justify-center px-3 py-2.5 rounded-xl text-sm font-semibold bg-accent text-white"
                       >
-                        Cotizar a medida
+                        Cotizar
                       </Link>
                     )}
                   </>

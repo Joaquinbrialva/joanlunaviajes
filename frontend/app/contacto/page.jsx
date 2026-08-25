@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { LuPhone, LuMail, LuMapPin, LuClock, LuSend, LuCheck, LuArrowUpRight } from 'react-icons/lu';
 import { FaWhatsapp, FaInstagram, FaFacebook } from 'react-icons/fa';
-const syne = { fontFamily: 'var(--font-syne)' };
-const cormorant = { fontFamily: 'var(--font-cormorant)' };
 
 const INFO_ITEMS = [
   { Icon: LuPhone, label: 'Teléfono', value: '011 5813-9420', href: 'tel:+541158139420' },
@@ -23,7 +21,7 @@ const MOTIVOS = ['Consulta general', 'Cotización de viaje', 'Modificar una rese
 
 const INITIAL = { nombre: '', email: '', telefono: '', motivo: '', mensaje: '' };
 
-const inputClass = 'w-full h-11 rounded-xl border border-border bg-surface px-4 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all';
+const inputClass = 'w-full h-11 rounded-xl border border-border bg-surface px-4 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary/50 transition-all';
 
 export default function ContactoPage() {
   const [form, setForm] = useState(INITIAL);
@@ -62,34 +60,13 @@ export default function ContactoPage() {
   return (
     <div>
 
-      {/* ── Hero editorial ── */}
-      <section className="w-screen -mx-[calc((100vw-100%)/2)] relative overflow-hidden">
-        <div className="absolute inset-0 bg-[#0b1520]" />
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-950/30 via-transparent to-transparent" />
-        {/* Texto decorativo de fondo */}
-        <div
-          className="absolute -right-4 top-1/2 -translate-y-1/2 text-[200px] leading-none font-light text-white/[0.02] select-none pointer-events-none hidden lg:block"
-          style={cormorant}
-        >
-          Hola.
-        </div>
+      {/* ── Hero ── */}
+      <section className="w-screen -mx-[calc((100vw-100%)/2)] relative overflow-hidden bg-gradient-to-b from-brand-primary/[0.08] to-surface-secondary">
         <div className="relative max-w-7xl mx-auto px-6 sm:px-10 py-20">
-          <p
-            className="text-[10px] uppercase tracking-[0.28em] font-semibold text-orange-300/60 mb-4"
-            style={syne}
-          >
-            Contacto
-          </p>
-          <h1
-            className="text-5xl md:text-6xl font-light text-white leading-[1.05] mb-4 max-w-2xl"
-            style={cormorant}
-          >
-            Hablemos de tu{' '}
-            <em className="font-semibold" style={{ color: '#ff9a5c' }}>
-              próximo viaje.
-            </em>
+          <h1 className="text-4xl md:text-6xl font-extrabold text-foreground leading-tight tracking-tight mb-4 max-w-2xl">
+            Hablemos de tu <span className="text-brand-primary">próximo viaje.</span>
           </h1>
-          <p className="text-[15px] text-white/45 max-w-lg leading-relaxed" style={syne}>
+          <p className="text-[15px] text-muted max-w-lg leading-relaxed">
             Escríbenos, llámanos o pasa por la oficina. Estamos para ayudarte a organizar la experiencia que sueñas.
           </p>
         </div>
@@ -100,31 +77,24 @@ export default function ContactoPage() {
 
         {/* Formulario */}
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-px w-8 bg-accent" />
-            <p className="text-[10px] uppercase tracking-[0.25em] font-semibold text-accent" style={syne}>
-              Envíanos un mensaje
-            </p>
-          </div>
-          <h2 className="text-2xl md:text-3xl font-light text-foreground mb-8" style={cormorant}>
-            ¿En qué te podemos <em className="font-semibold">ayudar?</em>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-foreground mb-8 tracking-tight">
+            ¿En qué te podemos ayudar?
           </h2>
 
           {status === 'success' ? (
-            <div className="flex flex-col items-center justify-center gap-5 rounded-2xl border border-green-200/50 bg-green-50/50 dark:border-green-800/30 dark:bg-green-900/10 p-14 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-                <LuCheck className="h-7 w-7 text-green-600 dark:text-green-400" />
+            <div className="flex flex-col items-center justify-center gap-5 rounded-2xl border border-success/20 bg-success/5 p-14 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/15">
+                <LuCheck className="h-7 w-7 text-success" />
               </div>
               <div>
-                <p className="text-lg font-semibold text-foreground mb-1" style={syne}>¡Mensaje enviado!</p>
+                <p className="text-lg font-bold text-foreground mb-1">¡Mensaje enviado!</p>
                 <p className="text-sm text-muted">
                   Te respondemos a la brevedad, generalmente en menos de 24 horas.
                 </p>
               </div>
               <button
                 onClick={() => setStatus('idle')}
-                className="text-sm font-medium text-accent hover:underline"
-                style={syne}
+                className="text-sm font-semibold text-brand-primary hover:underline"
               >
                 Enviar otro mensaje
               </button>
@@ -133,7 +103,7 @@ export default function ContactoPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted uppercase tracking-wider" style={syne}>
+                  <label className="text-xs font-semibold text-muted uppercase tracking-wider">
                     Nombre <span className="text-rose-500 normal-case">*</span>
                   </label>
                   <input
@@ -142,11 +112,11 @@ export default function ContactoPage() {
                     placeholder="Tu nombre"
                     value={form.nombre}
                     onChange={(e) => update('nombre', e.target.value)}
-                    style={syne}
+                   
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted uppercase tracking-wider" style={syne}>
+                  <label className="text-xs font-semibold text-muted uppercase tracking-wider">
                     Email <span className="text-rose-500 normal-case">*</span>
                   </label>
                   <input
@@ -156,14 +126,14 @@ export default function ContactoPage() {
                     placeholder="nombre@email.com"
                     value={form.email}
                     onChange={(e) => update('email', e.target.value)}
-                    style={syne}
+                   
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted uppercase tracking-wider" style={syne}>
+                  <label className="text-xs font-semibold text-muted uppercase tracking-wider">
                     Teléfono
                   </label>
                   <input
@@ -172,11 +142,11 @@ export default function ContactoPage() {
                     placeholder="+54 11 ..."
                     value={form.telefono}
                     onChange={(e) => update('telefono', e.target.value)}
-                    style={syne}
+                   
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted uppercase tracking-wider" style={syne}>
+                  <label className="text-xs font-semibold text-muted uppercase tracking-wider">
                     Motivo <span className="text-rose-500 normal-case">*</span>
                   </label>
                   <select
@@ -184,7 +154,7 @@ export default function ContactoPage() {
                     className={inputClass}
                     value={form.motivo}
                     onChange={(e) => update('motivo', e.target.value)}
-                    style={syne}
+                   
                   >
                     <option value="">Selecciona un motivo</option>
                     {MOTIVOS.map((m) => <option key={m} value={m}>{m}</option>)}
@@ -193,29 +163,27 @@ export default function ContactoPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted uppercase tracking-wider" style={syne}>
+                <label className="text-xs font-semibold text-muted uppercase tracking-wider">
                   Mensaje <span className="text-rose-500 normal-case">*</span>
                 </label>
                 <textarea
                   required
                   rows={5}
-                  className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all resize-none"
+                  className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary/50 transition-all resize-none"
                   placeholder="Cuéntanos qué tienes en mente..."
                   value={form.mensaje}
                   onChange={(e) => update('mensaje', e.target.value)}
-                  style={syne}
                 />
               </div>
 
               {status === 'error' && (
-                <p className="text-sm text-rose-500" style={syne}>{error}</p>
+                <p className="text-sm text-danger">{error}</p>
               )}
 
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="inline-flex h-12 items-center gap-2 rounded-full bg-accent px-8 text-sm font-semibold text-white hover:bg-orange-500 transition-colors disabled:opacity-60 shadow-md shadow-orange-500/20"
-                style={syne}
+                className="inline-flex h-12 items-center gap-2 rounded-full bg-brand-primary px-8 text-sm font-semibold text-brand-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-60 shadow-md shadow-brand-primary/20"
               >
                 {status === 'loading' ? (
                   <>
@@ -235,32 +203,24 @@ export default function ContactoPage() {
 
         {/* Info de contacto */}
         <div className="space-y-8">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-px w-8 bg-accent" />
-              <p className="text-[10px] uppercase tracking-[0.25em] font-semibold text-accent" style={syne}>
-                Información
-              </p>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-light text-foreground" style={cormorant}>
-              Encontranos
-            </h2>
-          </div>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
+            Encuéntranos
+          </h2>
 
           <div className="space-y-5">
             {INFO_ITEMS.map(({ Icon, label, value, href }) => (
               <div key={label} className="flex items-start gap-4 group">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/10 group-hover:bg-accent/20 transition-colors">
-                  <Icon className="h-4.5 w-4.5 text-accent" size={18} />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-primary/10 group-hover:bg-brand-primary/20 transition-colors">
+                  <Icon className="h-4.5 w-4.5 text-brand-primary" size={18} />
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted mb-0.5" style={syne}>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted mb-0.5">
                     {label}
                   </p>
                   {href ? (
                     <a
                       href={href}
-                      className="text-sm text-foreground hover:text-accent transition-colors flex items-center gap-1 group/link"
+                      className="text-sm text-foreground hover:text-brand-primary transition-colors flex items-center gap-1 group/link"
                       target={href.startsWith('http') ? '_blank' : undefined}
                       rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
                     >
@@ -279,8 +239,8 @@ export default function ContactoPage() {
 
           {/* Redes */}
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted mb-3" style={syne}>
-              Seguinos
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted mb-3">
+              Síguenos
             </p>
             <div className="flex gap-2.5">
               {SOCIAL.map(({ Icon, href, label }) => (
@@ -290,7 +250,7 @@ export default function ContactoPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-muted hover:text-accent hover:border-accent/30 hover:bg-surface-secondary transition-all"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-muted hover:text-brand-primary hover:border-brand-primary/30 hover:bg-surface-secondary transition-all"
                 >
                   <Icon size={17} />
                 </a>
