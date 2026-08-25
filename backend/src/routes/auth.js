@@ -49,7 +49,8 @@ router.post('/login', async (req, res) => {
 
     res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
     res.json({ user: sanitizeUser(user) });
-  } catch {
+  } catch (err) {
+    console.error('[auth/login]', err);
     res.status(500).json({ error: 'Error al iniciar sesión.' });
   }
 });
